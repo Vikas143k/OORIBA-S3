@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:ooriba_s3/services/employeeService.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -14,26 +16,50 @@ class _SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
   DateTime? _dob;
   String? _aadharCopyPath;
-  final _phoneNumber= TextEditingController();
-  final _firstName=TextEditingController();
-  final _middleName=TextEditingController();
-  final _lastName=TextEditingController();
-  final _email=TextEditingController();
-  final _Password=TextEditingController();
-  final _panNo=TextEditingController();
-  final _residentialAddress=TextEditingController();
-  final _permanentAddress=TextEditingController();
-  final _password=TextEditingController();
+  final _phoneNumber = TextEditingController();
+  final _firstName = TextEditingController();
+  final _middleName = TextEditingController();
+  final _lastName = TextEditingController();
+  final _email = TextEditingController();
+  final _panNo = TextEditingController();
+  final _residentialAddress = TextEditingController();
+  final _permanentAddress = TextEditingController();
+  final _password = TextEditingController();
+  File? dpImage;
   final EmployeeService _employeeService = EmployeeService();
-  // final image = await _employeeService.pickImage();
 
-  // void _submitForm() async {
-  //   final firstName = _firstName.t;
-  //   final phoneNo = _phoneNoController.text;
-  //     await _employeeService.addEmployee(name, phoneNo, image);
-  //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Employee added successfully')));
-    
-  // }
+  Future<void> _pickImage(bool isProfilePicture) async {
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        if (isProfilePicture) {
+          dpImage = File(pickedFile.path);
+        } else {
+          // _documentation = File(pickedFile.path);
+        }
+      });
+    }
+  }
+
+  void _submitForm() async {
+    // final dob=_dob;
+    final firstName = _firstName.text;
+    final middlenName = _middleName.text;
+    final lastName = _lastName.text;
+    final email = _email.text;
+    final password = _password.text;
+    final panNo = _panNo.text;
+    final resAdd = _residentialAddress.text;
+    final perAdd = _permanentAddress.text;
+    final phoneNo = _phoneNumber.text;
+
+    String dob = DateFormat.yMd().format(_dob!);
+    await _employeeService.addEmployee(firstName, middlenName, lastName, email,
+        password, panNo, resAdd, perAdd, phoneNo, dob, dpImage!,
+        context: context);
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text('Employee added successfully')));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +95,8 @@ class _SignUpPageState extends State<SignUpPage> {
                     children: <Widget>[
                       const Text(
                         'Sign Up',
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 20),
                       TextFormField(
@@ -87,7 +114,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                       const SizedBox(height: 20),
                       TextFormField(
-                        controller:_middleName,
+                        controller: _middleName,
                         decoration: const InputDecoration(
                           labelText: 'Middle Name',
                           border: OutlineInputBorder(),
@@ -95,7 +122,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                       const SizedBox(height: 20),
                       TextFormField(
-                        controller:_lastName,
+                        controller: _lastName,
                         decoration: const InputDecoration(
                           labelText: 'Last Name',
                           border: OutlineInputBorder(),
@@ -167,7 +194,6 @@ class _SignUpPageState extends State<SignUpPage> {
                           if (pickedDate != null) {
                             setState(() {
                               _dob = pickedDate;
-
                             });
                           }
                         },
@@ -222,42 +248,37 @@ class _SignUpPageState extends State<SignUpPage> {
                       const SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: () async {
-                          final adhaarimage = await _employeeService.pickImage();
+                          // final adhaarimage = await _employeeService.pickImage();
                           // final String? result = await Navigator.push(
                           //   context,
                           //   MaterialPageRoute(builder: (context) => const AadharCopyUploadPage()),
                           // );
                         },
-                        child: Text(_aadharCopyPath == null ? 'Upload Aadhar Copy' : 'Aadhar Copy Uploaded'),
+                        child: Text(_aadharCopyPath == null
+                            ? 'Upload Aadhar Copy'
+                            : 'Aadhar Copy Uploaded'),
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton(
-                        onPressed: () async{
-                          final facialimage = await _employeeService.pickImage();
-                        },
-                        child: const Text('Upload Facial Photo'),
+                        onPressed: () => _pickImage(true),
+                        child: Text('Upload Profile Picture'),
                       ),
-                      const SizedBox(height: 20),
+                      dpImage == null
+                          ? Text('No profile picture selected.')
+                          : Image.file(dpImage!,
+                              height: 100, width: 100),
+                      SizedBox(height: 20),
                       ElevatedButton(
-                        onPressed: () async{
-                          final supportimage = await _employeeService.pickImage();
+                        onPressed: () {
+                          // () async{
+                          // final supportimage = await _employeeService.pickImage();
+                          // },
                         },
                         child: const Text('Upload Supporting Document'),
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton(
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            Fluttertoast.showToast(
-                            msg:"Signed Up Successfully",
-                            toastLength: Toast.LENGTH_LONG,
-                            gravity: ToastGravity.SNACKBAR,
-                            backgroundColor: Colors.black54,
-                            textColor: Colors.white,
-                            fontSize: 14.0,
-                          );
-                          }
-                        },
+                        onPressed: _submitForm,
                         child: const Text('Sign Up'),
                       ),
                     ],

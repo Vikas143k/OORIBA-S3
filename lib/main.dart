@@ -5,8 +5,6 @@ import 'package:ooriba_s3/firebase_options.dart';
 import 'package:ooriba_s3/hr_login_page.dart';
 import 'package:ooriba_s3/services/auth_service.dart';
 import 'package:ooriba_s3/signup_page.dart';
-import 'package:ooriba_s3/test/details2.dart';
-import 'package:ooriba_s3/test/signup.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -98,7 +96,7 @@ class LoginPage extends StatelessWidget {
                               // TODO: Implement forgot password functionality
                               Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => EmployeeForm()),
+                              MaterialPageRoute(builder: (context) =>SignUpPage()),
                             );
                             },
                             child: const Text('Forgot Password'),
