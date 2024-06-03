@@ -1,7 +1,6 @@
 // hr_login_page.dart
 import 'package:flutter/material.dart';
 import 'package:ooriba_s3/services/auth_service.dart';
-import 'hr_dashboard_page.dart';
 
 class HRLoginPage extends StatefulWidget {
   const HRLoginPage({super.key});

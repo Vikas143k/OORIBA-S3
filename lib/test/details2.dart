@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(Detail2());
+  runApp(const Detail2());
 }
 
 class Detail2 extends StatelessWidget {
+  const Detail2({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: Text('Details'),
+          title: const Text('Details'),
         ),
         body: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -51,7 +53,7 @@ class Detail2 extends StatelessWidget {
   }
 
   Widget _buildInfoRow() {
-    return Row(
+    return const Row(
       children: [
         Expanded(
           child: Column(
@@ -71,10 +73,10 @@ class Detail2 extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        ElevatedButton(onPressed: () {}, child: Text('Show')),
-        ElevatedButton(onPressed: () {}, child: Text('Approve')),
-        ElevatedButton(onPressed: () {}, child: Text('Reject')),
-        ElevatedButton(onPressed: () {}, child: Text('Edit')),
+        ElevatedButton(onPressed: () {}, child: const Text('Show')),
+        ElevatedButton(onPressed: () {}, child: const Text('Approve')),
+        ElevatedButton(onPressed: () {}, child: const Text('Reject')),
+        ElevatedButton(onPressed: () {}, child: const Text('Edit')),
       ],
     );
   }

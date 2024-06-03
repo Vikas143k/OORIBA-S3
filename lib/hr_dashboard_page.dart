@@ -1,20 +1,69 @@
 import 'package:flutter/material.dart';
 
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'HR Dashboard',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: HRDashboardPage(),
+    );
+  }
+}
+
 class HRDashboardPage extends StatefulWidget {
-  const HRDashboardPage({super.key});
+  const HRDashboardPage({Key? key}) : super(key: key);
 
   @override
-  // ignore: library_private_types_in_public_api
   _HRDashboardPageState createState() => _HRDashboardPageState();
 }
+
 class _HRDashboardPageState extends State<HRDashboardPage> {
   // State variables to keep track of the accepted state of each employee card
   final Map<int, bool> _isAccepted = {};
   List<Employee> employees = [
-    Employee(name: 'John Doe', age: 30, phone: '123-456-7890', email: 'john.doe@example.com'),
-    Employee(name: 'Jane Smith', age: 25, phone: '987-654-3210', email: 'jane.smith@example.com'),
-    Employee(name: 'Alice Johnson', age: 28, phone: '555-666-7777', email: 'alice.johnson@example.com'),
-    Employee(name: 'Bob Brown', age: 35, phone: '111-222-3333', email: 'bob.brown@example.com'),
+    Employee(
+        name: 'John Doe',
+        age: 30,
+        phone: '123-456-7890',
+        email: 'john.doe@example.com',
+        dob: '01/01/1990',
+        pan: 'ABCDE1234F',
+        residentialAddress: '123 Main St',
+        permanentAddress: '456 Main St'),
+    Employee(
+        name: 'Jane Smith',
+        age: 25,
+        phone: '987-654-3210',
+        email: 'jane.smith@example.com',
+        dob: '02/02/1995',
+        pan: 'FGHIJ5678K',
+        residentialAddress: '789 Main St',
+        permanentAddress: '101 Main St'),
+    Employee(
+        name: 'Alice Johnson',
+        age: 28,
+        phone: '555-666-7777',
+        email: 'alice.johnson@example.com',
+        dob: '03/03/1992',
+        pan: 'KLMNO1234P',
+        residentialAddress: '102 Main St',
+        permanentAddress: '103 Main St'),
+    Employee(
+        name: 'Bob Brown',
+        age: 35,
+        phone: '111-222-3333',
+        email: 'bob.brown@example.com',
+        dob: '04/04/1985',
+        pan: 'QRSTU5678V',
+        residentialAddress: '104 Main St',
+        permanentAddress: '105 Main St'),
   ];
 
   @override
@@ -87,32 +136,42 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
                 ),
               ),
             ),
-            Wrap(
-              spacing: 16.0,
-              runSpacing: 16.0,
-              children: <Widget>[
-                _buildDashboardBlock(
-                  context,
-                  'Registered Employees',
-                  Icons.person,
-                  Colors.blue,
-                  _showRegisteredEmployees,
-                ),
-                _buildDashboardBlock(
-                  context,
-                  'New Applicants',
-                  Icons.person_add,
-                  Colors.green,
-                  _showNewApplicants,
-                ),
-                _buildDashboardBlock(
-                  context,
-                  'Rejected Applications',
-                  Icons.person_off,
-                  Colors.red,
-                  _showRejectedApplications,
-                ),
-              ],
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Expanded(
+                    child: _buildDashboardBlock(
+                      context,
+                      'Registered Employees',
+                      Icons.person,
+                      Colors.blue,
+                      _showRegisteredEmployees,
+                    ),
+                  ),
+                  SizedBox(width: 16.0),
+                  Expanded(
+                    child: _buildDashboardBlock(
+                      context,
+                      'New Applicants',
+                      Icons.person_add,
+                      Colors.green,
+                      _showNewApplicants,
+                    ),
+                  ),
+                  SizedBox(width: 16.0),
+                  Expanded(
+                    child: _buildDashboardBlock(
+                      context,
+                      'Rejected Applications',
+                      Icons.person_off,
+                      Colors.red,
+                      _showRejectedApplications,
+                    ),
+                  ),
+                ],
+              ),
             ),
             SizedBox(height: 16.0),
             Padding(
@@ -126,7 +185,8 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
               ),
             ),
             // Employee cards will be added dynamically here
-            for (int i = 0; i < employees.length; i++) _buildEmployeeCard(context, i),
+            for (int i = 0; i < employees.length; i++)
+              _buildEmployeeCard(context, i),
           ],
         ),
       ),
@@ -177,7 +237,7 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
     }
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
@@ -187,7 +247,7 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
               children: <Widget>[
                 CircleAvatar(
                   // Placeholder image, replace with actual photo
-                  child: Image.network(
+                   child: Image.network(
             'https://firebasestorage.googleapis.com/v0/b/ooriba-s3-add23.appspot.com/o/image%2Fdp.png?alt=media&token=87f1b3a7-d249-4976-bdf9-5fdaa808bea0',
           ),
                   radius: 30.0,
@@ -222,6 +282,19 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                  ),
+                  onPressed: () {
+                    _showEmployeeDetails(context, index);
+                  },
+                  child: Text(
+                    'View More',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+                const SizedBox(width: 24.0),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
@@ -278,53 +351,150 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
   }
 
   void _showRegisteredEmployees(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => RegisteredEmployeesPage()),
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Registered Employees'),
+          content: const Text('Details of registered employees will be shown here.'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
     );
   }
 
   void _showNewApplicants(BuildContext context) {
-    // Implement navigation to new applicants page
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('New Applicants'),
+          content: const Text('Details of new applicants will be shown here.'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _showRejectedApplications(BuildContext context) {
-    // Implement navigation to rejected applications page
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Rejected Applications'),
+          content: const Text('Details of rejected applications will be shown here.'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showEmployeeDetails(BuildContext context, int index) {
+    Employee employee = employees[index];
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(employee.name),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Date of Birth: ${employee.dob}'),
+                Text('PAN: ${employee.pan}'),
+                Text('Residential Address: ${employee.residentialAddress}'),
+                Text('Permanent Address: ${employee.permanentAddress}'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Close'),
+            ),
+            /* Remove the Edit button by commenting it out or deleting this block
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EditEmployeePage(
+                      employeeIndex: index,
+                      employee: employee,
+                    ),
+                  ),
+                ).then((updatedEmployee) {
+                  if (updatedEmployee != null) {
+                    setState(() {
+                      employees[index] = updatedEmployee;
+                    });
+                  }
+                });
+              },
+              child: const Text('Edit'),
+            ),
+            */
+          ],
+        );
+      },
+    );
   }
 }
 
-class RegisteredEmployeesPage extends StatelessWidget {
-  const RegisteredEmployeesPage({Key? key}) : super(key: key);
+class Employee {
+  String name;
+  int age;
+  String phone;
+  String email;
+  String dob;
+  String pan;
+  String residentialAddress;
+  String permanentAddress;
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Registered Employees'),
-      ),
-      body: ListView.builder(
-        itemCount: 10, // Example itemCount; replace with actual data
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text('Employee ${index + 1}'),
-            onTap: () {
-              // Implement navigation to employee details page
-            },
-          );
-        },
-      ),
-    );
-  }
+  Employee({
+    required this.name,
+    required this.age,
+    required this.phone,
+    required this.email,
+    required this.dob,
+    required this.pan,
+    required this.residentialAddress,
+    required this.permanentAddress,
+  });
 }
 
 class EditEmployeePage extends StatefulWidget {
   final int employeeIndex;
   final Employee employee;
 
-  EditEmployeePage({
+  const EditEmployeePage({
+    Key? key,
     required this.employeeIndex,
     required this.employee,
-  });
+  }) : super(key: key);
 
   @override
   _EditEmployeePageState createState() => _EditEmployeePageState();
@@ -335,6 +505,10 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
   late TextEditingController _ageController;
   late TextEditingController _phoneController;
   late TextEditingController _emailController;
+  late TextEditingController _dobController;
+  late TextEditingController _panController;
+  late TextEditingController _residentialAddressController;
+  late TextEditingController _permanentAddressController;
 
   @override
   void initState() {
@@ -343,6 +517,10 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
     _ageController = TextEditingController(text: widget.employee.age.toString());
     _phoneController = TextEditingController(text: widget.employee.phone);
     _emailController = TextEditingController(text: widget.employee.email);
+    _dobController = TextEditingController(text: widget.employee.dob);
+    _panController = TextEditingController(text: widget.employee.pan);
+    _residentialAddressController = TextEditingController(text: widget.employee.residentialAddress);
+    _permanentAddressController = TextEditingController(text: widget.employee.permanentAddress);
   }
 
   @override
@@ -351,79 +529,91 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
     _ageController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
+    _dobController.dispose();
+    _panController.dispose();
+    _residentialAddressController.dispose();
+    _permanentAddressController.dispose();
     super.dispose();
-  }
-
-  void _saveEmployeeDetails() {
-    Employee updatedEmployee = Employee(
-      name: _nameController.text,
-      age: int.parse(_ageController.text),
-      phone: _phoneController.text,
-      email: _emailController.text,
-    );
-    Navigator.pop(context, updatedEmployee);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Employee Details'),
+        title: const Text('Edit Employee'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            TextField(
-              controller: _nameController,
-              decoration: InputDecoration(
-                labelText: 'Name',
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              TextField(
+                controller: _nameController,
+                decoration: const InputDecoration(labelText: 'Name'),
               ),
-            ),
-            TextField(
-              controller: _ageController,
-              decoration: InputDecoration(
-                labelText: 'Age',
+              TextField(
+                controller: _ageController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: 'Age'),
               ),
-              keyboardType: TextInputType.number,
-            ),
-            TextField(
-              controller: _phoneController,
-              decoration: InputDecoration(
-                labelText: 'Phone',
+              TextField(
+                controller: _phoneController,
+                decoration: const InputDecoration(labelText: 'Phone'),
               ),
-              keyboardType: TextInputType.phone,
-            ),
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(
-                labelText: 'Email',
+              TextField(
+                controller: _emailController,
+                decoration: const InputDecoration(labelText: 'Email'),
               ),
-              keyboardType: TextInputType.emailAddress,
-            ),
-            SizedBox(height: 24.0),
-            ElevatedButton(
-              onPressed: _saveEmployeeDetails,
-              child: const Text('Save'),
-            ),
-          ],
+              TextField(
+                controller: _dobController,
+                decoration: const InputDecoration(labelText: 'Date of Birth'),
+              ),
+              TextField(
+                controller: _panController,
+                decoration: const InputDecoration(labelText: 'PAN'),
+              ),
+              TextField(
+                controller: _residentialAddressController,
+                decoration: const InputDecoration(labelText: 'Residential Address'),
+              ),
+              TextField(
+                controller: _permanentAddressController,
+                decoration: const InputDecoration(labelText: 'Permanent Address'),
+              ),
+              SizedBox(height: 24.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Cancel'),
+                  ),
+                  SizedBox(width: 16.0),
+                  ElevatedButton(
+                    onPressed: () {
+                      Employee updatedEmployee = Employee(
+                        name: _nameController.text,
+                        age: int.parse(_ageController.text),
+                        phone: _phoneController.text,
+                        email: _emailController.text,
+                        dob: _dobController.text,
+                        pan: _panController.text,
+                        residentialAddress: _residentialAddressController.text,
+                        permanentAddress: _permanentAddressController.text,
+                      );
+                      Navigator.of(context).pop(updatedEmployee);
+                    },
+                    child: const Text('Save'),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
-}
-
-class Employee {
-  String name;
-  int age;
-  String phone;
-  String email;
-
-  Employee({
-    required this.name,
-    required this.age,
-    required this.phone,
-    required this.email,
-  });
 }

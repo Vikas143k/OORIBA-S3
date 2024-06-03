@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:ooriba_s3/services/employeeService.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -12,6 +14,26 @@ class _SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
   DateTime? _dob;
   String? _aadharCopyPath;
+  final _phoneNumber= TextEditingController();
+  final _firstName=TextEditingController();
+  final _middleName=TextEditingController();
+  final _lastName=TextEditingController();
+  final _email=TextEditingController();
+  final _Password=TextEditingController();
+  final _panNo=TextEditingController();
+  final _residentialAddress=TextEditingController();
+  final _permanentAddress=TextEditingController();
+  final _password=TextEditingController();
+  final EmployeeService _employeeService = EmployeeService();
+  // final image = await _employeeService.pickImage();
+
+  // void _submitForm() async {
+  //   final firstName = _firstName.t;
+  //   final phoneNo = _phoneNoController.text;
+  //     await _employeeService.addEmployee(name, phoneNo, image);
+  //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Employee added successfully')));
+    
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +73,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                       const SizedBox(height: 20),
                       TextFormField(
+                        controller: _firstName,
                         decoration: const InputDecoration(
                           labelText: 'First Name',
                           border: OutlineInputBorder(),
@@ -64,6 +87,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                       const SizedBox(height: 20),
                       TextFormField(
+                        controller:_middleName,
                         decoration: const InputDecoration(
                           labelText: 'Middle Name',
                           border: OutlineInputBorder(),
@@ -71,6 +95,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                       const SizedBox(height: 20),
                       TextFormField(
+                        controller:_lastName,
                         decoration: const InputDecoration(
                           labelText: 'Last Name',
                           border: OutlineInputBorder(),
@@ -84,6 +109,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                       const SizedBox(height: 20),
                       TextFormField(
+                        controller: _email,
                         decoration: const InputDecoration(
                           labelText: 'Email',
                           border: OutlineInputBorder(),
@@ -97,6 +123,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                       const SizedBox(height: 20),
                       TextFormField(
+                        controller: _password,
                         decoration: const InputDecoration(
                           labelText: 'Password',
                           border: OutlineInputBorder(),
@@ -111,6 +138,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                       const SizedBox(height: 20),
                       TextFormField(
+                        controller: _phoneNumber,
                         decoration: const InputDecoration(
                           labelText: 'Phone Number',
                           border: OutlineInputBorder(),
@@ -139,6 +167,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           if (pickedDate != null) {
                             setState(() {
                               _dob = pickedDate;
+
                             });
                           }
                         },
@@ -150,6 +179,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                       const SizedBox(height: 20),
                       TextFormField(
+                        controller: _panNo,
                         decoration: const InputDecoration(
                           labelText: 'Pan Number',
                           border: OutlineInputBorder(),
@@ -163,6 +193,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                       const SizedBox(height: 20),
                       TextFormField(
+                        controller: _residentialAddress,
                         decoration: const InputDecoration(
                           labelText: 'Residential Address',
                           border: OutlineInputBorder(),
@@ -176,6 +207,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                       const SizedBox(height: 20),
                       TextFormField(
+                        controller: _permanentAddress,
                         decoration: const InputDecoration(
                           labelText: 'Permanent Address',
                           border: OutlineInputBorder(),
@@ -190,30 +222,25 @@ class _SignUpPageState extends State<SignUpPage> {
                       const SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: () async {
-                          // TODO: Implement Aadhar copy upload functionality
-                          final String? result = await Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const AadharCopyUploadPage()),
-                          );
-                          if (result != null) {
-                            setState(() {
-                              _aadharCopyPath = result;
-                            });
-                          }
+                          final adhaarimage = await _employeeService.pickImage();
+                          // final String? result = await Navigator.push(
+                          //   context,
+                          //   MaterialPageRoute(builder: (context) => const AadharCopyUploadPage()),
+                          // );
                         },
                         child: Text(_aadharCopyPath == null ? 'Upload Aadhar Copy' : 'Aadhar Copy Uploaded'),
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton(
-                        onPressed: () {
-                          // TODO: Implement facial photo upload functionality
+                        onPressed: () async{
+                          final facialimage = await _employeeService.pickImage();
                         },
                         child: const Text('Upload Facial Photo'),
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton(
-                        onPressed: () {
-                          // TODO: Implement supporting document upload functionality
+                        onPressed: () async{
+                          final supportimage = await _employeeService.pickImage();
                         },
                         child: const Text('Upload Supporting Document'),
                       ),
@@ -221,7 +248,14 @@ class _SignUpPageState extends State<SignUpPage> {
                       ElevatedButton(
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
-                            // TODO: Implement sign up functionality
+                            Fluttertoast.showToast(
+                            msg:"Signed Up Successfully",
+                            toastLength: Toast.LENGTH_LONG,
+                            gravity: ToastGravity.SNACKBAR,
+                            backgroundColor: Colors.black54,
+                            textColor: Colors.white,
+                            fontSize: 14.0,
+                          );
                           }
                         },
                         child: const Text('Sign Up'),

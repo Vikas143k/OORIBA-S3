@@ -5,7 +5,6 @@ import 'package:ooriba_s3/home/home.dart';
 import 'package:ooriba_s3/hr_dashboard_page.dart';
 import 'package:ooriba_s3/main.dart';
 import 'package:ooriba_s3/signup_page.dart';
-import 'package:ooriba_s3/test/hrdashboardpage.dart';
 class AuthService {
 
   Future<void> signup({
@@ -45,9 +44,6 @@ class AuthService {
         fontSize: 14.0,
       );
     }
-    catch(e){
-
-    }
 
   }
 
@@ -78,7 +74,7 @@ class AuthService {
               Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (BuildContext context) => DataDisplayScreen()
+          builder: (BuildContext context) =>  const HRDashboardPage()
         )
       );
       }
@@ -99,9 +95,6 @@ class AuthService {
         textColor: Colors.white,
         fontSize: 14.0,
       );
-    }
-    catch(e){
-
     }
 
   }

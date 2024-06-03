@@ -3,12 +3,14 @@ import 'package:ooriba_s3/services/hrDashboardService.dart';
 
 
 class DataDisplayScreen extends StatefulWidget {
+  const DataDisplayScreen({super.key});
+
   @override
   _DataDisplayScreenState createState() => _DataDisplayScreenState();
 }
 
 class _DataDisplayScreenState extends State<DataDisplayScreen> {
-  FirestoreService _firestoreService = FirestoreService();
+  final FirestoreService _firestoreService = FirestoreService();
   List<Map<String, dynamic>> _data = [];
 
   @override
@@ -28,10 +30,10 @@ class _DataDisplayScreenState extends State<DataDisplayScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Firestore Data'),
+        title: const Text('Firestore Data'),
       ),
       body: _data.isEmpty
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
               itemCount: _data.length,
               itemBuilder: (context, index) {
@@ -45,4 +47,6 @@ class _DataDisplayScreenState extends State<DataDisplayScreen> {
             ),
     );
   }
+  //first copy
+  
 }
