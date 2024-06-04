@@ -15,7 +15,6 @@ class SignUpPage extends StatefulWidget {
 class _SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
   DateTime? _dob;
-  String? _aadharCopyPath;
   final _phoneNumber = TextEditingController();
   final _firstName = TextEditingController();
   final _middleName = TextEditingController();
@@ -25,17 +24,19 @@ class _SignUpPageState extends State<SignUpPage> {
   final _residentialAddress = TextEditingController();
   final _permanentAddress = TextEditingController();
   final _password = TextEditingController();
-  File? dpImage;
+  File? dpImage, supportImage,adhaarImage;
   final EmployeeService _employeeService = EmployeeService();
 
-  Future<void> _pickImage(bool isProfilePicture) async {
+  Future<void> _pickImage(int x) async {
     final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
-        if (isProfilePicture) {
+        if (x==2) {
           dpImage = File(pickedFile.path);
-        } else {
-          // _documentation = File(pickedFile.path);
+        }if(x==1) {
+          adhaarImage = File(pickedFile.path);
+        }if(x==3){
+          supportImage=File(pickedFile.path);
         }
       });
     }
@@ -55,10 +56,10 @@ class _SignUpPageState extends State<SignUpPage> {
 
     String dob = DateFormat.yMd().format(_dob!);
     await _employeeService.addEmployee(firstName, middlenName, lastName, email,
-        password, panNo, resAdd, perAdd, phoneNo, dob, dpImage!,
+        password, panNo, resAdd, perAdd, phoneNo, dob, dpImage!,adhaarImage!,supportImage!,
         context: context);
     ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text('Employee added successfully')));
+        .showSnackBar(SnackBar(content: Text('Signed up successfully')));
   }
 
   @override
@@ -247,20 +248,16 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton(
-                        onPressed: () async {
-                          // final adhaarimage = await _employeeService.pickImage();
-                          // final String? result = await Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(builder: (context) => const AadharCopyUploadPage()),
-                          // );
-                        },
-                        child: Text(_aadharCopyPath == null
-                            ? 'Upload Aadhar Copy'
-                            : 'Aadhar Copy Uploaded'),
-                      ),
-                      const SizedBox(height: 20),
+                        onPressed: () => _pickImage(1),
+                        child: Text('Upload Adhaar Card Copy'),
+                              ),
+                          adhaarImage == null
+                          ? Text('No Adhaar Card Copy Uploaded.')
+                          : Image.file(adhaarImage!,
+                              height: 100, width: 100),
+                      SizedBox(height: 20),
                       ElevatedButton(
-                        onPressed: () => _pickImage(true),
+                        onPressed: () => _pickImage(2),
                         child: Text('Upload Profile Picture'),
                       ),
                       dpImage == null
@@ -269,14 +266,14 @@ class _SignUpPageState extends State<SignUpPage> {
                               height: 100, width: 100),
                       SizedBox(height: 20),
                       ElevatedButton(
-                        onPressed: () {
-                          // () async{
-                          // final supportimage = await _employeeService.pickImage();
-                          // },
-                        },
-                        child: const Text('Upload Supporting Document'),
+                       onPressed: () => _pickImage(3),
+                        child: Text('Upload Supporting Document'),
                       ),
-                      const SizedBox(height: 20),
+                      supportImage == null
+                          ? Text('No Document selected.')
+                          : Image.file(supportImage!,
+                              height: 100, width: 100),
+                      SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: _submitForm,
                         child: const Text('Sign Up'),
@@ -287,28 +284,6 @@ class _SignUpPageState extends State<SignUpPage> {
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class AadharCopyUploadPage extends StatelessWidget {
-  const AadharCopyUploadPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Upload Aadhar Copy'),
-      ),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            // TODO: Implement Aadhar copy upload functionality
-            Navigator.pop(context, 'path_to_aadhar_copy');
-          },
-          child: const Text('Upload Aadhar Copy'),
         ),
       ),
     );

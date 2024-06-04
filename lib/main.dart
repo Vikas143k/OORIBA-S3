@@ -20,6 +20,7 @@ class OoribaApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'OORIBA_S3',
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -94,10 +95,10 @@ class LoginPage extends StatelessWidget {
                           child: TextButton(
                             onPressed: () {
                               // TODO: Implement forgot password functionality
-                              Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) =>SignUpPage()),
-                            );
+                            //   Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(builder: (context) =>OOoribaApp()),
+                            // );
                             },
                             child: const Text('Forgot Password'),
                           ),
