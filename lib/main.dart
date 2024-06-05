@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:ooriba_s3/firebase_options.dart';
 import 'package:ooriba_s3/hr_login_page.dart';
 import 'package:ooriba_s3/services/auth_service.dart';
+import 'package:ooriba_s3/services/dark_mode.dart';
 import 'package:ooriba_s3/signup_page.dart';
+import 'package:provider/provider.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,16 +21,30 @@ class OoribaApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'OORIBA_S3',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return ChangeNotifierProvider(
+      create: (_) => DarkModeService(),
+      child: Consumer<DarkModeService>(
+        builder: (context, darkModeService, _) {
+          return MaterialApp(
+              debugShowCheckedModeBanner: false,
+            title: 'OORIBA_S3',
+            theme: ThemeData(
+              primarySwatch: Colors.blue,
+              brightness: Brightness.light,
+            ),
+            darkTheme: ThemeData(
+              primarySwatch: Colors.blue,
+              brightness: Brightness.dark,
+            ),
+            themeMode: darkModeService.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+            home: LoginPage(),
+          );
+        },
       ),
-      home:LoginPage(),
     );
   }
-}
+
+  }
 class LoginPage extends StatelessWidget {
   LoginPage({super.key});
 
@@ -37,9 +53,18 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final darkModeService = Provider.of<DarkModeService>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
         title: const Text('OORIBA_S3'),
+                actions: [
+          IconButton(
+            icon: Icon(darkModeService.isDarkMode ? Icons.light_mode : Icons.dark_mode),
+            onPressed: () {
+              darkModeService.toggleDarkMode();
+            },
+          ),
+        ],
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -54,7 +79,7 @@ class LoginPage extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(16.0),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(10),
                       boxShadow: const [
                         BoxShadow(
@@ -67,6 +92,7 @@ class LoginPage extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
+                        // ......................................
                         const Text(
                           'Welcome To OORIBA-S3',
                           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -95,9 +121,9 @@ class LoginPage extends StatelessWidget {
                           child: TextButton(
                             onPressed: () {
                               // TODO: Implement forgot password functionality
-                            //   Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(builder: (context) =>OOoribaApp()),
+                              // Navigator.push(
+                              // context,
+                              // MaterialPageRoute(builder: (context) =>LayApp() ),
                             // );
                             },
                             child: const Text('Forgot Password'),
@@ -118,8 +144,9 @@ class LoginPage extends StatelessWidget {
                         const SizedBox(height: 20),
                         RichText(
                           text: TextSpan(
+                            //..........................................................
                             text: "Don't have an account? ",
-                            style: const TextStyle(color: Colors.black),
+                            style:TextStyle(color: Theme.of(context).textTheme.bodyLarge!.color),
                             children: [
                               TextSpan(
                                 text: 'Sign Up here',

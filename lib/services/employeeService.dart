@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:ooriba_s3/employee_signup_success.dart';
+import 'package:ooriba_s3/services/auth_service.dart';
 class EmployeeService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
@@ -60,12 +60,17 @@ class EmployeeService {
         'dpImageUrl': dpImageUrl,
         'adhaarUrl':adhaarUrl,
         'supportUrl':supportUrl
-        });
+        }); 
+      
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => ConfirmationPage()),
-      );
+        await AuthService().signup(
+                        email: email,
+                        password:password,
+                        context: context
+                      );
+
+          
+
     } 
     catch (e) {
       print('Failed to add employee: $e');
@@ -77,4 +82,22 @@ class EmployeeService {
     TaskSnapshot taskSnapshot = await uploadTask;
     return await taskSnapshot.ref.getDownloadURL();
   }
+
+
 }
+// class AuthService {
+//   final FirebaseAuth _auth = FirebaseAuth.instance;
+
+//   Future<void> signUpWithEmailAndPassword(String email, String password) async {
+//     try {
+//       await _auth.createUserWithEmailAndPassword(
+//         email: email,
+//         password: password,
+//       );
+//     } catch (e) {
+//       // Handle authentication errors here
+//       print('Error signing up: $e');
+//       throw e;
+//     }
+//   }
+// }
