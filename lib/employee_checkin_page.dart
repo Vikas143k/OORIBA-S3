@@ -1,9 +1,13 @@
+//EmailJS
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 
 class EmployeeCheckInPage extends StatefulWidget {
-  final String email;
-
-  EmployeeCheckInPage(this.email);
+ final String empname;
+  final String empemail;
+  const EmployeeCheckInPage({super.key, required this.empname, required this.empemail});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -25,11 +29,11 @@ class CheckInOutRecord {
 
 class _EmployeeCheckInPageState extends State<EmployeeCheckInPage> {
   late List<CheckInOutRecord> checkInOutRecords;
-   late String email;
+   late String _email;
   @override
   void initState() {
     super.initState();
-    email = widget.email;
+    _email = widget.empemail;
     checkInOutRecords = _generateCheckInOutRecords();
   }
 
@@ -54,73 +58,116 @@ class _EmployeeCheckInPageState extends State<EmployeeCheckInPage> {
     return records;
   }
 
-  void _toggleCheckInOut(int index) {
+ void _toggleCheckInOut(int index) async {
     setState(() {
       checkInOutRecords[index].isCheckedIn =
           !checkInOutRecords[index].isCheckedIn;
       if (checkInOutRecords[index].isCheckedIn) {
         checkInOutRecords[index].checkInTime = DateTime.now();
         checkInOutRecords[index].checkOutTime = null;
+        _sendCheckInEmail(widget.empname, widget.empemail,
+            checkInOutRecords[index].checkInTime!);
       } else {
         checkInOutRecords[index].checkOutTime = DateTime.now();
+        _sendCheckOutEmail(widget.empname, widget.empemail,
+            checkInOutRecords[index].checkOutTime!);
       }
     });
   }
 
-  @override
+  //email thing by emailJS
+  Future<void> _sendCheckInEmail(
+      String empname,String empemail, DateTime checkInTime) async {
+    const serviceId = 'service_qe69w28';
+    const templateId = 'template_1owmygk';
+    const userId = 'lMYaM2NpLYjm2qSWI';
+    final url = Uri.parse('https://api.emailjs.com/api/v1.0/email/send');
+    final response = await http.post(
+      url,
+      headers: {
+        'origin':'http:localhost',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'service_id': serviceId,
+        'template_id': templateId,
+        'user_id': userId,
+        'template_params': {
+          'empname': empname,
+          'empemail':empemail,
+          'check_in_time': checkInTime.toIso8601String(),
+        }
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      if (kDebugMode) {
+        print('Check-in email sent successfully');
+      }
+    } else {
+      if (kDebugMode) {
+        print('Failed to send check-in email: ${response.body}');
+      }
+    }
+  }
+
+  Future<void> _sendCheckOutEmail(
+      String empname,String empemail, DateTime checkOutTime) async {
+    const serviceId = 'service_qe69w28';
+    const templateId = 'template_drhybtc';
+    const userId = 'lMYaM2NpLYjm2qSWI';
+    final url = Uri.parse('https://api.emailjs.com/api/v1.0/email/send');
+    final response = await http.post(
+      url,
+      headers: {  
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'service_id': serviceId,
+        'template_id': templateId,
+        'user_id': userId,
+        'template_params': {
+          'empemail':empemail,
+          'empname': empname,
+          'check_out_time': checkOutTime.toIso8601String(),
+        }
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      if (kDebugMode) {
+        print('Check-out email sent successfully');
+      }
+    } else {
+      if (kDebugMode) {
+        print('Failed to send check-out email: ${response.body}');
+      }
+    }
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Employee Check In/Out -$email'),
+        title: Text('Welcome, ${_email}'),
       ),
       body: ListView.builder(
         itemCount: checkInOutRecords.length,
         itemBuilder: (context, index) {
-          return CheckInOutCard(
-              record: checkInOutRecords[index],
-              onToggle: () => _toggleCheckInOut(index));
+          return ListTile(
+            title: Text(
+                'Date: ${checkInOutRecords[index].date.toLocal().toString().split(' ')[0]}'),
+            subtitle: checkInOutRecords[index].isCheckedIn
+                ? Text('Checked in at: ${checkInOutRecords[index].checkInTime}')
+                : Text(
+                    'Checked out at: ${checkInOutRecords[index].checkOutTime}'),
+            trailing: ElevatedButton(
+              onPressed: () => _toggleCheckInOut(index),
+              child: checkInOutRecords[index].isCheckedIn
+                  ? const Text('Check Out')
+                  : const Text('Check In'),
+            ),
+          );
         },
-      ),
-    );
-  }
-}
-
-class CheckInOutCard extends StatelessWidget {
-  final CheckInOutRecord record;
-  final VoidCallback onToggle;
-
-  const CheckInOutCard({Key? key, required this.record, required this.onToggle})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    Color statusColor = record.isCheckedIn ? Colors.green : Colors.red;
-    return Card(
-      elevation: 4,
-      margin: const EdgeInsets.all(8),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Date: ${record.date.day}/${record.date.month}/${record.date.year}',
-              style: TextStyle(
-                  color: statusColor), // Set color based on check-in/out status
-            ),
-            const SizedBox(height: 8),
-            Text(
-                'Status: ${record.isCheckedIn ? 'Checked In' : 'Checked Out'}'),
-            const SizedBox(height: 8),
-            Text('Check In Time: ${record.checkInTime ?? 'N/A'}'),
-            Text('Check Out Time: ${record.checkOutTime ?? 'N/A'}'),
-            const SizedBox(height: 8),
-            Switch(
-              value: record.isCheckedIn,
-              onChanged: (_) => onToggle(),
-            ),
-          ],
-        ),
       ),
     );
   }

@@ -70,7 +70,7 @@ class AuthService {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (BuildContext context) => EmployeeCheckInPage(email)
+          builder: (BuildContext context) => EmployeeCheckInPage(empname:"vikas",empemail:email)
         )
       );
       }
