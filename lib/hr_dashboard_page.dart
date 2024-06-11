@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ooriba_s3/attendance.dart';
 
 void main() {
   runApp(MyApp());
@@ -112,6 +113,18 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.access_time),
+              title: const Text('Attendance'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const AttendancePage()),
+                );
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.logout),
               title: const Text('Log Out'),
               onTap: () {
@@ -126,9 +139,8 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            const Padding(
-              // padding: const EdgeInsets.all(16.0),
-              padding: EdgeInsets.all(2.0),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
               child: Text(
                 'Dashboard',
                 style: TextStyle(
@@ -138,8 +150,7 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
               ),
             ),
             Padding(
-              // padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              padding: const EdgeInsets.symmetric(horizontal: 2.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
@@ -152,8 +163,7 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
                       _showRegisteredEmployees,
                     ),
                   ),
-                  // SizedBox(width: 16.0),
-                  SizedBox(width: 2.0),
+                  SizedBox(width: 16.0),
                   Expanded(
                     child: _buildDashboardBlock(
                       context,
@@ -163,8 +173,7 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
                       _showNewApplicants,
                     ),
                   ),
-                  // SizedBox(width: 16.0),
-                  SizedBox(width: 2.0),
+                  SizedBox(width: 16.0),
                   Expanded(
                     child: _buildDashboardBlock(
                       context,
@@ -251,9 +260,9 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
               children: <Widget>[
                 CircleAvatar(
                   // Placeholder image, replace with actual photo
-                   child: Image.network(
-            'https://firebasestorage.googleapis.com/v0/b/ooriba-s3-add23.appspot.com/o/image%2Fdp.png?alt=media&token=87f1b3a7-d249-4976-bdf9-5fdaa808bea0',
-          ),
+                  child: Image.network(
+                    'https://firebasestorage.googleapis.com/v0/b/ooriba-s3-add23.appspot.com/o/image%2Fdp.png?alt=media&token=87f1b3a7-d249-4976-bdf9-5fdaa808bea0',
+                  ),
                   radius: 30.0,
                 ),
                 SizedBox(width: 16.0),
@@ -360,7 +369,8 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Registered Employees'),
-          content: const Text('Details of registered employees will be shown here.'),
+          content:
+              const Text('Details of registered employees will be shown here.'),
           actions: <Widget>[
             TextButton(
               onPressed: () {
@@ -400,7 +410,8 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Rejected Applications'),
-          content: const Text('Details of rejected applications will be shown here.'),
+          content: const Text(
+              'Details of rejected applications will be shown here.'),
           actions: <Widget>[
             TextButton(
               onPressed: () {
@@ -518,13 +529,16 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.employee.name);
-    _ageController = TextEditingController(text: widget.employee.age.toString());
+    _ageController =
+        TextEditingController(text: widget.employee.age.toString());
     _phoneController = TextEditingController(text: widget.employee.phone);
     _emailController = TextEditingController(text: widget.employee.email);
     _dobController = TextEditingController(text: widget.employee.dob);
     _panController = TextEditingController(text: widget.employee.pan);
-    _residentialAddressController = TextEditingController(text: widget.employee.residentialAddress);
-    _permanentAddressController = TextEditingController(text: widget.employee.permanentAddress);
+    _residentialAddressController =
+        TextEditingController(text: widget.employee.residentialAddress);
+    _permanentAddressController =
+        TextEditingController(text: widget.employee.permanentAddress);
   }
 
   @override
@@ -579,11 +593,13 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
               ),
               TextField(
                 controller: _residentialAddressController,
-                decoration: const InputDecoration(labelText: 'Residential Address'),
+                decoration:
+                    const InputDecoration(labelText: 'Residential Address'),
               ),
               TextField(
                 controller: _permanentAddressController,
-                decoration: const InputDecoration(labelText: 'Permanent Address'),
+                decoration:
+                    const InputDecoration(labelText: 'Permanent Address'),
               ),
               SizedBox(height: 24.0),
               Row(

@@ -2,9 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ooriba_s3/employee_checkin_page.dart';
+import 'package:ooriba_s3/hr_dashboard_page.dart';
 import 'package:ooriba_s3/services/retrieveDataByEmail.dart';
 import 'package:ooriba_s3/employee_signup_success.dart';
-import 'package:ooriba_s3/hr_dashboard_page.dart';
 import 'package:ooriba_s3/main.dart';
 class AuthService {
   Future<void> signup({

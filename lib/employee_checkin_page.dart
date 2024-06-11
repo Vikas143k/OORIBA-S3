@@ -4,10 +4,13 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:ooriba_s3/services/auth_service.dart';
+import 'package:ooriba_s3/services/updateEmployee.dart';
 
 class EmployeeCheckInPage extends StatefulWidget {
+  
  final String empname;
   final String empemail;
+ 
   const EmployeeCheckInPage({super.key, required this.empname, required this.empemail});
 
   @override
@@ -29,6 +32,7 @@ class CheckInOutRecord {
 }
 
 class _EmployeeCheckInPageState extends State<EmployeeCheckInPage> {
+   late DateTime dataDate;
   late List<CheckInOutRecord> checkInOutRecords;
    late String _email;
   @override
@@ -42,10 +46,11 @@ class _EmployeeCheckInPageState extends State<EmployeeCheckInPage> {
     // Generate records for the last 7 days
     List<CheckInOutRecord> records = [];
     DateTime now = DateTime.now();
+    
     for (int i = 0; i < 7; i++) {
       DateTime date = now.subtract(Duration(days: i));
       // Dummy logic to alternate check-in and check-out for demonstration
-      bool isCheckedIn = i.isEven;
+      bool isCheckedIn = i.isOdd;
       DateTime? checkInTime = isCheckedIn ? date.add(Duration(hours: 9)) : null;
       DateTime? checkOutTime =
           isCheckedIn ? null : date.add(Duration(hours: 18));
@@ -59,21 +64,53 @@ class _EmployeeCheckInPageState extends State<EmployeeCheckInPage> {
     return records;
   }
 
+  
+
  void _toggleCheckInOut(int index) async {
+  
+    final FirestoreService _firestoreService = FirestoreService();
+       void _addData() async {
+    if (widget.empname.isNotEmpty) {
+      setState(() {
+      });
+      
+      await _firestoreService.addCheckInOutData(widget.empemail,checkInOutRecords[index].checkInTime!,checkInOutRecords[index].checkOutTime!,dataDate);
+
+      setState(() {
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Data added successfully')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please enter a first name')),
+      );
+    }
+  }
+      
     setState(() {
+      DateTime now=DateTime.now();
       checkInOutRecords[index].isCheckedIn =
           !checkInOutRecords[index].isCheckedIn;
+        dataDate=now.subtract(Duration(days: index));
       if (checkInOutRecords[index].isCheckedIn) {
         checkInOutRecords[index].checkInTime = DateTime.now();
         checkInOutRecords[index].checkOutTime = null;
+
         _sendCheckInEmail(widget.empname, widget.empemail,
             checkInOutRecords[index].checkInTime!);
       } else {
         checkInOutRecords[index].checkOutTime = DateTime.now();
+         _addData();
         _sendCheckOutEmail(widget.empname, widget.empemail,
             checkInOutRecords[index].checkOutTime!);
       }
     });
+    //update into database
+
+     
+
   }
 
   //email thing by emailJS

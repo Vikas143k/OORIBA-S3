@@ -3,19 +3,20 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:ooriba_s3/firebase_options.dart';
+import 'package:ooriba_s3/hr_dashboard_page.dart';
 import 'package:ooriba_s3/hr_login_page.dart';
 import 'package:ooriba_s3/services/auth_service.dart';
 import 'package:ooriba_s3/services/dark_mode.dart';
 import 'package:ooriba_s3/signup_page.dart';
-import 'package:ooriba_s3/test/official.dart';
+// import 'package:ooriba_s3/test/updateEmployeeTest.dart';
 import 'package:provider/provider.dart';
 List<CameraDescription>? cameras;
 Future <void> main() async{
   WidgetsFlutterBinding.ensureInitialized();
-  cameras=await availableCameras();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
 );
+  cameras = await availableCameras();
   runApp( const OoribaApp());
 }
 
@@ -125,12 +126,12 @@ class LoginPage extends StatelessWidget {
                           child: TextButton(
                             onPressed: () {
                               // TODO: Implement forgot password functionality
-                            //   Navigator.push(
-                            //   context,
-                            //   //.........................................................................
-                            //   // MaterialPageRoute(builder: (context) =>EmployeeSearchPage() ),
-                            //   MaterialPageRoute(builder: (context) =>Official() ),
-                            // );
+                              Navigator.push(
+                              context,
+                              //.........................................................................
+                              MaterialPageRoute(builder: (context) =>HRDashboardPage()),
+                            //   MaterialPageRoute(builder: (context) =>LLMyHomePage(cameras: cameras!) ),
+                            );
                             },
                             child: const Text('Forgot Password'),
                           ),
