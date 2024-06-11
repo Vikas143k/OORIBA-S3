@@ -260,9 +260,9 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
               children: <Widget>[
                 CircleAvatar(
                   // Placeholder image, replace with actual photo
-                  child: Image.network(
-                    'https://firebasestorage.googleapis.com/v0/b/ooriba-s3-add23.appspot.com/o/image%2Fdp.png?alt=media&token=87f1b3a7-d249-4976-bdf9-5fdaa808bea0',
-                  ),
+                  // child: Image.network(
+                  //   'https://firebasestorage.googleapis.com/v0/b/ooriba-s3-add23.appspot.com/o/image%2Fdp.png?alt=media&token=87f1b3a7-d249-4976-bdf9-5fdaa808bea0',
+                  // ),
                   radius: 30.0,
                 ),
                 SizedBox(width: 16.0),
