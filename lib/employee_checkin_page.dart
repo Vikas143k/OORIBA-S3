@@ -217,31 +217,6 @@ class _EmployeeCheckInPageState extends State<EmployeeCheckInPage> {
       ),
     );
   }
-  // Widget build(BuildContext context) {
-  //   return Scaffold(
-  //     appBar: AppBar(
-  //       title: Text('Welcome, ${_email}'),
-  //     ),
-  //     body: ListView.builder(
-  //       itemCount: checkInOutRecords.length,
-  //       itemBuilder: (context, index) {
-  //         return ListTile(
-  //           title: Text(
-  //               'Date: ${checkInOutRecords[index].date.toLocal().toString().split(' ')[0]}'),
-  //           subtitle: checkInOutRecords[index].isCheckedIn
-  //               ? Text('Checked in at: ${checkInOutRecords[index].checkInTime}')
-  //               : Text(
-  //                   'Checked out at: ${checkInOutRecords[index].checkOutTime}'),
-  //           trailing: ElevatedButton(
-  //             onPressed: () => _toggleCheckInOut(index),
-  //             child: checkInOutRecords[index].isCheckedIn
-  //                 ? const Text('Check Out')
-  //                 : const Text('Check In'),
-  //           ),
-  //         );
-  //       },
-  //     ),
-  //   );
-  // }
+ 
 }
 
