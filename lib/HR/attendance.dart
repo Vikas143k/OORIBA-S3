@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ooriba_s3/services/retrieveFromDates_service.dart'; // For formatting date
 // import 'date_service.dart'; // Import the service file
+import 'package:firebase_storage/firebase_storage.dart'; // Firebase Storage
 
 class DatePickerButton extends StatefulWidget {
   @override
@@ -36,71 +37,118 @@ class _DatePickerButtonState extends State<DatePickerButton> {
     });
   }
 
+  Future<String> getImageUrl(String email) async {
+    // Construct the path to the image in Firebase Storage
+    String imagePath = 'authImage/$email.jpg';
+
+    try {
+      // Get the download URL for the image
+      final ref = FirebaseStorage.instance.ref().child(imagePath);
+      final url = await ref.getDownloadURL();
+      return url;
+    } catch (e) {
+      print('Error fetching image for $email: $e');
+      return '';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-        return Scaffold(
+    return Scaffold(
       appBar: AppBar(
         title: const Text('Attendance Page'),
       ),
       body: Column(
-      children: [
-        ElevatedButton(
-          onPressed: () => _selectDate(context),
-          child: Text('Select date'),
-        ),
-        Expanded(
-          child: ListView.builder(
-            itemCount: _data.length,
-            itemBuilder: (context, index) {
-              String email = _data.keys.elementAt(index);
-              Map<String, String> emailData = _data[email]!;
+        children: [
+          ElevatedButton(
+            onPressed: (){_selectDate(context);
+            } ,
+            child: Text('Select date'),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: _data.length,
+              itemBuilder: (context, index) {
+                String email = _data.keys.elementAt(index);
+                Map<String, String> emailData = _data[email]!;
 
                 return Card(
-  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-  child: ListTile(
-    title: Text(email),
-    subtitle: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(child: Text('Check-in: ${emailData['checkIn']}')),
-            Expanded(child: Text('Check-out: ${emailData['checkOut']}')),
-          ],
-        ),
-        const SizedBox(height: 4),
-        RichText(
-          text: TextSpan(
-            children: [
-              const TextSpan(
-                text: 'Status: ',
-                style: TextStyle(color: Colors.black),
-              ),
-              TextSpan(
-                text: 'present',
-                style: const TextStyle(color: Colors.green),
-              ),
-            ],
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: ListTile(
+                    title: Text(email),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(child: Text('Check-in: ${emailData['checkIn']}')),
+                            Expanded(child: Text('Check-out: ${emailData['checkOut']}')),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        RichText(
+                          text: const TextSpan(
+                            children: [
+                              TextSpan(
+                                text: 'Status: ',
+                                style: TextStyle(color: Colors.black),
+                              ),
+                              TextSpan(
+                                text: 'present',
+                                style: TextStyle(color: Colors.green),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    trailing: IconButton(
+                      icon: Icon(Icons.image),
+                      onPressed: () async {
+                        String imageUrl = await getImageUrl(email);
+                        if (imageUrl.isNotEmpty) {
+                          // Show image dialog
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              content: Image.network(imageUrl),
+                              actions: <Widget>[
+                                TextButton(
+                                  child: Text('Close'),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                              ],
+                            ),
+                          );
+                        } else {
+                          // Handle error case
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              content: Text('Image not found for $email'),
+                              actions: <Widget>[
+                                TextButton(
+                                  child: Text('Close'),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                    
+                  ),
+                );
+              },
+            ),
           ),
-        ),
-      ],
-    ),
-  ),
-);
-                // },
-
-
-              // return Card(
-              //   child: ListTile(
-              //     title: Text(email),
-              //     subtitle: Text('Check-in: ${emailData['checkIn']}\nCheck-out: ${emailData['checkOut']}'),
-              //   ),
-              // );
-            },
-          ),
-        ),
-      ],
+        ],
       ),
     );
   }

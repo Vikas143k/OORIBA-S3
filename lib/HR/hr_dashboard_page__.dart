@@ -1,13 +1,5 @@
-// import 'package:flutter/material.dart';
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:ooriba/employee_details_page.dart';
-// // import 'package:ooriba/registered_employees_page.dart';
-// // import 'services/auth_service.dart'; // Replace with your auth service file path
-// // import 'registered_service.dart'; // Replace with your registered service file path
-// import 'attendance.dart'; // Assuming this file contains DatePickerButton widget
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:ooriba_s3/HR/registered_employees_page.dart';
 import 'package:ooriba_s3/services/auth_service.dart';
 import 'package:ooriba_s3/services/registered_service.dart';
 import 'attendance.dart'; // Assuming this file contains DatePickerButton widget
@@ -22,7 +14,6 @@ class HRDashboardPage extends StatefulWidget {
 
 class _HRDashboardPageState extends State<HRDashboardPage> {
   final Map<int, bool> _isAccepted = {};
-
   final RegisteredService _registeredService = RegisteredService();
 
   @override
@@ -56,10 +47,10 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
             ),
             ListTile(
               leading: const Icon(Icons.people),
-              title: const Text('Registered Employees'),
+              title: const Text('Employee'),
               onTap: () {
                 Navigator.pop(context);
-                _showRegisteredEmployees(context);
+                // Navigate to Employee Page
               },
             ),
             ListTile(
@@ -96,8 +87,8 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(16.0),
+            const Padding(
+              padding: EdgeInsets.all(16.0),
               child: Text(
                 'Dashboard',
                 style: TextStyle(
@@ -144,8 +135,8 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
               ),
             ),
             SizedBox(height: 16.0),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(
                 'Employee Details',
                 style: TextStyle(
@@ -203,7 +194,7 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
             SizedBox(height: 8.0),
             Text(
               title,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18.0,
                 fontWeight: FontWeight.bold,
@@ -217,7 +208,7 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
 
   Widget _buildEmployeeCard(BuildContext context, Map<String, dynamic> data,
       DocumentReference docRef) {
-        bool isAccepted = _isAccepted[docRef.id.hashCode] ?? false;
+    bool isAccepted = _isAccepted[docRef.id.hashCode] ?? false;
 
     void _acceptEmployee(Map<String, dynamic> data, DocumentReference docRef) {
       setState(() {
@@ -231,8 +222,9 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
     if (isAccepted) {
       return Container(); // Return empty container if already accepted
     }
+
     return Card(
-      margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4.0),
       child: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
@@ -286,6 +278,32 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
                     style: TextStyle(color: Colors.white),
                   ),
                 ),
+                const SizedBox(width: 24.0),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                  ),
+                  onPressed: () {
+                    _acceptEmployee(data, docRef);
+                  },
+                  child: Text(
+                    'Accept',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+                const SizedBox(width: 24.0),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                  ),
+                  onPressed: () {
+                    // Implement reject logic
+                  },
+                  child: const Text(
+                    'Reject',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
               ],
             ),
           ],
@@ -295,9 +313,22 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
   }
 
   void _showRegisteredEmployees(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => RegisteredEmployeesPage()),
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Registered Employees'),
+          content: const Text('List of registered employees...'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Close'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 

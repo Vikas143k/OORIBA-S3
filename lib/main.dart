@@ -1,22 +1,20 @@
-// import 'package:camera/camera.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:ooriba_s3/firebase_options.dart';
-import 'package:ooriba_s3/HR/hr_dashboard_page.dart';
 import 'package:ooriba_s3/hr_login_page.dart';
 import 'package:ooriba_s3/services/auth_service.dart';
 import 'package:ooriba_s3/services/dark_mode.dart';
 import 'package:ooriba_s3/signup_page.dart';
 import 'package:provider/provider.dart';
-// List<CameraDescription>? cameras;
-Future <void> main() async{
+import 'package:ooriba_s3/facial/HomeScreen.dart';
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
-);
-  // cameras = await availableCameras();
-  runApp( const OoribaApp());
+  );
+  runApp(const OoribaApp());
 }
 
 class OoribaApp extends StatelessWidget {
@@ -29,7 +27,7 @@ class OoribaApp extends StatelessWidget {
       child: Consumer<DarkModeService>(
         builder: (context, darkModeService, _) {
           return MaterialApp(
-              debugShowCheckedModeBanner: false,
+            debugShowCheckedModeBanner: false,
             title: 'OORIBA_S3',
             theme: ThemeData(
               primarySwatch: Colors.blue,
@@ -46,12 +44,10 @@ class OoribaApp extends StatelessWidget {
       ),
     );
   }
+}
 
-  }
 class LoginPage extends StatelessWidget {
-
   LoginPage({super.key});
-
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -61,7 +57,7 @@ class LoginPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('OORIBA_S3'),
-                actions: [
+        actions: [
           IconButton(
             icon: Icon(darkModeService.isDarkMode ? Icons.light_mode : Icons.dark_mode),
             onPressed: () {
@@ -96,7 +92,6 @@ class LoginPage extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        // ......................................
                         const Text(
                           'Welcome To OORIBA-S3',
                           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -104,7 +99,7 @@ class LoginPage extends StatelessWidget {
                         const SizedBox(height: 40),
                         TextField(
                           controller: _emailController,
-                          decoration:const InputDecoration(
+                          decoration: const InputDecoration(
                             filled: true,
                             labelText: 'Email ID',
                             border: OutlineInputBorder(),
@@ -124,14 +119,11 @@ class LoginPage extends StatelessWidget {
                           alignment: Alignment.centerRight,
                           child: TextButton(
                             onPressed: () {
-                              // TODO: Implement forgot password functionality
-                              Navigator.push(
-                              context,
-                              //.........................................................................
-                              // MaterialPageRoute(builder: (context) =>DatePickerButton()),
-                              MaterialPageRoute(builder: (context) =>HRDashboardPage()),
-                            //   MaterialPageRoute(builder: (context) =>LLMyHomePage(cameras: cameras!) ),
-                            );
+                              // Implement forgot password functionality
+                              // Navigator.push(
+                              //   context,
+                              //   MaterialPageRoute(builder: (context) => HRDashboardPage()),
+                              // );
                             },
                             child: const Text('Forgot Password'),
                           ),
@@ -139,21 +131,26 @@ class LoginPage extends StatelessWidget {
                         const SizedBox(height: 20),
                         ElevatedButton(
                           onPressed: () async {
-                            await AuthService().signin(
+                            bool success = await AuthService().signin(
                               email: _emailController.text,
                               password: _passwordController.text,
-                              role:"employee",
+                              role: "employee",
                               context: context
                             );
+                            if (success) {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (context) => HomeScreen(email: _emailController.text)),
+                              );
+                            }
                           },
                           child: const Text('Sign In'),
                         ),
                         const SizedBox(height: 20),
                         RichText(
                           text: TextSpan(
-                            //..........................................................
                             text: "Don't have an account? ",
-                            style:TextStyle(color: Theme.of(context).textTheme.bodyLarge!.color),
+                            style: TextStyle(color: Theme.of(context).textTheme.bodyLarge!.color),
                             children: [
                               TextSpan(
                                 text: 'Sign Up here',
