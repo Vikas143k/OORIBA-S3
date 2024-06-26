@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:ooriba_s3/facial/RecognitionScreen.dart';
-import 'package:ooriba_s3/services/retrieveDataByEmail.dart';
 
 class HomeScreen extends StatefulWidget{
   final String email;
@@ -32,6 +31,7 @@ class _HomePageState extends State<HomeScreen> {
                 ElevatedButton(
                   onPressed: () {
                     Navigator.push(context, MaterialPageRoute(builder: (context) => RecognitionScreen(email: widget.email)));
+                    // Navigator.push(context, MaterialPageRoute(builder: (context) => RecognitionScreen(email:"vikasyadav177714@gmail.com")));
                   },
                   style: ElevatedButton.styleFrom(minimumSize: Size(screenWidth - 30, 50)),
                   child: const Text("Recognize"),

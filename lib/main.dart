@@ -1,7 +1,11 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:ooriba_s3/employee_signup_success.dart';
+import 'package:ooriba_s3/facial/HomeScreen2.dart';
+import 'package:ooriba_s3/facial/RegistrationScreen.dart';
 import 'package:ooriba_s3/firebase_options.dart';
+import 'package:ooriba_s3/home/home.dart';
 import 'package:ooriba_s3/hr_login_page.dart';
 import 'package:ooriba_s3/services/auth_service.dart';
 import 'package:ooriba_s3/services/dark_mode.dart';
@@ -120,10 +124,10 @@ class LoginPage extends StatelessWidget {
                           child: TextButton(
                             onPressed: () {
                               // Implement forgot password functionality
-                              // Navigator.push(
-                              //   context,
-                              //   MaterialPageRoute(builder: (context) => HRDashboardPage()),
-                              // );
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => HomeScreen2()),
+                              );
                             },
                             child: const Text('Forgot Password'),
                           ),
@@ -162,7 +166,8 @@ class LoginPage extends StatelessWidget {
                                   ..onTap = () {
                                     Navigator.push(
                                       context,
-                                      MaterialPageRoute(builder: (context) => const SignUpPage()),
+                                      // MaterialPageRoute(builder: (context) => const SignUpPage()),
+                                      MaterialPageRoute(builder: (context) =>ConfirmationPage()),
                                     );
                                   },
                               ),

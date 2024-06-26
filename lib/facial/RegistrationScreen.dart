@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
+import 'package:ooriba_s3/facial/ML/Recognition.dart';
 import 'package:ooriba_s3/facial/ML/Recognizer.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';

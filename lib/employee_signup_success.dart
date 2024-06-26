@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ooriba_s3/facial/RegistrationScreen.dart';
 import 'package:ooriba_s3/main.dart';
 
 class ConfirmationPage extends StatelessWidget {
@@ -62,10 +63,49 @@ class ConfirmationPage extends StatelessWidget {
                   style: TextStyle(fontSize: 20),
                 ),
               ),
+              ElevatedButton(
+                onPressed: () {
+                   Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => RegistrationScreen()),
+      );
+                },
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.blue, backgroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+                child: Text(
+                  'Go to Registration',
+                  style: TextStyle(fontSize: 20),
+                ),
+              ),
+
             ],
           ),
         ),
       ),
     );
   }
+  //  Widget _navigateToRegistration(BuildContext context) {
+  //   return ElevatedButton(
+  //     style: ElevatedButton.styleFrom(
+  //       backgroundColor: const Color(0xff0D6EFD),
+  //       shape: RoundedRectangleBorder(
+  //         borderRadius: BorderRadius.circular(14),
+  //       ),
+  //       minimumSize: const Size(double.infinity, 60),
+  //       elevation: 0,
+  //     ),
+  //     onPressed: () {
+  //       Navigator.push(
+  //         context,
+  //         MaterialPageRoute(builder: (context) => RegistrationScreen()),
+  //       );
+  //     },
+  //     child: const Text("Go to Registration"),
+  //   );
+  // }
 }
