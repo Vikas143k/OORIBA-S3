@@ -1,19 +1,14 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:ooriba_s3/employee_signup_success.dart';
-import 'package:ooriba_s3/facial/HomeScreen2.dart';
-import 'package:ooriba_s3/facial/RegistrationScreen.dart';
+import 'package:ooriba_s3/HR/hr_dashboard_page.dart';
 import 'package:ooriba_s3/firebase_options.dart';
-import 'package:ooriba_s3/home/home.dart';
-import 'package:ooriba_s3/hr_login_page.dart';
 import 'package:ooriba_s3/services/auth_service.dart';
 import 'package:ooriba_s3/services/dark_mode.dart';
 import 'package:ooriba_s3/signup_page.dart';
 import 'package:provider/provider.dart';
-import 'package:ooriba_s3/facial/HomeScreen.dart';
 
-Future<void> main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -41,7 +36,8 @@ class OoribaApp extends StatelessWidget {
               primarySwatch: Colors.blue,
               brightness: Brightness.dark,
             ),
-            themeMode: darkModeService.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+            themeMode:
+                darkModeService.isDarkMode ? ThemeMode.dark : ThemeMode.light,
             home: LoginPage(),
           );
         },
@@ -52,18 +48,22 @@ class OoribaApp extends StatelessWidget {
 
 class LoginPage extends StatelessWidget {
   LoginPage({super.key});
+
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    final darkModeService = Provider.of<DarkModeService>(context, listen: false);
+    final darkModeService =
+        Provider.of<DarkModeService>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
         title: const Text('OORIBA_S3'),
         actions: [
           IconButton(
-            icon: Icon(darkModeService.isDarkMode ? Icons.light_mode : Icons.dark_mode),
+            icon: Icon(darkModeService.isDarkMode
+                ? Icons.light_mode
+                : Icons.dark_mode),
             onPressed: () {
               darkModeService.toggleDarkMode();
             },
@@ -98,7 +98,8 @@ class LoginPage extends StatelessWidget {
                       children: <Widget>[
                         const Text(
                           'Welcome To OORIBA-S3',
-                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontSize: 24, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 40),
                         TextField(
@@ -123,10 +124,10 @@ class LoginPage extends StatelessWidget {
                           alignment: Alignment.centerRight,
                           child: TextButton(
                             onPressed: () {
-                              // Implement forgot password functionality
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => HomeScreen2()),
+                                MaterialPageRoute(
+                                    builder: (context) => HRDashboardPage()),
                               );
                             },
                             child: const Text('Forgot Password'),
@@ -135,18 +136,10 @@ class LoginPage extends StatelessWidget {
                         const SizedBox(height: 20),
                         ElevatedButton(
                           onPressed: () async {
-                            bool success = await AuthService().signin(
-                              email: _emailController.text,
-                              password: _passwordController.text,
-                              role: "employee",
-                              context: context
-                            );
-                            if (success) {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(builder: (context) => HomeScreen(email: _emailController.text)),
-                              );
-                            }
+                            await AuthService().signin(
+                                email: _emailController.text,
+                                password: _passwordController.text,
+                                context: context);
                           },
                           child: const Text('Sign In'),
                         ),
@@ -154,7 +147,11 @@ class LoginPage extends StatelessWidget {
                         RichText(
                           text: TextSpan(
                             text: "Don't have an account? ",
-                            style: TextStyle(color: Theme.of(context).textTheme.bodyLarge!.color),
+                            style: TextStyle(
+                                color: Theme.of(context)
+                                    .textTheme
+                                    .bodyLarge!
+                                    .color),
                             children: [
                               TextSpan(
                                 text: 'Sign Up here',
@@ -166,23 +163,25 @@ class LoginPage extends StatelessWidget {
                                   ..onTap = () {
                                     Navigator.push(
                                       context,
-                                      // MaterialPageRoute(builder: (context) => const SignUpPage()),
-                                      MaterialPageRoute(builder: (context) =>ConfirmationPage()),
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const SignUpPage()),
                                     );
                                   },
                               ),
                             ],
                           ),
                         ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => const HRLoginPage()),
-                            );
-                          },
-                          child: const Text('HR sign-in here'),
-                        ),
+                        // TextButton(
+                        //   onPressed: () {
+                        //     Navigator.push(
+                        //       context,
+                        //       MaterialPageRoute(
+                        //           builder: (context) => const HRLoginPage()),
+                        //     );
+                        //   },
+                        //   child: const Text('HR sign-in here'),
+                        // ),
                       ],
                     ),
                   ),

@@ -2,102 +2,78 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:ooriba_s3/services/auth_service.dart';
+
 class EmployeeService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
+
   Future<void> addEmployee(
     String firstName,
-    String middlenName,
+    String middleName,
     String lastName,
     String email,
     String password,
     String panNo,
-    String residentialAddress,
-    String permanentAddress,
+    String resAdd,
+    String perAdd,
     String phoneNo,
     String dob,
-    File adhaarImage,
+    String aadharNo,
     File dpImage,
-    File supportImage
-    ,{required BuildContext context}
-    ) async {
+    File adhaarImage,
+    File supportImage, {
+    required BuildContext context,
+  }) async {
     try {
-      // Add employee data to Firestore
-      DocumentReference docRef = await _firestore.collection('Employee').add({
+      // Remove spaces from Aadhaar number
+      aadharNo = aadharNo.replaceAll(' ', '');
+      // Convert PAN number to uppercase
+      panNo = panNo.toUpperCase();
+
+      // Upload images to Firebase Storage
+      String dpImageUrl =
+          await _uploadImage(dpImage, 'profile_pictures/$email');
+      String adhaarImageUrl =
+          await _uploadImage(adhaarImage, 'aadhaar_cards/$email');
+      String supportImageUrl =
+          await _uploadImage(supportImage, 'supporting_documents/$email');
+
+      // Prepare employee data
+      final employeeData = {
         'firstName': firstName,
-        'middleName':middlenName,
-        'lastName':lastName,
-        'email':email,
-        'password':password,
-        'panNo':panNo,
-        'residentialAddress':residentialAddress,
-        'permanentAddress':permanentAddress,
+        'middleName': middleName,
+        'lastName': lastName,
+        'email': email,
+        'password': password,
+        'panNo': panNo,
+        'residentialAddress': resAdd,
+        'permanentAddress': perAdd,
         'phoneNo': phoneNo,
-        'dob':dob,
+        'dob': dob,
+        'aadharNo': aadharNo,
         'timestamp': FieldValue.serverTimestamp(),
-        
-      });
-        //uploading dp into storage
-        String dpImageUrl = await _uploadFile(
-        'employees/${docRef.id}/profile_picture.jpg',
-        dpImage,
-        );
-        //uploading aadhaarCard into storage
-        String adhaarUrl = await _uploadFile(
-        'employees/${docRef.id}/adhaar_card.jpg',
-        adhaarImage,
-      );
-        //uploading Supporting document into storage
-        String supportUrl = await _uploadFile(
-        'employees/${docRef.id}/support.jpg',
-        supportImage,
-      );
-
-
-
-        await docRef.update({
         'dpImageUrl': dpImageUrl,
-        'adhaarUrl':adhaarUrl,
-        'supportUrl':supportUrl
-        }); 
-      
+        'adhaarImageUrl': adhaarImageUrl,
+        'supportImageUrl': supportImageUrl,
+      };
 
-        await AuthService().signup(
-                        email: email,
-                        password:password,
-                        context: context
-                      );
-
-          
-
-    } 
-    catch (e) {
-      print('Failed to add employee: $e');
+      // Save employee data to Firestore with email as document ID
+      await _db
+          .collection('Employee')
+          .doc(email)
+          .set(employeeData, SetOptions(merge: true));
+    } catch (e) {
+      print('Error saving employee data: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to sign up: $e')),
+      );
+      throw e;
     }
   }
 
-    Future<String> _uploadFile(String path, File file) async {
-    UploadTask uploadTask = _storage.ref().child(path).putFile(file);
-    TaskSnapshot taskSnapshot = await uploadTask;
-    return await taskSnapshot.ref.getDownloadURL();
+  Future<String> _uploadImage(File image, String path) async {
+    final ref = _storage.ref().child(path);
+    await ref.putFile(image);
+    return await ref.getDownloadURL();
   }
-
-
 }
-// class AuthService {
-//   final FirebaseAuth _auth = FirebaseAuth.instance;
-
-//   Future<void> signUpWithEmailAndPassword(String email, String password) async {
-//     try {
-//       await _auth.createUserWithEmailAndPassword(
-//         email: email,
-//         password: password,
-//       );
-//     } catch (e) {
-//       // Handle authentication errors here
-//       print('Error signing up: $e');
-//       throw e;
-//     }
-//   }
-// }

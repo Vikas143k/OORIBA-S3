@@ -90,10 +90,10 @@ class _DatePickerButtonState extends State<DatePickerButton> {
   }
 
   List<Map<String, dynamic>> _filterEmployeesByLocation() {
-    if (_selectedLocation == 'Default Location') {
-      return _allEmployees;
-    }
-    return _allEmployees.where((e) => e['location'] == _selectedLocation).toList();
+    return _allEmployees.where((e) => 
+      (_selectedLocation == 'Default Location' || e['location'] == _selectedLocation) &&
+      e['role'] == 'Standard'
+    ).toList();
   }
 
   Future<String> getImageUrl(String email) async {
@@ -262,6 +262,7 @@ class _DatePickerButtonState extends State<DatePickerButton> {
       ),
     );
   }
+
 // void _downloadCsv() async {
 //   List<List<String>> data = [
 //     ['Date', DateFormat('dd-MM-yyyy').format(_selectedDate!)], // Add selected date at the beginning

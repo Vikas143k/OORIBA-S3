@@ -1,4 +1,3 @@
-// registered employees button
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -81,6 +80,7 @@ class EmployeeCard extends StatelessWidget {
                     SizedBox(height: 4.0),
                     Text('Phone: ${data['phoneNo']}'),
                     Text('Email: ${data['email']}'),
+                    Text('Employee Type: ${data['employeeType']}'),
                   ],
                 ),
               ],
@@ -138,6 +138,22 @@ class _EmployeeDetailsDialogState extends State<EmployeeDetailsDialog> {
   late TextEditingController _dobController;
   late TextEditingController _dpImageUrlController;
   late TextEditingController _supportUrlController;
+  late TextEditingController _aadharNoController;
+  late TextEditingController _aadharImageUrlController;
+  late TextEditingController _joiningDateController;
+  late TextEditingController _employeeIdController;
+  late TextEditingController _bankNameController;
+  late TextEditingController _accountNumberController;
+  late TextEditingController _ifscCodeController;
+
+  String _selectedDepartment = '';
+  String _selectedDesignation = '';
+  String _selectedLocation = '';
+  String _selectedStatus = '';
+  String _selectedRole = '';
+  String _selectedEmployeeType = '';
+
+  final Map<String, String> _validationErrors = {};
 
   @override
   void initState() {
@@ -158,6 +174,24 @@ class _EmployeeDetailsDialogState extends State<EmployeeDetailsDialog> {
         TextEditingController(text: widget.data['dpImageUrl']);
     _supportUrlController =
         TextEditingController(text: widget.data['supportUrl']);
+    _aadharNoController =
+        TextEditingController(text: widget.data['aadharNo'] ?? '');
+    _aadharImageUrlController =
+        TextEditingController(text: widget.data['aadharImageUrl'] ?? '');
+    _joiningDateController =
+        TextEditingController(text: widget.data['joiningDate']);
+    _employeeIdController =
+        TextEditingController(text: widget.data['employeeId']);
+    _bankNameController = TextEditingController(text: widget.data['bankName']);
+    _accountNumberController =
+        TextEditingController(text: widget.data['accountNumber']);
+    _ifscCodeController = TextEditingController(text: widget.data['ifscCode']);
+    _selectedDepartment = widget.data['department'] ?? '';
+    _selectedDesignation = widget.data['designation'] ?? '';
+    _selectedLocation = widget.data['location'] ?? '';
+    _selectedStatus = widget.data['status'] ?? '';
+    _selectedRole = widget.data['role'] ?? '';
+    _selectedEmployeeType = widget.data['employeeType'] ?? '';
   }
 
   @override
@@ -173,139 +207,316 @@ class _EmployeeDetailsDialogState extends State<EmployeeDetailsDialog> {
     _dobController.dispose();
     _dpImageUrlController.dispose();
     _supportUrlController.dispose();
+    _aadharNoController.dispose();
+    _aadharImageUrlController.dispose();
     super.dispose();
+  }
+
+  bool _validateInputs() {
+    final firstName = _firstNameController.text.trim();
+    final lastName = _lastNameController.text.trim();
+    final phone = _phoneController.text.trim();
+    final email = _emailController.text.trim();
+    final pan = _panController.text.trim();
+    final password = _passwordController.text.trim();
+    final permanentAddress = _permanentAddressController.text.trim();
+    final residentialAddress = _residentialAddressController.text.trim();
+    final dob = _dobController.text.trim();
+    final aadharNo = _aadharNoController.text.trim();
+
+    _validationErrors.clear();
+
+    if (firstName.isEmpty || lastName.isEmpty) {
+      _validationErrors['name'] =
+          'First name and last name should not be empty.';
+    } else if (firstName.length > 50 || lastName.length > 50) {
+      _validationErrors['name'] =
+          'First name and last name should not exceed 50 characters.';
+    } else if (!RegExp(r'^[a-zA-Z.]+$').hasMatch(firstName) ||
+        !RegExp(r'^[a-zA-Z.]+$').hasMatch(lastName)) {
+      _validationErrors['name'] =
+          'First name and last name should contain only alphabets and dot (.)';
+    }
+
+    if (!RegExp(r'^[0-9]{10}$').hasMatch(phone)) {
+      _validationErrors['phone'] = 'Phone number should be 10 digits.';
+    }
+
+    if (email.isEmpty ||
+        !RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$')
+            .hasMatch(email)) {
+      _validationErrors['email'] = 'Please enter a valid email address.';
+    }
+
+    if (!RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]$').hasMatch(pan)) {
+      _validationErrors['pan'] = 'PAN number should be valid.';
+    }
+
+    if (password.isEmpty) {
+      _validationErrors['password'] = 'Password must not be empty.';
+    } else if (password.length < 8) {
+      _validationErrors['password'] =
+          'Password must be at least 8 characters long.';
+    } else if (!RegExp(
+            r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]')
+        .hasMatch(password)) {
+      _validationErrors['password'] =
+          'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.';
+    }
+
+    if (permanentAddress.isEmpty ||
+        permanentAddress.length < 10 ||
+        permanentAddress.length > 100) {
+      _validationErrors['permanentAddress'] =
+          'Permanent address should be between 10 and 100 characters.';
+    }
+
+    if (residentialAddress.isEmpty ||
+        residentialAddress.length < 10 ||
+        residentialAddress.length > 100) {
+      _validationErrors['residentialAddress'] =
+          'Residential address should be between 10 and 100 characters.';
+    }
+
+    if (dob.isEmpty) {
+      _validationErrors['dob'] = 'Date of birth should not be empty.';
+    } else {
+      try {
+        final dobDate = DateTime.parse(dob);
+        final today = DateTime.now();
+        final eighteenYearsAgo =
+            DateTime(today.year - 18, today.month, today.day);
+
+        if (dobDate.isAfter(eighteenYearsAgo)) {
+          _validationErrors['dob'] = 'Employee must be at least 18 years old.';
+        }
+      } catch (e) {
+        _validationErrors['dob'] = 'Invalid date format.';
+      }
+    }
+
+    if (aadharNo.isNotEmpty && !RegExp(r'^[0-9]{12}$').hasMatch(aadharNo)) {
+      _validationErrors['aadharNo'] = 'Aadhar number should be 12 digits.';
+    }
+
+    return _validationErrors.isEmpty;
   }
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text('Employee Details'),
-      content: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            _buildDetailRow('First Name', _firstNameController.text),
-            _buildDetailRow('Last Name', _lastNameController.text),
-            _buildDetailRow('Phone', _phoneController.text),
-            _buildDetailRow('Email', _emailController.text),
-            _buildDetailRow('PAN Number', _panController.text),
-            _buildDetailRow('Password', _passwordController.text),
-            _buildDetailRow(
-                'Permanent Address', _permanentAddressController.text),
-            _buildDetailRow(
-                'Residential Address', _residentialAddressController.text),
-            _buildDetailRow('Date of Birth', _dobController.text),
-            _buildDetailRow('Profile Picture', _dpImageUrlController.text),
-            _buildDetailRow('Support URL', _supportUrlController.text),
-          ],
-        ),
-      ),
-      actions: <Widget>[
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  _isEditing = !_isEditing;
-                });
-              },
-              child: Text(_isEditing ? 'Save' : 'Edit'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                // Save changes to Firestore
-                await _saveChanges();
-                Navigator.of(context).pop();
-              },
-              child: Text('Close'),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          SizedBox(width: 120.0, child: Text('$label:')),
-          SizedBox(width: 8.0),
-          Expanded(
-            child: _isEditing
-                ? TextFormField(
-                    controller: _getController(label),
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
+    return Dialog(
+      child: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              _buildRow('First Name', _firstNameController),
+              _buildRow('Last Name', _lastNameController),
+              _buildRow('Phone Number', _phoneController),
+              _buildRow('Email', _emailController),
+              _buildRow('PAN Number', _panController),
+              _buildRow('Password', _passwordController, obscureText: true),
+              _buildRow('Permanent Address', _permanentAddressController),
+              _buildRow('Residential Address', _residentialAddressController),
+              _buildRow('Date of Birth', _dobController),
+              _buildRow('Profile Picture URL', _dpImageUrlController),
+              _buildRow('Supporting Document URL', _supportUrlController),
+              _buildRow('Aadhar Number', _aadharNoController),
+              _buildRow('Aadhar Image URL', _aadharImageUrlController),
+              _buildRow('Joining Date', _joiningDateController),
+              _buildRow('employeeId', _employeeIdController),
+              _buildRow('Bank Name', _bankNameController),
+              _buildRow('Account Number', _accountNumberController),
+              _buildRow('IFSC Code', _ifscCodeController),
+              _buildDropdown('Department', _selectedDepartment, [
+                'Sales',
+                'Services',
+                'Spares',
+                'Administration',
+                'Board of Directors'
+              ]),
+              _buildDropdown('Designation', _selectedDesignation, [
+                'Manager',
+                'Senior Engineer',
+                'Junior Engineer',
+                'Technician',
+                'Executive'
+              ]),
+              _buildDropdown('Location', _selectedLocation,
+                  ['Jaypore', 'Berhampur', 'Raigada']),
+              _buildDropdown('Status', _selectedStatus, ['Active', 'Inactive']),
+              _buildDropdown('Role', _selectedRole, ['Standard', 'HR']),
+              _buildDropdown('Employee Type', _selectedEmployeeType,
+                  ['On-site', 'Off-site']),
+              if (_validationErrors.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: _validationErrors.entries.map((entry) {
+                      return Text(
+                        '${entry.value}',
+                        style: TextStyle(color: Colors.red),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              SizedBox(height: 16.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
                     ),
-                  )
-                : Text(value),
+                    onPressed: () {
+                      if (_isEditing) {
+                        if (_validateInputs()) {
+                          // Save the updated data to Firestore
+                          FirebaseFirestore.instance
+                              .collection('Regemp')
+                              .doc(widget.data['id'])
+                              .update({
+                            'firstName': _firstNameController.text.trim(),
+                            'lastName': _lastNameController.text.trim(),
+                            'phoneNo': _phoneController.text.trim(),
+                            'email': _emailController.text.trim(),
+                            'panNo': _panController.text.trim(),
+                            'password': _passwordController.text.trim(),
+                            'permanentAddress':
+                                _permanentAddressController.text.trim(),
+                            'residentialAddress':
+                                _residentialAddressController.text.trim(),
+                            'dob': _dobController.text.trim(),
+                            'dpImageUrl': _dpImageUrlController.text.trim(),
+                            'supportUrl': _supportUrlController.text.trim(),
+                            'aadharNo': _aadharNoController.text.trim(),
+                            'aadharImageUrl':
+                                _aadharImageUrlController.text.trim(),
+                            'joiningDate': _joiningDateController.text.trim(),
+                            'employeeId': _employeeIdController.text.trim(),
+                            'bankName': _bankNameController.text.trim(),
+                            'accountNumber':
+                                _accountNumberController.text.trim(),
+                            'ifscCode': _ifscCodeController.text.trim(),
+                            'department': _selectedDepartment,
+                            'designation': _selectedDesignation,
+                            'location': _selectedLocation,
+                            'status': _selectedStatus,
+                            'role': _selectedRole,
+                            'employeeType': _selectedEmployeeType,
+                          }).then((_) {
+                            setState(() {
+                              _isEditing = false;
+                            });
+                          }).catchError((error) {
+                            // Handle error
+                            print('Failed to update employee: $error');
+                          });
+                        }
+                      } else {
+                        setState(() {
+                          _isEditing = true;
+                        });
+                      }
+                    },
+                    child: Text(
+                      _isEditing ? 'Save' : 'Edit',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  SizedBox(width: 8.0),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text(
+                      'Close',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
-  TextEditingController _getController(String label) {
-    switch (label) {
-      case 'First Name':
-        return _firstNameController;
-      case 'Last Name':
-        return _lastNameController;
-      case 'Phone':
-        return _phoneController;
-      case 'Email':
-        return _emailController;
-      case 'PAN Number':
-        return _panController;
-      case 'Password':
-        return _passwordController;
-      case 'Permanent Address':
-        return _permanentAddressController;
-      case 'Residential Address':
-        return _residentialAddressController;
-      case 'Date of Birth':
-        return _dobController;
-      case 'Profile Picture':
-        return _dpImageUrlController;
-      case 'Support URL':
-        return _supportUrlController;
-      default:
-        throw Exception('Invalid label: $label');
-    }
-  }
-
-  Future<void> _saveChanges() async {
-    // Construct updated data map
-    Map<String, dynamic> updatedData = {
-      'firstName': _firstNameController.text,
-      'lastName': _lastNameController.text,
-      'phoneNo': _phoneController.text,
-      'email': _emailController.text,
-      'panNo': _panController.text,
-      'password': _passwordController.text,
-      'permanentAddress': _permanentAddressController.text,
-      'residentialAddress': _residentialAddressController.text,
-      'dob': _dobController.text,
-      'dpImageUrl': _dpImageUrlController.text,
-      'supportUrl': _supportUrlController.text,
-    };
-
-    // Get the document reference based on email
-    DocumentReference documentReference = FirebaseFirestore.instance
-        .collection('Regemp')
-        .doc(widget.data['email']);
-
-    // Update the document in Firestore
-    await documentReference.update(updatedData);
-
-    // Show success message or handle accordingly
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Changes saved successfully')),
+  Widget _buildRow(String label, TextEditingController controller,
+      {bool obscureText = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextFormField(
+        controller: controller,
+        obscureText: obscureText,
+        readOnly: !_isEditing,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(),
+        ),
+      ),
     );
   }
+
+  Widget _buildDropdown(
+      String label, String selectedValue, List<String> options) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(),
+        ),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<String>(
+            value: selectedValue.isNotEmpty ? selectedValue : null,
+            onChanged: _isEditing
+                ? (newValue) {
+                    setState(() {
+                      switch (label) {
+                        case 'Department':
+                          _selectedDepartment = newValue!;
+                          break;
+                        case 'Designation':
+                          _selectedDesignation = newValue!;
+                          break;
+                        case 'Location':
+                          _selectedLocation = newValue!;
+                          break;
+                        case 'Status':
+                          _selectedStatus = newValue!;
+                          break;
+                        case 'Role':
+                          _selectedRole = newValue!;
+                          break;
+                        case 'Employee Type':
+                          _selectedEmployeeType = newValue!;
+                          break;
+                      }
+                    });
+                  }
+                : null,
+            items: options.map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+void main() {
+  runApp(MaterialApp(
+    home: RegisteredEmployeesPage(),
+  ));
 }

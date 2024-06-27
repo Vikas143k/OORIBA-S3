@@ -1,17 +1,11 @@
-// import 'package:flutter/material.dart';
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:ooriba/employee_details_page.dart';
-// // import 'package:ooriba/registered_employees_page.dart';
-// // import 'services/auth_service.dart'; // Replace with your auth service file path
-// // import 'registered_service.dart'; // Replace with your registered service file path
-// import 'attendance.dart'; // Assuming this file contains DatePickerButton widget
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ooriba_s3/HR/employee_details_page.dart';
 import 'package:ooriba_s3/HR/registered_employees_page.dart';
+import 'package:ooriba_s3/HR/rejected_employees_page.dart';
 import 'package:ooriba_s3/services/auth_service.dart';
 import 'package:ooriba_s3/services/registered_service.dart';
 import 'attendance.dart'; // Assuming this file contains DatePickerButton widget
-import 'employee_details_page.dart'; // Assuming this file contains EmployeeDetailsPage widget
 
 class HRDashboardPage extends StatefulWidget {
   const HRDashboardPage({Key? key}) : super(key: key);
@@ -21,8 +15,6 @@ class HRDashboardPage extends StatefulWidget {
 }
 
 class _HRDashboardPageState extends State<HRDashboardPage> {
-  final Map<int, bool> _isAccepted = {};
-
   final RegisteredService _registeredService = RegisteredService();
 
   @override
@@ -30,6 +22,14 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('HR Dashboard'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: () async {
+              await AuthService().signout(context: context);
+            },
+          ),
+        ],
       ),
       drawer: Drawer(
         child: ListView(
@@ -217,20 +217,6 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
 
   Widget _buildEmployeeCard(BuildContext context, Map<String, dynamic> data,
       DocumentReference docRef) {
-        bool isAccepted = _isAccepted[docRef.id.hashCode] ?? false;
-
-    void _acceptEmployee(Map<String, dynamic> data, DocumentReference docRef) {
-      setState(() {
-        _isAccepted[docRef.id.hashCode] = true;
-      });
-
-      // Call registered service to handle acceptance
-      _registeredService.registerEmployee(data['email'], data);
-    }
-
-    if (isAccepted) {
-      return Container(); // Return empty container if already accepted
-    }
     return Card(
       margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Padding(
@@ -322,22 +308,10 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
   }
 
   void _showRejectedApplications(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Rejected Applications'),
-          content: const Text('List of rejected applications...'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Close'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => RejectedEmployeesPage(),
+      ),
     );
   }
 
