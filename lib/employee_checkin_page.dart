@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:ooriba_s3/services/auth_service.dart';
 import 'package:ooriba_s3/services/updateEmployee.dart';
+import 'package:ooriba_s3/services/retrieveDataByEmail.dart' as retrieveDataByEmail;
 
 class EmployeeCheckInPage extends StatefulWidget {
   
@@ -31,29 +32,48 @@ class CheckInOutRecord {
       this.checkOutTime});
 }
 
+
 class _EmployeeCheckInPageState extends State<EmployeeCheckInPage> {
+   String? employeeId;
+  String? employeeName;
    late DateTime dataDate;
   late List<CheckInOutRecord> checkInOutRecords;
    late String _email;
+ 
+
   @override
   void initState() {
     super.initState();
     _email = widget.empemail;
     checkInOutRecords = _generateCheckInOutRecords();
+     _fetchEmployeeDetails(widget.empemail);
+  }
+  Future<void> _fetchEmployeeDetails(String email) async {
+    retrieveDataByEmail.FirestoreService firestoreService = retrieveDataByEmail.FirestoreService();
+    Map<String, dynamic>? employeeData = await firestoreService.getEmployeeByEmail(email);
+
+    if (employeeData != null) {
+      setState(() {
+        employeeId = employeeData['employeeId'];
+        employeeName = employeeData['firstName'];
+        // employeeName = employeeData['firstName'] + ' ' + employeeData['lastName'];
+      });
+    }
   }
 
   List<CheckInOutRecord> _generateCheckInOutRecords() {
+
     // Generate records for the last 7 days
     List<CheckInOutRecord> records = [];
     DateTime now = DateTime.now();
     
-    for (int i = 0; i < 7; i++) {
+    for (int i = 0; i < 1; i++) {
       DateTime date = now.subtract(Duration(days: i));
       // Dummy logic to alternate check-in and check-out for demonstration
       bool isCheckedIn = i.isOdd;
-      DateTime? checkInTime = isCheckedIn ? date.add(Duration(hours: 9)) : null;
+      DateTime? checkInTime = isCheckedIn ? date.add(Duration(hours: 8)) : null;
       DateTime? checkOutTime =
-          isCheckedIn ? null : date.add(Duration(hours: 18));
+          isCheckedIn ? null : date.add(Duration(hours: 8));
 
       records.add(CheckInOutRecord(
           date: date,
@@ -186,7 +206,7 @@ class _EmployeeCheckInPageState extends State<EmployeeCheckInPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Welcome, ${_email}'),
+        title: Text('Welcome, ${employeeId != null && employeeName != null ? '$employeeName ($employeeId)' : widget.empemail}'),
         actions: [
           IconButton(
             icon: Icon(Icons.logout),
@@ -197,24 +217,27 @@ class _EmployeeCheckInPageState extends State<EmployeeCheckInPage> {
         ],
       ),
       body: ListView.builder(
-        itemCount: checkInOutRecords.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(
-                'Date: ${checkInOutRecords[index].date.toLocal().toString().split(' ')[0]}'),
-            subtitle: checkInOutRecords[index].isCheckedIn
-                ? Text('Checked in at: ${checkInOutRecords[index].checkInTime}')
-                : Text(
-                    'Checked out at: ${checkInOutRecords[index].checkOutTime}'),
-            trailing: ElevatedButton(
-              onPressed: () => _toggleCheckInOut(index),
-              child: checkInOutRecords[index].isCheckedIn
-                  ? const Text('Check Out')
-                  : const Text('Check In'),
-            ),
-          );
-        },
+  itemCount: checkInOutRecords.length,
+  itemBuilder: (context, index) {
+    bool isCheckedIn = checkInOutRecords[index].isCheckedIn;
+    return ListTile(
+      title: Text(
+        'Date: ${checkInOutRecords[index].date.toLocal().toString().split(' ')[0]}',
       ),
+      subtitle: isCheckedIn
+          ? Text('Checked in at: ${checkInOutRecords[index].checkInTime}')
+          : Text('Checked out at: ${checkInOutRecords[index].checkOutTime}'),
+      trailing: ElevatedButton(
+        onPressed: () => _toggleCheckInOut(index),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: isCheckedIn ? Colors.green: Colors.orange, // Set button color
+        ),
+        child: Text(isCheckedIn ? 'Check Out' : 'Check In'),
+      ),
+    );
+  },
+),
+
     );
   }
  

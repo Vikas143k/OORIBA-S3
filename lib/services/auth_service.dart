@@ -116,8 +116,10 @@ import 'package:ooriba_s3/employee_checkin_page.dart';
 import 'package:ooriba_s3/employee_signup_success.dart';
 import 'package:ooriba_s3/facial/HomeScreen.dart';
 import 'package:ooriba_s3/main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
+  
   Future<void> signup({
     required String email,
     required String password,
@@ -252,6 +254,7 @@ class AuthService {
           //       EmployeeCheckInPage(empname: firstName, empemail: email),
           // ),
         );
+        return true;
       } else if (role == "HR") {
         Navigator.pushReplacement(
           context,
@@ -259,6 +262,7 @@ class AuthService {
             builder: (BuildContext context) => const HRDashboardPage(),
           ),
         );
+        return false;
       } else {
         Fluttertoast.showToast(
           msg: 'Invalid role assigned to the user.',
@@ -302,5 +306,23 @@ class AuthService {
       ),
     );
   }
+
+  getUserSession() {}
 }
+
+Future<void> saveUserSession(String? uid) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('userUid', uid ?? '');
+  }
+
+  Future<String?> getUserSession() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('userUid');
+  }
+
+  Future<void> clearUserSession() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('userUid');
+  }
+
 

@@ -3,9 +3,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:ooriba_s3/HR/hr_dashboard_page.dart';
 import 'package:ooriba_s3/firebase_options.dart';
+import 'package:ooriba_s3/post_login_page.dart';
 import 'package:ooriba_s3/services/auth_service.dart';
 import 'package:ooriba_s3/services/dark_mode.dart';
 import 'package:ooriba_s3/signup_page.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -13,11 +15,28 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const OoribaApp());
+   await _requestPermissions();
+   final AuthService authService = AuthService();
+  final String? uid = await authService.getUserSession();
+  runApp(OoribaApp(isLoggedIn: uid != null));
+}
+Future<void> _requestPermissions() async {
+  // Request storage permissions
+  PermissionStatus status = await Permission.storage.request();
+  if (status.isGranted) {
+    print('Storage permission granted');
+  } else if (status.isDenied) {
+    print('Storage permission denied');
+  } else if (status.isPermanentlyDenied) {
+    print('Storage permission permanently denied');
+    openAppSettings();
+  }
 }
 
 class OoribaApp extends StatelessWidget {
-  const OoribaApp({super.key});
+  final bool isLoggedIn;
+
+  const OoribaApp({Key? key, required this.isLoggedIn}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +120,20 @@ class LoginPage extends StatelessWidget {
                           style: TextStyle(
                               fontSize: 24, fontWeight: FontWeight.bold),
                         ),
-                        const SizedBox(height: 40),
+                        const SizedBox(height: 20),
+Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Image.asset(
+          'assets/images/companyLogo.png', // Replace with your image asset path
+          width: 200, // Adjust width as needed
+          height: 190, // Adjust height as needed
+        ),
+      ],
+    ),
+    const SizedBox(height: 20),
+
+
                         TextField(
                           controller: _emailController,
                           decoration: const InputDecoration(
@@ -135,13 +167,27 @@ class LoginPage extends StatelessWidget {
                         ),
                         const SizedBox(height: 20),
                         ElevatedButton(
-                          onPressed: () async {
-                            await AuthService().signin(
-                                email: _emailController.text,
-                                password: _passwordController.text,
-                                context: context);
-                          },
-                          child: const Text('Sign In'),
+                          // onPressed: () async {
+                          //   await AuthService().signin(
+                          //       email: _emailController.text,
+                          //       password: _passwordController.text,
+                          //       context: context);
+                          // },
+                           onPressed: () async {
+    bool success = await AuthService().signin(
+      email: _emailController.text,
+      password: _passwordController.text,
+      context: context,
+    );
+    if (success) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>  PostLoginPage(email: _emailController.text, userDetails: {},),
+        ),
+      );
+    }
+  },                         child: const Text('Sign In'),
                         ),
                         const SizedBox(height: 20),
                         RichText(

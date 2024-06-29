@@ -227,15 +227,28 @@ class FacePainter extends CustomPainter {
 
     for (Recognition rectangle in facesList) {
       canvas.drawRect(rectangle.location, p);
-      TextSpan span = TextSpan(
-          style: const TextStyle(color: Colors.white, fontSize: 100),
-          text: "${rectangle.name}  ${rectangle.distance.toStringAsFixed(2)}");
-      TextPainter tp = TextPainter(
-          text: span,
-          textAlign: TextAlign.left,
-          textDirection: TextDirection.ltr);
-      tp.layout();
-      tp.paint(canvas, Offset(rectangle.location.left, rectangle.location.top));
+      // TextSpan span = TextSpan(
+      //     style: const TextStyle(color: Colors.white, fontSize: 100),
+
+
+
+      //     ///////////////////////////////////////
+      //     text: "${rectangle.name}  ${rectangle.distance.toStringAsFixed(2)}");
+
+
+
+
+
+
+
+
+          ///////////////////////////
+      // TextPainter tp = TextPainter(
+      //     text: span,
+      //     textAlign: TextAlign.left,
+      //     textDirection: TextDirection.ltr);
+      // tp.layout();
+      // tp.paint(canvas, Offset(rectangle.location.left, rectangle.location.top));
     }
   }
 

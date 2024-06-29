@@ -9,7 +9,30 @@ class RegisteredEmployeesPage extends StatefulWidget {
 
 class _RegisteredEmployeesPageState extends State<RegisteredEmployeesPage> {
   @override
-  Widget build(BuildContext context) {
+  // Widget build(BuildContext context) {
+  //   return Scaffold(
+  //     appBar: AppBar(
+  //       title: Text('Registered Employees'),
+  //     ),
+  //     body: StreamBuilder<QuerySnapshot>(
+  //       stream: FirebaseFirestore.instance.collection('Regemp').snapshots(),
+  //       builder: (context, snapshot) {
+  //         if (snapshot.connectionState == ConnectionState.waiting) {
+  //           return Center(child: CircularProgressIndicator());
+  //         } else if (snapshot.hasError) {
+  //           return Center(child: Text('Error: ${snapshot.error}'));
+  //         } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+  //           return Center(child: Text('No registered employees found'));
+  //         }
+
+  //         final employees = snapshot.data!.docs;
+  //         return ListView.builder(
+  //           itemCount: employees.length,
+  //           itemBuilder: (context, index) {
+  //             final data = employees[index].data() as Map<String, dynamic>;
+  //             return EmployeeCard(data: data);
+  //           },
+   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Registered Employees'),
@@ -26,10 +49,19 @@ class _RegisteredEmployeesPageState extends State<RegisteredEmployeesPage> {
           }
 
           final employees = snapshot.data!.docs;
+          final filteredEmployees = employees.where((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            return data['role'] != 'HR';
+          }).toList();
+
+          if (filteredEmployees.isEmpty) {
+            return Center(child: Text('No registered employees found'));
+          }
+
           return ListView.builder(
-            itemCount: employees.length,
+            itemCount: filteredEmployees.length,
             itemBuilder: (context, index) {
-              final data = employees[index].data() as Map<String, dynamic>;
+              final data = filteredEmployees[index].data() as Map<String, dynamic>;
               return EmployeeCard(data: data);
             },
           );
@@ -56,16 +88,31 @@ class EmployeeCard extends StatelessWidget {
             Row(
               children: <Widget>[
                 CircleAvatar(
-                  radius: 30.0,
-                  backgroundColor: Colors.purple[100],
-                  child: Text(
-                    '${data['firstName'][0]}${data['lastName'][0]}',
-                    style: TextStyle(
-                      fontSize: 24.0,
-                      color: Colors.white,
-                    ),
+          radius: 30.0,
+          backgroundColor: Colors.purple[100],
+          backgroundImage: data['dpImageUrl'] != null && data['dpImageUrl'].isNotEmpty
+              ? NetworkImage(data['dpImageUrl'])
+              : null,
+          child: data['dpImageUrl'] == null || data['dpImageUrl'].isEmpty
+              ? Text(
+                  '${data['firstName'][0]}${data['lastName'][0]}',
+                  style: TextStyle(
+                    fontSize: 24.0,
+                    color: Colors.white,
                   ),
-                ),
+                )
+              : null,
+        ),
+                //   radius: 30.0,
+                //   backgroundColor: Colors.purple[100],
+                //   child: Text(
+                //     '${data['firstName'][0]}${data['lastName'][0]}',
+                //     style: TextStyle(
+                //       fontSize: 24.0,
+                //       color: Colors.white,
+                //     ),
+                //   ),
+                // ),
                 SizedBox(width: 16.0),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

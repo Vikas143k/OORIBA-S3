@@ -1,9 +1,13 @@
 // import 'dart:io';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:ooriba_s3/services/retrieveDataByEmail.dart';
 import 'package:ooriba_s3/services/retrieveFromDates_service.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 // import 'package:csv/csv.dart';
 // import 'package:path_provider/path_provider.dart';
 // import 'package:flutter/foundation.dart' show kIsWeb;
@@ -22,13 +26,16 @@ class _DatePickerButtonState extends State<DatePickerButton> {
   bool _sortOrder = true; // true for ascending (absent first), false for descending (present first)
   String _selectedLocation = 'Default Location'; // Track the selected location
   List<String> _locations = ['Default Location']; // List of locations including 'All'
-
+  void removeLocationn(String location) {
+  _locations.removeWhere((element) => element == location);
+  }
   @override
   void initState() {
     super.initState();
     _selectedDate = DateTime.now(); // Set to today's date by default
     _fetchAllEmployees();
     _fetchData(DateFormat('yyyy-MM-dd').format(_selectedDate!)); // Fetch today's data by default
+    
   }
 
   void _fetchAllEmployees() async {
@@ -36,6 +43,7 @@ class _DatePickerButtonState extends State<DatePickerButton> {
     _allEmployees = await firestoreService.getAllEmployees();
     // Extract distinct locations
     _locations.addAll(_allEmployees.map((e) => e['location'] ?? '').toSet().cast<String>());
+    removeLocationn('');
     setState(() {});
   }
 
@@ -110,6 +118,62 @@ class _DatePickerButtonState extends State<DatePickerButton> {
       return '';
     }
   }
+Future<void> _downloadCsv() async {
+  List<Map<String, dynamic>> filteredEmployees = _filterEmployeesByLocation();
+
+  // Build CSV content
+  StringBuffer csvContent = StringBuffer();
+  csvContent.writeln(  "Date, $DateFormat('dd-MM-yyyy').format(_selectedDate!)");
+  csvContent.writeln('EmployeeId,Name,Location,Check-in,Check-out,Status,Phone No');
+
+  for (var employee in filteredEmployees) {
+    String email=employee['email'];
+    String empId= employee['employeeId']?? 'Null';
+    String name = employee['firstName']+" "+employee['lastName'] ?? 'Null';
+    String location = employee['location'] ?? '';
+    String phoneNo=employee['phoneNo']??'Null';
+    bool isPresent = _data.containsKey(email);
+    Map<String, String> emailData = isPresent
+        ? _data[email]!
+        : {'checkIn': 'N/A', 'checkOut': 'N/A'};
+    String checkIn = emailData['checkIn']!;
+    String checkOut = emailData['checkOut']!;
+    String status = isPresent ? 'present' : 'absent';
+
+    csvContent.writeln('$empId,$name,$location,$checkIn,$checkOut,$status,$phoneNo');
+  }
+
+  // Request storage permission
+  if (await Permission.storage.request().isGranted || await Permission.manageExternalStorage.request().isGranted) {
+    // Get the downloads directory
+    Directory? directory = await getExternalStorageDirectory();
+    String? downloadPath;
+
+    if (Platform.isAndroid) {
+      downloadPath = '/storage/emulated/0/Download'; // Path to the Download folder on Android
+    } else {
+      downloadPath = directory?.path;
+    }
+
+    if (downloadPath != null) {
+      String path = '$downloadPath/attendance_${DateFormat('yyyyMMdd').format(DateTime.now())}.csv';
+
+      // Save the CSV file
+      File file = File(path);
+      await file.writeAsString(csvContent.toString());
+
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('CSV saved to $path')));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Unable to access storage directory')));
+    }
+  } else if (await Permission.storage.isDenied || await Permission.manageExternalStorage.isDenied) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Storage permission denied')));
+  } else if (await Permission.storage.isPermanentlyDenied || await Permission.manageExternalStorage.isPermanentlyDenied) {
+    openAppSettings();
+  }
+}
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -117,12 +181,12 @@ class _DatePickerButtonState extends State<DatePickerButton> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Attendance Page'),
-        // actions: [
-        //   IconButton(
-        //     icon: Icon(Icons.download),
-        //     onPressed: _downloadCsv,
-        //   ),
-        // ],
+        actions: [
+          IconButton(
+            icon: Icon(Icons.download),
+            onPressed: _downloadCsv,
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -262,6 +326,7 @@ class _DatePickerButtonState extends State<DatePickerButton> {
       ),
     );
   }
+}
 
 // void _downloadCsv() async {
 //   List<List<String>> data = [
@@ -313,5 +378,3 @@ class _DatePickerButtonState extends State<DatePickerButton> {
 //   }
 // }
 
-
-}

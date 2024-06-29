@@ -6,6 +6,7 @@ import 'package:ooriba_s3/facial/ML/Recognizer.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image/image.dart' as img;
+import 'package:ooriba_s3/services/auth_service.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({Key? key}) : super(key: key);
@@ -125,13 +126,14 @@ class _HomePageState extends State<RegistrationScreen> {
               ),
               const SizedBox(height: 10),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   recognizer.registerFaceInDB(textEditingController.text, recognition.embeddings);
                   textEditingController.text = "";
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                     content: Text("Face Registered"),
                   ));
+                  await AuthService().signout(context: context);
                 },
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.blue, minimumSize: const Size(200, 40)),
                 child: const Text("Register"),
