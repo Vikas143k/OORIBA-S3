@@ -63,25 +63,25 @@ class ConfirmationPage extends StatelessWidget {
                   style: TextStyle(fontSize: 20),
                 ),
               ),
-              ElevatedButton(
-                onPressed: () {
-                   Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => RegistrationScreen()),
-      );
-                },
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.blue, backgroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                ),
-                child: Text(
-                  'Go to Registration',
-                  style: TextStyle(fontSize: 20),
-                ),
-              ),
+      //         ElevatedButton(
+      //           onPressed: () {
+      //              Navigator.push(
+      //   context,
+      //   MaterialPageRoute(builder: (context) => RegistrationScreen()),
+      // );
+      //           },
+      //           style: ElevatedButton.styleFrom(
+      //             foregroundColor: Colors.blue, backgroundColor: Colors.white,
+      //             padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+      //             shape: RoundedRectangleBorder(
+      //               borderRadius: BorderRadius.circular(30),
+      //             ),
+      //           ),
+      //           child: Text(
+      //             'Go to Registration',
+      //             style: TextStyle(fontSize: 20),
+      //           ),
+      //         ),
 
             ],
           ),

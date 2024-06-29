@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:ooriba_s3/services/auth_service.dart';
 import 'package:ooriba_s3/services/updateEmployee.dart';
 import 'package:ooriba_s3/services/retrieveDataByEmail.dart' as retrieveDataByEmail;
@@ -47,6 +48,12 @@ class _EmployeeCheckInPageState extends State<EmployeeCheckInPage> {
     _email = widget.empemail;
     checkInOutRecords = _generateCheckInOutRecords();
      _fetchEmployeeDetails(widget.empemail);
+  }
+ String formatTimeWithoutSeconds(DateTime? dateTime) {
+    if (dateTime == null) {
+      return 'N/A'; // Return 'N/A' if dateTime is null
+    }
+    return DateFormat('yyyy-MM-dd HH:mm').format(dateTime); // Format without seconds
   }
   Future<void> _fetchEmployeeDetails(String email) async {
     retrieveDataByEmail.FirestoreService firestoreService = retrieveDataByEmail.FirestoreService();
@@ -206,7 +213,7 @@ class _EmployeeCheckInPageState extends State<EmployeeCheckInPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Welcome, ${employeeId != null && employeeName != null ? '$employeeName ($employeeId)' : widget.empemail}'),
+        title: Text('Welcome, ${employeeId != null && employeeName != null ? '$employeeName-$employeeId' : widget.empemail}'),
         actions: [
           IconButton(
             icon: Icon(Icons.logout),
@@ -225,8 +232,8 @@ class _EmployeeCheckInPageState extends State<EmployeeCheckInPage> {
         'Date: ${checkInOutRecords[index].date.toLocal().toString().split(' ')[0]}',
       ),
       subtitle: isCheckedIn
-          ? Text('Checked in at: ${checkInOutRecords[index].checkInTime}')
-          : Text('Checked out at: ${checkInOutRecords[index].checkOutTime}'),
+          ? Text('Checked in at: ${formatTimeWithoutSeconds(checkInOutRecords[index].checkInTime)}')
+          : Text('Checked out at: ${formatTimeWithoutSeconds(checkInOutRecords[index].checkOutTime)}'),
       trailing: ElevatedButton(
         onPressed: () => _toggleCheckInOut(index),
         style: ElevatedButton.styleFrom(

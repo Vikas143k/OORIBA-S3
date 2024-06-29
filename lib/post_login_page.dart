@@ -61,6 +61,7 @@
 //   }
 // }
 import 'package:flutter/material.dart';
+import 'package:ooriba_s3/editpersonaldetails.dart';
 import 'package:ooriba_s3/employee_checkin_page.dart';
 import 'package:ooriba_s3/facial/DB/DatabaseHelper.dart';
 import 'package:ooriba_s3/facial/HomeScreen.dart';
@@ -149,6 +150,19 @@ class _PostLoginPageState extends State<PostLoginPage> {
               child: Text(isRegistered ? 'Attendance' : 'Register for Facial Authentication'),
             ),
             const SizedBox(height: 20),
+            //  ElevatedButton(
+            //   onPressed: () {
+            //     Navigator.push(
+            //       context,
+            //       MaterialPageRoute(
+            //         builder: (context) => EditPersonalDetailsPage(
+            //           email:widget.email,
+            //         ),
+            //       ),
+            //     );
+            //   },
+            //   child: const Text('Edit Personal Details'),
+            // ),
           ],
         ),
       ),

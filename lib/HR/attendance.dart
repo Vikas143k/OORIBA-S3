@@ -123,7 +123,7 @@ Future<void> _downloadCsv() async {
 
   // Build CSV content
   StringBuffer csvContent = StringBuffer();
-  csvContent.writeln(  "Date, $DateFormat('dd-MM-yyyy').format(_selectedDate!)");
+  csvContent.writeln(  "Date, ${DateFormat('dd-MM-yyyy').format(_selectedDate!)}");
   csvContent.writeln('EmployeeId,Name,Location,Check-in,Check-out,Status,Phone No');
 
   for (var employee in filteredEmployees) {
@@ -156,7 +156,7 @@ Future<void> _downloadCsv() async {
     }
 
     if (downloadPath != null) {
-      String path = '$downloadPath/attendance_${DateFormat('yyyyMMdd').format(DateTime.now())}.csv';
+      String path = '$downloadPath/attendance_${DateFormat('yyyyMMdd').format(_selectedDate!)}.csv';
 
       // Save the CSV file
       File file = File(path);
@@ -267,7 +267,7 @@ Future<void> _downloadCsv() async {
                                 style: TextStyle(color: Colors.black),
                               ),
                               TextSpan(
-                                text: isPresent ? 'present' : 'absent',
+                                text: isPresent ? 'Present' : 'Absent',
                                 style: TextStyle(
                                     color:
                                         isPresent ? Colors.green : Colors.red),
