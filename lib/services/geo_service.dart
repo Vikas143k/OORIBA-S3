@@ -4,8 +4,8 @@ import 'package:geolocator/geolocator.dart';
 
 class GeoService {
   // Set a fixed landmark position (update with your desired coordinates)
-  final double landmarkLatitude = 16.487026724481314;  // landmark latitude
-  final double landmarkLongitude = 80.5028066313203;  // landmark longitude
+  final double landmarkLatitude = 16.52154568524242;  // landmark latitude
+  final double landmarkLongitude = 80.52320068916423;  // landmark longitude
 
   Future<Position> determinePosition() async {
     bool serviceEnabled;

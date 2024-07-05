@@ -15,8 +15,8 @@ class _HomeState extends State<Geolocation> {
 
   // Set a fixed landmark position (update with your desired coordinates)
   // 16.487026724481314, 80.5028066313203
-  final double landmarkLatitude = 16.487026724481314;  // landmark latitude
-  final double landmarkLongitude = 80.5028066313203;  // landmark longitude
+  final double landmarkLatitude = 16.52154568524242;  // landmark latitude
+  final double landmarkLongitude = 80.52320068916423;  // landmark longitude
 
   Future<Position> _determinePosition() async {
     bool serviceEnabled;
