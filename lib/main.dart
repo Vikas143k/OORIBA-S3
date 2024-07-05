@@ -428,16 +428,16 @@ class LoginPage extends StatelessWidget {
                             ],
                           ),
                         ),
-                        const SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => CheckInPage()),
-                            );
-                          },
-                          child: const Text('Geolocation'),
-                        ),
+                        //const SizedBox(height: 20),
+                        //ElevatedButton(
+                        //  onPressed: () {
+                        //    Navigator.push(
+                        //      context,
+                        //      MaterialPageRoute(builder: (context) => CheckInPage()),
+                        //    );
+                        //  },
+                        //  child: const Text('Geolocation'),
+                        //),
                         // Additional buttons can be added here
                       ],
                     ),

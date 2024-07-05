@@ -43,17 +43,18 @@ class _PostLoginPageState extends State<PostLoginPage> {
   final GeoService geoService = GeoService();
   bool isWithinRange = false;
   bool isLoadingForLocation = false;
-  Timer? _disableButtonTimer;
+  //Timer? _disableButtonTimer;
   
   
 
   @override
   void initState() {
     super.initState();
-     _startLocationCheckTimer();
+    // _startLocationCheckTimer();
     dbHelper = DatabaseHelper();
     fetchEmployeeData();
     _checkIfFaceIsRegistered();
+    _checkLocation();
   }
   Future<void> fetchEmployeeData() async {
     await _fetchEmployeeDetails(widget.email);
@@ -63,14 +64,14 @@ class _PostLoginPageState extends State<PostLoginPage> {
       isLoading = false;
     });
   }
-   void _startLocationCheckTimer() {
-    _disableButtonTimer = Timer(Duration(minutes: 5), () {
-      setState(() {
-        isWithinRange = false;
-      });
-      Fluttertoast.showToast(msg: 'Check-in button disabled after 5 minutes');
-    });// Initial check
-  }
+   //void _startLocationCheckTimer() {
+   // _disableButtonTimer = Timer(Duration(minutes: 5), () {
+   //   setState(() {
+   //     isWithinRange = false;
+   //   });
+   //   Fluttertoast.showToast(msg: 'Check-in button disabled after 5 minutes');
+   // });// Initial check
+  //}
   
   Future<void> _checkIfFaceIsRegistered() async {
     await dbHelper.init();
@@ -341,11 +342,11 @@ class _PostLoginPageState extends State<PostLoginPage> {
                           ),
                           child: Text(isCheckedIn ? 'Check-out' : 'Check-in'),
                         ),
-                        SizedBox(width: 10),
-                        IconButton(
-                          icon: const Icon(Icons.location_on, size: 40),
-                          onPressed: _checkLocation,
-                        ),
+                        //SizedBox(width: 10),
+                        //IconButton(
+                        //  icon: const Icon(Icons.location_on, size: 40),
+                        //  onPressed: _checkLocation,
+                        //),
                         SizedBox(width: 20),
                         isPresent
                             ? FutureBuilder<String>(
