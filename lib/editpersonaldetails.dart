@@ -252,7 +252,7 @@ import 'package:ooriba_s3/services/retrieveDataByEmail.dart';
 class EditPersonalDetailsPage extends StatefulWidget {
   final String email;
 
-  const EditPersonalDetailsPage({Key? key, required this.email}) : super(key: key);
+  const EditPersonalDetailsPage({super.key, required this.email});
 
   @override
   _EditPersonalDetailsPageState createState() => _EditPersonalDetailsPageState();
@@ -278,7 +278,7 @@ class _EditPersonalDetailsPageState extends State<EditPersonalDetailsPage> {
   }
 
   Future<void> _fetchEmployeeData() async {
-    Map<String, dynamic>? userDetails = await firestoreService.getEmployeeByEmail(widget.email);
+    Map<String, dynamic>? userDetails = await firestoreService.getEmployeeByEmail(widget.email, 'Regemp');
     if (userDetails != null) {
       setState(() {
         _firstName.text = userDetails['firstName'] ?? '';
@@ -292,7 +292,7 @@ class _EditPersonalDetailsPageState extends State<EditPersonalDetailsPage> {
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Employee data not found')),
+        const SnackBar(content: Text('Employee data not found')),
       );
     }
   }
@@ -340,7 +340,7 @@ class _EditPersonalDetailsPageState extends State<EditPersonalDetailsPage> {
         context: context,
       );
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Details updated successfully')),
+        const SnackBar(content: Text('Details updated successfully')),
       );
       Navigator.pop(context);
     } catch (e) {

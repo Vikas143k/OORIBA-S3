@@ -4,10 +4,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  Future<Map<String, dynamic>?> getEmployeeByEmail(String email) async {
+  Future<Map<String, dynamic>?> getEmployeeByEmail(String email, String database) async {
     try {
       QuerySnapshot snapshot = await _db
-          .collection('Regemp')
+          .collection(database)
           .where('email', isEqualTo: email).where('role',isEqualTo: 'Standard')
           .limit(1)
           .get();
@@ -25,7 +25,7 @@ class FirestoreService {
 
   Future<Map<String, dynamic>?> searchEmployee({required String email}) async {
     if (email.isNotEmpty) {
-      final employeeData = await getEmployeeByEmail(email);
+      final employeeData = await getEmployeeByEmail(email,"Regemp");
       return employeeData;
     }
     return null;

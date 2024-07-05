@@ -4,7 +4,6 @@ import 'dart:ui';
 import 'package:image/image.dart' as img;
 import 'package:tflite_flutter/tflite_flutter.dart';
 import '../DB/DatabaseHelper.dart';
-import '../HomeScreen.dart';
 import 'Recognition.dart';
 
 class Recognizer {
@@ -13,7 +12,7 @@ class Recognizer {
   static const int WIDTH = 112;
   static const int HEIGHT = 112;
   final dbHelper = DatabaseHelper();
-  Map<String,Recognition> registered = Map();
+  Map<String,Recognition> registered = {};
   @override
   String get modelName => 'assets/mobile_face_net.tflite';
 
@@ -65,7 +64,7 @@ class Recognizer {
   }
 
   List<dynamic> imageToArray(img.Image inputImage){
-    img.Image resizedImage = img.copyResize(inputImage!, width: WIDTH, height: HEIGHT);
+    img.Image resizedImage = img.copyResize(inputImage, width: WIDTH, height: HEIGHT);
     List<double> flattenedList = resizedImage.data!.expand((channel) => [channel.r, channel.g, channel.b]).map((value) => value.toDouble()).toList();
     Float32List float32Array = Float32List.fromList(flattenedList);
     int channels = 3;

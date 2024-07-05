@@ -67,7 +67,7 @@ class EmployeeService {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to sign up: $e')),
       );
-      throw e;
+      rethrow;
     }
   }
 
@@ -126,14 +126,14 @@ class EmployeeService {
       // Update employee data in Firestore
       await _db.collection('regemp').doc(email).update(dataToUpdate);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Employee data updated successfully')),
+        const SnackBar(content: Text('Employee data updated successfully')),
       );
     } catch (e) {
       print('Error updating employee data: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to update data service: $e')),
       );
-      throw e;
+      rethrow;
     }
   }
 

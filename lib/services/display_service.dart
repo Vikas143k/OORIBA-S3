@@ -6,7 +6,7 @@ class FirestoreService {
   Stream<List<Map<String, dynamic>>> getEmployees() {
     return _db.collection('Employee').snapshots().map((snapshot) {
       return snapshot.docs.map((doc) {
-        var data = doc.data() as Map<String, dynamic>;
+        var data = doc.data();
         data['id'] = doc.id; // Add document ID to the data
         return data;
       }).toList();
@@ -21,7 +21,7 @@ class FirestoreService {
           .set(data, SetOptions(merge: true));
     } catch (e) {
       print('Error saving employee data: $e');
-      throw e; // Re-throw the error to handle it in the UI
+      rethrow; // Re-throw the error to handle it in the UI
     }
   }
 }

@@ -6,7 +6,7 @@ class FirestoreService {
   Stream<List<Map<String, dynamic>>> getEmployees() {
     return _db.collection('Employee').snapshots().map((snapshot) {
       return snapshot.docs
-          .map((doc) => doc.data() as Map<String, dynamic>)
+          .map((doc) => doc.data())
           .toList();
     });
   }

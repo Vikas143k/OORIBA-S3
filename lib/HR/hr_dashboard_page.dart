@@ -437,7 +437,7 @@ import 'attendance.dart'; // Assuming this file contains DatePickerButton widget
 import 'rejected_employees_page.dart';
 
 class HRDashboardPage extends StatefulWidget {
-  const HRDashboardPage({Key? key}) : super(key: key);
+  const HRDashboardPage({super.key});
 
   @override
   _HRDashboardPageState createState() => _HRDashboardPageState();
@@ -453,7 +453,7 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
         title: const Text('HR Dashboard'),
         actions: [
           IconButton(
-            icon: Icon(Icons.logout),
+            icon: const Icon(Icons.logout),
             onPressed: () async {
               await AuthService().signout(context: context);
             },
@@ -506,7 +506,7 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => DatePickerButton()),
+                  MaterialPageRoute(builder: (context) => const DatePickerButton()),
                 );
               },
             ),
@@ -525,8 +525,8 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(16.0),
+            const Padding(
+              padding: EdgeInsets.all(16.0),
               child: Text(
                 'Dashboard',
                 style: TextStyle(
@@ -559,7 +559,7 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
                   //     _showNewApplicants,
                   //   ),
                   // ),
-                  SizedBox(width: 16.0),
+                  const SizedBox(width: 16.0),
                   Expanded(
                     child: _buildDashboardBlock(
                       context,
@@ -572,9 +572,9 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
                 ],
               ),
             ),
-            SizedBox(height: 16.0),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            const SizedBox(height: 16.0),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(
                 'Applicant Details',
                 style: TextStyle(
@@ -588,11 +588,11 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
                   FirebaseFirestore.instance.collection('Employee').snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return Center(child: Text('No employees found'));
+                  return const Center(child: Text('No employees found'));
                 }
 
                 final employees = snapshot.data!.docs;
@@ -629,10 +629,10 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
               color: Colors.white,
               size: 36.0,
             ),
-            SizedBox(height: 8.0),
+            const SizedBox(height: 8.0),
             Text(
               title,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18.0,
                 fontWeight: FontWeight.bold,
@@ -647,9 +647,9 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
   Widget _buildEmployeeCard(BuildContext context, Map<String, dynamic> data,
       DocumentReference docRef) {
     return Card(
-      margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -664,32 +664,32 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
           child: data['dpImageUrl'] == null || data['dpImageUrl'].isEmpty
               ? Text(
                   '${data['firstName'][0]}${data['lastName'][0]}',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 24.0,
                     color: Colors.white,
                   ),
                 )
               : null,
         ),
-                SizedBox(width: 16.0),
+                const SizedBox(width: 16.0),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
                       '${data['firstName']} ${data['lastName']}',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 18.0,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 4.0),
+                    const SizedBox(height: 4.0),
                     Text('Phone: ${data['phoneNo']}'),
                     Text('Email: ${data['email']}'),
                   ],
                 ),
               ],
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
@@ -706,7 +706,7 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
                       ),
                     );
                   },
-                  child: Text(
+                  child: const Text(
                     'View More',
                     style: TextStyle(color: Colors.white),
                   ),
@@ -722,7 +722,7 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
   void _showRegisteredEmployees(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => RegisteredEmployeesPage()),
+      MaterialPageRoute(builder: (context) => const RegisteredEmployeesPage()),
     );
   }
 
@@ -749,7 +749,7 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
   void _showRejectedApplications(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => RejectedEmployeesPage(),
+        builder: (context) => const RejectedEmployeesPage(),
       ),
     );
   }
@@ -767,7 +767,7 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
 class EditEmployeePage extends StatefulWidget {
   final Map<String, dynamic> employeeData;
 
-  EditEmployeePage({required this.employeeData});
+  const EditEmployeePage({super.key, required this.employeeData});
 
   @override
   _EditEmployeePageState createState() => _EditEmployeePageState();

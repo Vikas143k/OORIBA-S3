@@ -9,7 +9,7 @@ import 'package:image/image.dart' as img;
 import 'package:ooriba_s3/services/auth_service.dart';
 
 class RegistrationScreen extends StatefulWidget {
-  const RegistrationScreen({Key? key}) : super(key: key);
+  const RegistrationScreen({super.key});
 
   @override
   State<RegistrationScreen> createState() => _HomePageState();
