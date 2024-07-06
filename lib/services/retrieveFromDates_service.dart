@@ -44,14 +44,24 @@ class DateService {
         Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
         return data.map((employeeId, value) {
           Map<String, dynamic> employeeData = value as Map<String, dynamic>;
-          Timestamp checkInTimestamp = employeeData['checkIn'];
-          Timestamp checkOutTimestamp = employeeData['checkOut'];
-          DateTime checkIn = checkInTimestamp.toDate();
-          DateTime checkOut = checkOutTimestamp.toDate();
+
+          // Check if checkIn and checkOut fields exist and are not null
+          DateTime? checkIn;
+          DateTime? checkOut;
+
+          if (employeeData.containsKey('checkIn') && employeeData['checkIn'] != null) {
+            Timestamp checkInTimestamp = employeeData['checkIn'];
+            checkIn = checkInTimestamp.toDate();
+          }
+
+          if (employeeData.containsKey('checkOut') && employeeData['checkOut'] != null) {
+            Timestamp checkOutTimestamp = employeeData['checkOut'];
+            checkOut = checkOutTimestamp.toDate();
+          }
 
           return MapEntry(employeeId, {
-            'checkIn': checkIn.toString(),
-            'checkOut': checkOut.toString(),
+            'checkIn': checkIn?.toString() ?? 'Not Provided', // Provide default or handle as needed
+            'checkOut': checkOut?.toString() ?? 'Not Provided', // Provide default or handle as needed
           });
         });
       } else {
@@ -64,4 +74,3 @@ class DateService {
     }
   }
 }
-

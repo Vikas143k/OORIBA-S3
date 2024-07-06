@@ -253,8 +253,8 @@ import 'package:ooriba_s3/facial/ML/Recognizer.dart';
 import 'package:ooriba_s3/services/retrieveDataByEmail.dart';
 
 class RecognitionScreen extends StatefulWidget {
-  final String email;
-  const RecognitionScreen({super.key, required this.email});
+  final String phoneNumber;
+  const RecognitionScreen({super.key, required this.phoneNumber});
 
   @override
   State<RecognitionScreen> createState() => _RecognitionScreenState();
@@ -298,9 +298,9 @@ Map<String, dynamic> Employee = {};
     });
   }
 
-  Future<void> uploadImageToFirebase(File image, String email) async {
+  Future<void> uploadImageToFirebase(File image, String phoneNumber) async {
   final FirestoreService firestoreService = FirestoreService();
-  Map<String, dynamic>? employeeData = await firestoreService.getEmployeeByEmail(email,"Regemp");
+  Map<String, dynamic>? employeeData = await firestoreService.getEmployeeByEmailOrPhoneNo(phoneNumber,"Regemp");
   String id=employeeData?["employeeId"];
     try {
       String imagePath = 'authImage/$id.jpg';
@@ -358,7 +358,7 @@ Map<String, dynamic> Employee = {};
 
     if (_image != null && isFaceRecognized()) {
       // Automatically trigger the arrow button's action
-      await uploadImageToFirebase(_image!, widget.email);
+      await uploadImageToFirebase(_image!, widget.phoneNumber);
       Navigator.pop(context, true);
     }
   }
@@ -368,7 +368,7 @@ Map<String, dynamic> Employee = {};
   }
 
   void goback() async {
-    await uploadImageToFirebase(_image!, widget.email);
+    await uploadImageToFirebase(_image!, widget.phoneNumber);
     Navigator.pop(context, true);
   }
 

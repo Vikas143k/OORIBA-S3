@@ -673,6 +673,7 @@
 //     );
 //   }
 // }
+import 'dart:ffi';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -694,8 +695,10 @@ class _DatePickerButtonState extends State<DatePickerButton> {
   Map<String, Map<String, String>> _data = {};
   List<Map<String, dynamic>> _allEmployees = [];
   bool _sortOrder = true;
-  String _selectedLocation = 'Default Location';
-  final List<String> _locations = ['Default Location'];
+  String _selectedLocation = 'Berhampur';
+  final List<String> _locations = [];
+  // String _selectedLocation = 'Default Location';
+  // final List<String> _locations = ['Default Location'];
 
   @override
   void initState() {
@@ -710,7 +713,9 @@ class _DatePickerButtonState extends State<DatePickerButton> {
     _allEmployees = await firestoreService.getAllEmployees();
     _locations.addAll(_allEmployees.map((e) => e['location'] ?? '').toSet().cast<String>());
     _locations.removeWhere((element) => element == '');
-    setState(() {});
+    setState(() {
+      _sortEmployees();
+    });
   }
   
 
@@ -753,7 +758,8 @@ class _DatePickerButtonState extends State<DatePickerButton> {
 
   List<Map<String, dynamic>> _filterEmployeesByLocation() {
     return _allEmployees.where((e) => 
-      (_selectedLocation == 'Default Location' || e['location'] == _selectedLocation) &&
+      (e['location'] == _selectedLocation) &&
+      // (_selectedLocation == 'Default Location' || e['location'] == _selectedLocation) &&
       e['role'] == 'Standard'
     ).toList();
   }
@@ -774,7 +780,7 @@ class _DatePickerButtonState extends State<DatePickerButton> {
     List<Map<String, dynamic>> filteredEmployees = _filterEmployeesByLocation();
     StringBuffer csvContent = StringBuffer();
     csvContent.writeln("Date, ${DateFormat('dd-MM-yyyy').format(_selectedDate!)}");
-    csvContent.writeln('EmployeeId,Name,Location,Check-in,Check-out,Status,Phone No');
+    csvContent.writeln('EmployeeId,Name,Location,Check-in,Check-out,Status,Phone No,Hours');
 
     for (var employee in filteredEmployees) {
       String empId = employee['employeeId'] ?? 'Null';
@@ -786,8 +792,9 @@ class _DatePickerButtonState extends State<DatePickerButton> {
       String checkIn = empData['checkIn']!;
       String checkOut = empData['checkOut']!;
       String status = isPresent ? 'present' : 'absent';
+      String Hours="Upcoming";
 
-      csvContent.writeln('$empId,$name,$location,$checkIn,$checkOut,$status,$phoneNo');
+      csvContent.writeln('$empId,$name,$location,$checkIn,$checkOut,$status,$phoneNo,$Hours');
     }
 
     if (await Permission.storage.request().isGranted || await Permission.manageExternalStorage.request().isGranted) {
@@ -808,6 +815,67 @@ class _DatePickerButtonState extends State<DatePickerButton> {
       openAppSettings();
     }
   }
+//   Future<void> _downloadCsv() async {
+//   List<Map<String, dynamic>> filteredEmployees = _filterEmployeesByLocation();
+//   StringBuffer csvContent = StringBuffer();
+//   csvContent.writeln("Date, ${DateFormat('dd-MM-yyyy').format(_selectedDate!)}");
+//   csvContent.writeln('EmployeeId,Name,Location,Check-in,Check-out,Status,Phone No,Hours');
+
+//   for (var employee in filteredEmployees) {
+//     String empId = employee['employeeId'] ?? 'Null';
+//     String name = '${employee['firstName']} ${employee['lastName']}' ?? 'Null';
+//     String location = employee['location'] ?? '';
+//     String phoneNo = employee['phoneNo'] ?? 'Null';
+//     bool isPresent = _data.containsKey(empId);
+//     Map<String, String> empData = isPresent ? _data[empId]! : {'checkIn': 'N/A', 'checkOut': 'N/A'};
+//     String checkIn = empData['checkIn']!;
+//     String checkOut = empData['checkOut']!;
+//     String status = isPresent ? 'present' : 'absent';
+
+//     // Calculate hours
+//     int hours = 0;
+//     if (checkIn != 'N/A' && checkOut != 'N/A') {
+//       try {
+//         // Debug output
+//         print('Parsing times for employee $empId: checkIn: $checkIn, checkOut: $checkOut');
+        
+//         DateTime checkInTime = DateFormat('HH:mm').parse(checkIn);
+//         DateTime checkOutTime = DateFormat('HH:mm').parse(checkOut);
+        
+//         // Debug output
+//         print('Parsed times: checkInTime: $checkInTime, checkOutTime: $checkOutTime');
+        
+//         hours = checkOutTime.difference(checkInTime).inHours;
+
+//         // Debug output
+//         print('Calculated hours: $hours');
+//       } catch (e) {
+//         print('Error parsing time for employee $empId: $e');
+//       }
+//     }
+
+//     csvContent.writeln('$empId,$name,$location,$checkIn,$checkOut,$status,$phoneNo,$hours');
+//   }
+
+//   if (await Permission.storage.request().isGranted || await Permission.manageExternalStorage.request().isGranted) {
+//     Directory? directory = await getExternalStorageDirectory();
+//     String? downloadPath = Platform.isAndroid ? '/storage/emulated/0/Download' : directory?.path;
+
+//     if (downloadPath != null) {
+//       String path = '$downloadPath/attendance_${DateFormat('yyyyMMdd').format(_selectedDate!)}.csv';
+//       File file = File(path);
+//       await file.writeAsString(csvContent.toString());
+//       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('CSV saved to $path')));
+//     } else {
+//       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Unable to access storage directory')));
+//     }
+//   } else if (await Permission.storage.isDenied || await Permission.manageExternalStorage.isDenied) {
+//     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Storage permission denied')));
+//   } else if (await Permission.storage.isPermanentlyDenied || await Permission.manageExternalStorage.isPermanentlyDenied) {
+//     openAppSettings();
+//   }
+// }
+
 
   @override
   Widget build(BuildContext context) {
@@ -951,7 +1019,7 @@ class _DatePickerButtonState extends State<DatePickerButton> {
                               }
                             },
                           )
-                        : const Icon(Icons.image_not_supported, size: 60),     ),
+                        : const Icon(Icons.image_not_supported, size: 60),),
                 );
               },
             ),
