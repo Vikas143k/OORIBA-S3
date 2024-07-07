@@ -110,8 +110,11 @@ Future<void> _downloadImage(String url, String fileName) async {
   void _saveDetails() async {
     if (_formKey.currentState!.validate()) {
       try {
-        // Generate a new employee ID
-        final employeeId = await _idGenerator.generateEmployeeId();
+        String location = employeeData['location'];
+        if (location == null || location.isEmpty) {
+          throw Exception('Location is required to generate an employee ID');
+        }
+        final employeeId = await _idGenerator.generateEmployeeId(location);
         employeeData['employeeId'] = employeeId;
 
         print('Saving data: ${employeeData['phoneNo']} -> $employeeData');

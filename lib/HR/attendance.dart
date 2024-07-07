@@ -676,12 +676,16 @@
 import 'dart:ffi';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:ooriba_s3/services/retrieveDataByEmployeeId.dart'; // Updated import
 import 'package:ooriba_s3/services/retrieveFromDates_service.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:ooriba_s3/services/geo_service.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DatePickerButton extends StatefulWidget {
   const DatePickerButton({super.key});
@@ -875,7 +879,29 @@ class _DatePickerButtonState extends State<DatePickerButton> {
 //     openAppSettings();
 //   }
 // }
+void _openLocationOnMap(String employeeId) async {
+    try {
+      GeoService geoService = GeoService();
+      Position position = await geoService.determinePosition();
 
+      // You need to fetch latitude and longitude of the employee from your Firestore database
+      // Assuming employee details have `latitude` and `longitude` fields
+      var employee = _allEmployees.firstWhere((e) => e['employeeId'] == employeeId);
+      double employeeLatitude = 16.52154568524242;
+      double employeeLongitude = 80.52320068916423;
+
+      String googleMapsUrl = "https://www.google.com/maps/search/?api=1&query=$employeeLatitude,$employeeLongitude";
+
+      if (await canLaunch(googleMapsUrl)) {
+        await launch(googleMapsUrl);
+      } else {
+        throw 'Could not launch $googleMapsUrl';
+      }
+    } catch (e) {
+      print(e);
+      Fluttertoast.showToast(msg: 'Error opening map: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -931,9 +957,9 @@ class _DatePickerButtonState extends State<DatePickerButton> {
             child: ListView.builder(
               itemCount: filteredEmployees.length,
               itemBuilder: (context, index) {
-              String capitalize(String x) { 
-                return "${x[0].toUpperCase()}${x.substring(1)}"; 
-              } 
+                String capitalize(String x) { 
+                  return "${x[0].toUpperCase()}${x.substring(1)}"; 
+                } 
                 String employeeId = filteredEmployees[index]['employeeId'];
                 String firstName = capitalize(filteredEmployees[index]['firstName']) ?? '';
                 String lastName = filteredEmployees[index]['lastName'] ?? '';
@@ -951,7 +977,19 @@ class _DatePickerButtonState extends State<DatePickerButton> {
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Location: $location'),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('Location: $location'),
+                            IconButton(
+                              icon: const Icon(Icons.location_on),
+                              onPressed: () {
+                                _openLocationOnMap(employeeId);
+                                // Add your onPressed functionality here, if needed.
+                              },
+                            ),
+                          ],
+                        ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -1019,7 +1057,8 @@ class _DatePickerButtonState extends State<DatePickerButton> {
                               }
                             },
                           )
-                        : const Icon(Icons.image_not_supported, size: 60),),
+                        : const Icon(Icons.image_not_supported, size: 60),
+                  ),
                 );
               },
             ),

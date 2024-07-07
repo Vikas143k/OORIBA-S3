@@ -53,9 +53,10 @@ class _PostLoginPageState extends State<PostLoginPage> {
     fetchEmployeeData();
     _checkIfFaceIsRegistered();
     _checkLocation();
-     _loadLocalCheckInCheckOutTimes();
+    _loadLocalCheckInCheckOutTimes();
   }
- Future<void> _loadLocalCheckInCheckOutTimes() async {
+
+  Future<void> _loadLocalCheckInCheckOutTimes() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       checkInTime = prefs.containsKey('checkInTime')
@@ -68,7 +69,8 @@ class _PostLoginPageState extends State<PostLoginPage> {
     print('Loaded check-in time: $checkInTime');
     print('Loaded check-out time: $checkOutTime');
   }
-Future<void> _saveLocalCheckInTime(DateTime time) async {
+
+  Future<void> _saveLocalCheckInTime(DateTime time) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('checkInTime', time.toIso8601String());
     print('Saved check-in time: $time');
@@ -87,10 +89,6 @@ Future<void> _saveLocalCheckInTime(DateTime time) async {
     print('Cleared local check-in and check-out times');
   }
 
-
-
-
-
   Future<void> fetchEmployeeData() async {
     await _fetchEmployeeDetails(widget.phoneNumber);
     await _fetchCheckInStatus(widget.phoneNumber);
@@ -99,7 +97,6 @@ Future<void> _saveLocalCheckInTime(DateTime time) async {
       isLoading = false;
     });
   }
-  
 
   Future<void> _checkIfFaceIsRegistered() async {
     await dbHelper.init();
@@ -236,7 +233,7 @@ Future<void> _saveLocalCheckInTime(DateTime time) async {
     });
   }
 
- Future<void> _checkIn() async {
+  Future<void> _checkIn() async {
     DateTime now = DateTime.now();
     await firestoreService.addCheckInOutData(employeeId!, now, null, now);
 
@@ -251,9 +248,10 @@ Future<void> _saveLocalCheckInTime(DateTime time) async {
     await _clearLocalCheckInCheckOutTimes();
   }
 
- Future<void> _checkOut() async {
+  Future<void> _checkOut() async {
     DateTime now = DateTime.now();
-    await firestoreService.addCheckInOutData(employeeId!, checkInTime!, now, now);
+    await firestoreService.addCheckInOutData(
+        employeeId!, checkInTime!, now, now);
 
     setState(() {
       isCheckedIn = false;
@@ -353,7 +351,7 @@ Future<void> _saveLocalCheckInTime(DateTime time) async {
 //                       mainAxisAlignment: MainAxisAlignment.center,
 //                       crossAxisAlignment: CrossAxisAlignment.center,
 //                       children: [
-          
+
 //                         ElevatedButton(
 //                           onPressed: () {
 //                             if (isRegistered) {
@@ -428,7 +426,7 @@ Future<void> _saveLocalCheckInTime(DateTime time) async {
 //                     ),
 //                   ),
 //                   const SizedBox(height: 20),
-     
+
 //                   Row(
 //                     mainAxisAlignment:
 //                         MainAxisAlignment.spaceEvenly, // Adjust as needed
@@ -507,7 +505,7 @@ Future<void> _saveLocalCheckInTime(DateTime time) async {
 //     );
 //   }
 // }
- Widget build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -517,16 +515,28 @@ Future<void> _saveLocalCheckInTime(DateTime time) async {
                 backgroundImage: NetworkImage(dpImageUrl!),
               ),
             SizedBox(width: 8),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(employeeName != null ? 'Welcome, $employeeName-$employeeId' : "Loading"),
-                if (lastLoginTime != null)
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    'Last login: ${formatTimeWithoutSeconds(lastLoginTime)}',
-                    style: TextStyle(fontSize: 14),
+                    employeeName != null
+                        ? 'Welcome, $employeeName-$employeeId'
+                        : "Loading",
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    softWrap: false,
                   ),
-              ],
+                  if (lastLoginTime != null)
+                    Text(
+                      'Last login: ${formatTimeWithoutSeconds(lastLoginTime)}',
+                      style: TextStyle(fontSize: 14),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                      softWrap: false,
+                    ),
+                ],
+              ),
             ),
           ],
         ),
@@ -561,25 +571,34 @@ Future<void> _saveLocalCheckInTime(DateTime time) async {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const RegistrationScreen(),
+                                  builder: (context) =>
+                                      const RegistrationScreen(),
                                 ),
                               );
                             }
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: isRegistered ? (isCheckedIn ? Colors.green : Colors.orange) : null,
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                            backgroundColor: isRegistered
+                                ? (isCheckedIn ? Colors.green : Colors.orange)
+                                : null,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 15),
                           ),
-                          child: Text(isRegistered ? (isCheckedIn ? 'Check-out' : 'Check-in') : 'Register'),
+                          child: Text(isRegistered
+                              ? (isCheckedIn ? 'Check-out' : 'Check-in')
+                              : 'Register'),
                         ),
                         SizedBox(width: 20),
                         isPresent
                             ? FutureBuilder<String>(
                                 future: getImageUrl(employeeId!),
                                 builder: (context, snapshot) {
-                                  if (snapshot.connectionState == ConnectionState.waiting) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
                                     return const CircularProgressIndicator();
-                                  } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+                                  } else if (snapshot.hasError ||
+                                      !snapshot.hasData ||
+                                      snapshot.data!.isEmpty) {
                                     return const Text('No image');
                                   } else {
                                     return InkWell(
@@ -587,7 +606,8 @@ Future<void> _saveLocalCheckInTime(DateTime time) async {
                                         showDialog(
                                           context: context,
                                           builder: (context) => AlertDialog(
-                                            content: Image.network(snapshot.data!),
+                                            content:
+                                                Image.network(snapshot.data!),
                                             actions: <Widget>[
                                               TextButton(
                                                 child: const Text('Close'),
@@ -624,7 +644,9 @@ Future<void> _saveLocalCheckInTime(DateTime time) async {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Text('Last Check-in', style: TextStyle(fontWeight: FontWeight.bold)),
+                                const Text('Last Check-in',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold)),
                                 Text(formatTime(checkInTime)),
                               ],
                             ),
@@ -639,7 +661,9 @@ Future<void> _saveLocalCheckInTime(DateTime time) async {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Text('Last Check-out', style: TextStyle(fontWeight: FontWeight.bold)),
+                                const Text('Last Check-out',
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold)),
                                 Text(formatTime(checkOutTime)),
                               ],
                             ),
@@ -650,14 +674,12 @@ Future<void> _saveLocalCheckInTime(DateTime time) async {
                   ),
                   const SizedBox(height: 80),
                   Expanded(
-                    
                     child: ListView(
-                      
                       children: const [
-                         Divider(
-        color: Colors.blue,
-        thickness: 2.0,
-      ),
+                        Divider(
+                          color: Colors.blue,
+                          thickness: 2.0,
+                        ),
                         Card(
                           child: ListTile(
                             leading: Icon(Icons.calendar_today),
@@ -666,14 +688,11 @@ Future<void> _saveLocalCheckInTime(DateTime time) async {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text('Weekly Meeting at: 4 PM'),
-                               
                                 Text('Holiday: 15th July 2024'),
                                 Text('Leave: 12th July 2024'),
                               ],
                             ),
-                            
                           ),
-                          
                         ),
                         Card(
                           child: ListTile(
