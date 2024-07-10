@@ -431,6 +431,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ooriba_s3/HR/employee_details_page.dart';
 import 'package:ooriba_s3/HR/registered_employees_page.dart';
+import 'package:ooriba_s3/leave_approval.dart';
 import 'package:ooriba_s3/services/auth_service.dart';
 import 'package:ooriba_s3/services/registered_service.dart';
 import 'attendance.dart'; // Assuming this file contains DatePickerButton widget
@@ -493,10 +494,16 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
             ),
             ListTile(
               leading: const Icon(Icons.time_to_leave),
-              title: const Text('Leave'),
+              title: const Text('Employee Leave Requests'),
               onTap: () {
                 Navigator.pop(context);
-                // Navigate to Leave Page
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        LeaveApprovalPage(), // Navigate to LeaveApprovalPage
+                  ),
+                );
               },
             ),
             ListTile(
@@ -506,7 +513,8 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const DatePickerButton()),
+                  MaterialPageRoute(
+                      builder: (context) => const DatePickerButton()),
                 );
               },
             ),
@@ -656,21 +664,23 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
             Row(
               children: <Widget>[
                 CircleAvatar(
-          radius: 30.0,
-          backgroundColor: Colors.purple[100],
-          backgroundImage: data['dpImageUrl'] != null && data['dpImageUrl'].isNotEmpty
-              ? NetworkImage(data['dpImageUrl'])
-              : null,
-          child: data['dpImageUrl'] == null || data['dpImageUrl'].isEmpty
-              ? Text(
-                  '${data['firstName'][0]}${data['lastName'][0]}',
-                  style: const TextStyle(
-                    fontSize: 24.0,
-                    color: Colors.white,
-                  ),
-                )
-              : null,
-        ),
+                  radius: 30.0,
+                  backgroundColor: Colors.purple[100],
+                  backgroundImage: data['dpImageUrl'] != null &&
+                          data['dpImageUrl'].isNotEmpty
+                      ? NetworkImage(data['dpImageUrl'])
+                      : null,
+                  child:
+                      data['dpImageUrl'] == null || data['dpImageUrl'].isEmpty
+                          ? Text(
+                              '${data['firstName'][0]}${data['lastName'][0]}',
+                              style: const TextStyle(
+                                fontSize: 24.0,
+                                color: Colors.white,
+                              ),
+                            )
+                          : null,
+                ),
                 const SizedBox(width: 16.0),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

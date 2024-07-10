@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:ooriba_s3/facial/DB/DatabaseHelper.dart';
 import 'package:ooriba_s3/facial/RecognitionScreen.dart';
 import 'package:ooriba_s3/facial/RegistrationScreen.dart';
+import 'package:ooriba_s3/leave.dart';
 import 'package:ooriba_s3/services/auth_service.dart';
 import 'package:ooriba_s3/services/geo_service.dart';
 import 'package:ooriba_s3/services/retrieveDataByEmail.dart'
@@ -549,6 +550,44 @@ class _PostLoginPageState extends State<PostLoginPage> {
             },
           ),
         ],
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(color: Colors.blue),
+              child: Text('Menu',
+                  style: TextStyle(color: Colors.white, fontSize: 24)),
+            ),
+            ListTile(
+              leading: Icon(Icons.dashboard),
+              title: Text('Dashboard'),
+              onTap: () {
+                // Navigator.pop(context);
+                // navigateToDashboard();
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.leave_bags_at_home),
+              title: Text('Apply Leave'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => LeavePage(employeeId:employeeId)),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.person),
+              title: Text('Personal Information'),
+              onTap: () {
+                // Navigator.pop(context);
+                // navigateToPersonalInformation();
+              },
+            ),
+          ],
+        ),
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
