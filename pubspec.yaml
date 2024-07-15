@@ -76,6 +76,7 @@ dependencies:
   marquee: ^2.2.3
   location: ^7.0.0
   table_calendar: ^3.1.2
+  firebase_messaging: ^14.9.4
 dev_dependencies:
   flutter_test:
     sdk: flutter

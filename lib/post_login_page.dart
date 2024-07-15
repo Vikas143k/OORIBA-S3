@@ -1,4 +1,4 @@
-import 'dart:async';
+// import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -16,6 +16,7 @@ import 'package:ooriba_s3/services/retrieveDataByEmail.dart'
     as retrieveDataByEmail;
 import 'package:ooriba_s3/services/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ooriba_s3/services/employee_location_service.dart';
 
 class PostLoginPage extends StatefulWidget {
   final String phoneNumber;
@@ -45,7 +46,8 @@ class _PostLoginPageState extends State<PostLoginPage> {
   final GeoService geoService = GeoService();
   bool isWithinRange = false;
   bool isLoadingForLocation = false;
-  //Timer? _disableButtonTimer;
+  final EmployeeLocationService employeeLocationService = EmployeeLocationService();
+
 
   @override
   void initState() {
@@ -122,9 +124,10 @@ class _PostLoginPageState extends State<PostLoginPage> {
       });
 
       Fluttertoast.showToast(
-          msg: withinRange
-              ? "You are at the location"
-              : "You are not at the location");
+          msg: isWithinRange
+              ? "You are within the location"
+          : "You are away from the location",
+      );
     } catch (e) {
       print(e);
       Fluttertoast.showToast(msg: 'Error: $e');
@@ -238,6 +241,9 @@ class _PostLoginPageState extends State<PostLoginPage> {
     DateTime now = DateTime.now();
     await firestoreService.addCheckInOutData(employeeId!, now, null, now);
 
+    Position position = await geoService.determinePosition(); // Get current position
+    await employeeLocationService.saveEmployeeLocation(employeeId!, position, now, 'check-in'); // Save location
+
     setState(() {
       isCheckedIn = true;
       checkInTime = now;
@@ -253,6 +259,9 @@ class _PostLoginPageState extends State<PostLoginPage> {
     DateTime now = DateTime.now();
     await firestoreService.addCheckInOutData(
         employeeId!, checkInTime!, now, now);
+
+    Position position = await geoService.determinePosition(); // Get current position
+    await employeeLocationService.saveEmployeeLocation(employeeId!, position, now, 'check-in'); // Save location
 
     setState(() {
       isCheckedIn = false;
@@ -511,7 +520,9 @@ class _PostLoginPageState extends State<PostLoginPage> {
       appBar: AppBar(
         title: Row(
           children: [
+            
             if (dpImageUrl != null)
+            
               CircleAvatar(
                 backgroundImage: NetworkImage(dpImageUrl!),
               ),
@@ -532,6 +543,7 @@ class _PostLoginPageState extends State<PostLoginPage> {
                     Text(
                       'Last login: ${formatTimeWithoutSeconds(lastLoginTime)}',
                       style: TextStyle(fontSize: 14),
+                      
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                       softWrap: false,
@@ -584,6 +596,13 @@ class _PostLoginPageState extends State<PostLoginPage> {
               onTap: () {
                 // Navigator.pop(context);
                 // navigateToPersonalInformation();
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.person),
+              title: Text('Logout'),
+              onTap: () async {
+                await AuthService().signout(context: context);
               },
             ),
           ],
@@ -720,31 +739,39 @@ class _PostLoginPageState extends State<PostLoginPage> {
                           thickness: 2.0,
                         ),
                         Card(
+                          elevation: 5,
+                            color: Color.fromARGB(255, 222, 200, 174),
                           child: ListTile(
                             leading: Icon(Icons.calendar_today),
-                            title: Text('Upcoming Events'),
+                            title: Text('Upcoming Events',style: TextStyle(fontWeight: FontWeight.bold ,fontSize: 20),),
+                            
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Weekly Meeting at: 4 PM'),
-                                Text('Holiday: 15th July 2024'),
-                                Text('Leave: 12th July 2024'),
+                                Text('Weekly Meeting at: 3 PM'),
+                                Text('Holiday: 20th July 2024'),
+                                Text('Leave: 17th July 2024'),
                               ],
                             ),
                           ),
                         ),
                         Card(
+                          elevation: 5,
+                            color: Color.fromARGB(255, 222, 200, 174),
                           child: ListTile(
-                            leading: Icon(Icons.history),
-                            title: Text('Recent Activities'),
+                            leading: Icon(Icons.message),
+                            title: Text('Global Communitcation',style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),),
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Meeting with team at 11:00 AM'),
-                                Text('Submitted report at 2:00 PM'),
+                                Text('Dear OORIBA Family,'),
+                                Text('We are having Puja in our Company, So all are invited with famiy at 9:30am'),
+                                Text('Thankyou'),
+
                               ],
                             ),
                           ),
+                          // margin: EdgeInsets.all(5),
                         ),
                       ],
                     ),
