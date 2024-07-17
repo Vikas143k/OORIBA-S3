@@ -68,4 +68,17 @@ class BroadcastService {
   deleteBroadcastMessage(String id) {}
 
   // Other methods like editBroadcastMessage, deleteBroadcastMessage, etc.
+
+  Future<String?> getCurrentBroadcastMessage() async {
+    try {
+      DocumentSnapshot doc = await _firestore.collection('CurrentBroadcast').doc('current').get();
+      if (doc.exists && doc.data() != null) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        return data['message'] as String?;
+      }
+    } catch (e) {
+      print('Error fetching broadcast message: $e');
+    }
+    return null;
+  }
 }

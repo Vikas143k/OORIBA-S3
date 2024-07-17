@@ -79,26 +79,28 @@ class OoribaApp extends StatelessWidget {
               primarySwatch: Colors.blue,
               brightness: Brightness.dark,
             ),
-            themeMode:
+           themeMode:
                 darkModeService.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-            home: LoginPage(),
-          );
+            home: _getInitialPage(isLoggedIn, email, userRole),
+           );
         },
       ),
     );
   }
 
-  Widget _getInitialPage(bool isLoggedIn, String? email, String? role) {
+ Widget _getInitialPage(bool isLoggedIn, String? email, String? role) {
     if (!isLoggedIn) {
       return LoginPage();
     } else if (role == 'HR') {
       return const HRDashboardPage();
-   }
-   else if (role =='SiteManager'){
-    return Sitemanagerdashboard(phoneNumber: email ?? '', userDetails: {});
-   }
-    else {
+    } else if (role == 'SiteManager') {
+      return Sitemanagerdashboard(phoneNumber: email ?? '', userDetails: {});
+    } else if (role == 'Standard'){
       return PostLoginPage(phoneNumber: email ?? '', userDetails: {});
+    } else if (role == 'Admin'){
+      return  AdminDashboardPage();
+    }else{
+      return LoginPage();
     }
   }
 }

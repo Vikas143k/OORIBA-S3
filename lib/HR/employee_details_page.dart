@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ooriba_s3/employee_id_generator.dart';
 import 'package:ooriba_s3/services/accept_mail_service.dart';
+import 'package:ooriba_s3/services/admin/department_service.dart';
+import 'package:ooriba_s3/services/admin/retrieveLocation_service.dart';
 import 'package:ooriba_s3/services/registered_service.dart';
 import 'package:ooriba_s3/services/reject_service.dart';
 import 'package:path_provider/path_provider.dart';
@@ -31,10 +33,16 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
   final _formKey = GlobalKey<FormState>();
   final EmployeeIdGenerator _idGenerator = EmployeeIdGenerator();
   final TextEditingController _joiningDateController = TextEditingController();
+   LocationService locationService = LocationService();
+   DepartmentService departmentService=DepartmentService();
+  List<String> locationNames = [];
+  List<String> departmentNames = [];
 
   @override
   void initState() {
     super.initState();
+     fetchLocations();
+     fetchDepartment();
     employeeData = Map<String, dynamic>.from(widget.employeeData);
     _joiningDateController.text = employeeData['joiningDate'] ?? '';
 
@@ -46,7 +54,19 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
       employeeData['dob'] = formattedDob;
     }
   }
-
+ Future<void> fetchLocations() async {
+    List<String> locations = await locationService.getAllLocations();
+    setState(() {
+      locationNames = locations;
+      // print(locationNames);
+    });
+  }
+ Future<void> fetchDepartment() async {
+    List<String> department = await departmentService.getDepartments();
+    setState(() {
+      departmentNames = department;
+    });
+  }
 
 
 Future<void> _downloadImage(String url, String fileName) async {
@@ -170,7 +190,9 @@ Future<void> _downloadImage(String url, String fileName) async {
       employeeData['status'] = 'Active';
       employeeData['role'] = 'Standard';
     });
-
+    /////////////////////
+      // await _acceptMailService.sendAcceptanceEmail(employeeData['phoneNo']); //This has to be Removed
+/////////////////////////////////////
      if (employeeData['password']!=null && employeeData['email']!="null" && employeeData['email']!=null){
       try{
           UserCredential userCredential = await FirebaseAuth.instance
@@ -736,13 +758,7 @@ Future<void> _downloadImage(String url, String fileName) async {
                   ],
                 ),
               ),
-              _buildDropdownRow('Department', 'department', [
-                'Sales',
-                'Services',
-                'Spares',
-                'Administration',
-                'Board of Directors'
-              ]),
+              _buildDropdownRow('Department', 'department',departmentNames),
               _buildDropdownRow('Designation', 'designation', [
                 'Manager',
                 'Senior Engineer',
@@ -753,7 +769,8 @@ Future<void> _downloadImage(String url, String fileName) async {
               _buildDropdownRow(
                   'Employee Type', 'employeeType', ['On-site', 'Off-site']),
               _buildDropdownRow(
-                  'Location', 'location', ['Jeypore', 'Berhampur', 'Raigada']),
+                  // 'Location', 'location', ['Jeypore', 'Berhampur', 'Raigada']),
+                  'Location', 'location', locationNames),
             ]),
             _buildCategory('Bank Details', [
               _buildDetailRow('Bank Name', 'bankName'),

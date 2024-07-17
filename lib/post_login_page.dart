@@ -1,5 +1,4 @@
-// import 'dart:async';
-
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -35,6 +34,7 @@ class _PostLoginPageState extends State<PostLoginPage> {
   String? employeeName;
   String? employeePhoneNumber;
   String? dpImageUrl;
+  String? employeeType;
   DateTime? lastLoginTime;
   final UserFirestoreService firestoreService = UserFirestoreService();
   late DatabaseHelper dbHelper;
@@ -47,6 +47,7 @@ class _PostLoginPageState extends State<PostLoginPage> {
   bool isWithinRange = false;
   bool isLoadingForLocation = false;
   final EmployeeLocationService employeeLocationService = EmployeeLocationService();
+  Timer? _autoCheckOutTimer;
 
 
   @override
@@ -58,6 +59,13 @@ class _PostLoginPageState extends State<PostLoginPage> {
     _checkLocation();
     _loadLocalCheckInCheckOutTimes();
   }
+
+    @override
+  void dispose() {
+    _autoCheckOutTimer?.cancel();
+    super.dispose();
+  }
+
 
   Future<void> _loadLocalCheckInCheckOutTimes() async {
     final prefs = await SharedPreferences.getInstance();
@@ -155,6 +163,7 @@ class _PostLoginPageState extends State<PostLoginPage> {
         employeeName = employeeData['firstName'];
         employeePhoneNumber = employeeData['phoneNo'];
         dpImageUrl = employeeData['dpImageUrl'];
+        employeeType = employeeData['employeeType'];
       });
     } else {
       print(
@@ -253,7 +262,11 @@ class _PostLoginPageState extends State<PostLoginPage> {
 
     await _saveLocalCheckInTime(now);
     await _clearLocalCheckInCheckOutTimes();
-  }
+
+    _autoCheckOutTimer = Timer(Duration(hours: 9), () {
+    _checkOut();
+  });
+}
 
   Future<void> _checkOut() async {
     DateTime now = DateTime.now();
@@ -266,7 +279,7 @@ class _PostLoginPageState extends State<PostLoginPage> {
     setState(() {
       isCheckedIn = false;
       checkOutTime = now;
-      isPresent = true;
+      isPresent = false;
     });
 
     await _saveLocalCheckOutTime(now);
@@ -622,7 +635,8 @@ class _PostLoginPageState extends State<PostLoginPage> {
                         ElevatedButton(
                           onPressed: () {
                             if (isRegistered) {
-                              if (isWithinRange) {
+                              if (employeeType == "Off-site" || (employeeType == "On-site" && isWithinRange)) {
+                                
                                 navigateToFaceRecognitionScreen();
                               }
                             } else {

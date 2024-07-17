@@ -587,8 +587,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:ooriba_s3/services/retrieveDataByEmployeeId.dart';
-import 'services/leave_service.dart';
-import 'apply_leave.dart'; // Import the ApplyLeavePage
+import '../services/leave_service.dart';
+import '../apply_leave.dart'; // Import the ApplyLeavePage
 
 class LeaveApprovalPage extends StatefulWidget {
   @override
@@ -850,6 +850,7 @@ class _LeaveApprovalPageState extends State<LeaveApprovalPage> {
                         },
                       ),
                     ),
+
                   ],
                 ),
       floatingActionButton: FloatingActionButton(

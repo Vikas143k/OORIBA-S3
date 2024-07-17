@@ -435,6 +435,7 @@ import 'package:intl/intl.dart';
 import 'package:ooriba_s3/facial/DB/DatabaseHelper.dart';
 import 'package:ooriba_s3/facial/RecognitionScreenForSite.dart';
 import 'package:ooriba_s3/facial/RegistrationScreenForSite.dart';
+import 'package:ooriba_s3/services/admin/broadcast_service.dart';
 import 'package:ooriba_s3/services/auth_service.dart';
 import 'package:ooriba_s3/services/employee_location_service.dart';
 import 'package:ooriba_s3/services/geo_service.dart';
@@ -468,9 +469,11 @@ class _SitemanagerdashboardState extends State<Sitemanagerdashboard> {
   bool isWithinRange = false;
   bool isLoadingForLocation = false;
   List<Map<String, dynamic>> employeeDetails = [];
-   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-  final EmployeeLocationService employeeLocationService = EmployeeLocationService();
-
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  final EmployeeLocationService employeeLocationService =
+      EmployeeLocationService();
+  final BroadcastService _broadcastService = BroadcastService();
+  String? broadcastMessage;
 
   @override
   void initState() {
@@ -480,6 +483,17 @@ class _SitemanagerdashboardState extends State<Sitemanagerdashboard> {
     _checkIfFaceIsRegistered();
     _checkLocation();
     _fetchAllEmployees();
+    _fetchMessage();
+  }
+
+  Future<void> _fetchMessage() async {
+    String? message = await _broadcastService.getCurrentBroadcastMessage();
+    setState(() {
+      message != null
+          ? broadcastMessage = message
+          : broadcastMessage = "No Message";
+      isLoading = false;
+    });
   }
 
   Future<void> fetchEmployeeData() async {
@@ -635,13 +649,14 @@ class _SitemanagerdashboardState extends State<Sitemanagerdashboard> {
       List<Map<String, dynamic>> employees =
           await retrieveDataByEmail.FirestoreService().getAllEmployees();
       setState(() {
-        employeeDetails = employees.where((employee) => employee['employeeId'] != null).toList();
+        employeeDetails = employees
+            .where((employee) => employee['employeeId'] != null)
+            .toList();
       });
     } catch (e) {
       print('Error fetching employee details: $e');
     }
   }
-
 
   Future<Map<String, dynamic>> _getCheckInOutData(
       String employeeId, DateTime date) async {
@@ -678,8 +693,10 @@ class _SitemanagerdashboardState extends State<Sitemanagerdashboard> {
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Check-In: ${checkIn != null ? formatTime(checkIn) : 'N/A'}'),
-                  Text('Check-Out: ${checkOut != null ? formatTime(checkOut) : 'N/A'}'),
+                  Text(
+                      'Check-In: ${checkIn != null ? formatTime(checkIn) : 'N/A'}'),
+                  Text(
+                      'Check-Out: ${checkOut != null ? formatTime(checkOut) : 'N/A'}'),
                 ],
               ),
             ),
@@ -691,327 +708,329 @@ class _SitemanagerdashboardState extends State<Sitemanagerdashboard> {
 
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        titleSpacing: 0,
-        leading: Builder(
-          builder: (BuildContext context) {
-            return IconButton(
-              icon: Icon(Icons.menu),
-              onPressed: () {
-                Scaffold.of(context).openDrawer();
-              },
-            );
-          },
-        ),
-        title: Row(
-          children: [
-            SizedBox(width: 0),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    employeeName != null && siteLocation != null
-                        ? 'Site Manager - $siteLocation'
-                        : "Loading Site Manager",
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                    softWrap: false,
-                  ),
-                  if (lastLoginTime != null)
+        appBar: AppBar(
+          titleSpacing: 0,
+          leading: Builder(
+            builder: (BuildContext context) {
+              return IconButton(
+                icon: Icon(Icons.menu),
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
+              );
+            },
+          ),
+          title: Row(
+            children: [
+              SizedBox(width: 0),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Text(
-                      'Last login: ${formatTimeWithoutSeconds(lastLoginTime)}',
-                      style: TextStyle(fontSize: 14),
+                      employeeName != null && siteLocation != null
+                          ? 'Site Manager - $siteLocation'
+                          : "Loading Site Manager",
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                       softWrap: false,
                     ),
-                ],
+                    if (lastLoginTime != null)
+                      Text(
+                        'Last login: ${formatTimeWithoutSeconds(lastLoginTime)}',
+                        style: TextStyle(fontSize: 14),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        softWrap: false,
+                      ),
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
-        
-        actions: [
-          // IconButton(
-          //   icon: const Icon(Icons.refresh_outlined),
-          //   onPressed: () async {
-          //      if (navigatorKey.currentState != null) {
-          //         navigatorKey.currentState!.pushReplacement(
-          //           MaterialPageRoute(builder: (context) => Sitemanagerdashboard(phoneNumber:widget.phoneNumber, userDetails: {})),
-          //         );
-          //       } else {
-          //         print('Navigator state is null.');
-          //       }
-          //   },
-          // ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await _saveLastLoginTime();
-              await AuthService().signout(context: context);
-            },
+            ],
           ),
-        ],
-      ),
-      drawer: Drawer(
-        child: ListView(
-          children: [
-            UserAccountsDrawerHeader(
-              accountName: Text(employeeName ?? 'Loading...'),
-              accountEmail: Text(employeePhoneNumber ?? 'Loading...'),
-              currentAccountPicture: CircleAvatar(
-                backgroundImage:
-                    dpImageUrl != null ? NetworkImage(dpImageUrl!) : null,
-                child: dpImageUrl == null ? Icon(Icons.person) : null,
-              ),
-            ),
-            ListTile(
-              leading: Icon(Icons.emoji_emotions_outlined),
-              title: Text('Profile'),
-              onTap: () {
-                // Handle Profile tap
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.app_registration_outlined),
-              title: Text('Register'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        RegistrationScreen(siteManagerId: employeeId!),
-                  ),
-                );
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.event_available),
-              title: Text('Attendance'),
-              onTap: () {
-                // Handle Attendance tap
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.settings),
-              title: Text('Settings'),
-              onTap: () {
-                // Handle Settings tap
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.logout),
-              title: Text('Logout'),
-              onTap: () async {
+          actions: [
+            // IconButton(
+            //   icon: const Icon(Icons.refresh_outlined),
+            //   onPressed: () async {
+            //      if (navigatorKey.currentState != null) {
+            //         navigatorKey.currentState!.pushReplacement(
+            //           MaterialPageRoute(builder: (context) => Sitemanagerdashboard(phoneNumber:widget.phoneNumber, userDetails: {})),
+            //         );
+            //       } else {
+            //         print('Navigator state is null.');
+            //       }
+            //   },
+            // ),
+            IconButton(
+              icon: const Icon(Icons.logout),
+              onPressed: () async {
                 await _saveLastLoginTime();
                 await AuthService().signout(context: context);
               },
             ),
           ],
         ),
-      ),
-      // body: isLoading
-      //     ? Center(child: CircularProgressIndicator())
-      //     : Column(
-      //         children: [
-      //           if (!isRegistered)
-      //             ElevatedButton(
-      //               onPressed: () {
-      //                 Navigator.push(
-      //                   context,
-      //                   MaterialPageRoute(
-      //                       builder: (context) =>
-      //                           RegistrationScreen(siteManagerId: employeeId!)),
-      //                 );
-      //               },
-      //               child: Text('Register Face'),
-      //             ),
-      //           if (isRegistered && isWithinRange)
-      //             Padding(
-      //               padding: const EdgeInsets.only(top: 40.0, bottom: 40), // Add top padding as needed
-      //               child: Center(
-      //                 child: ElevatedButton(
-      //                   onPressed: isWithinRange
-      //                       ? () {
-      //                           navigateToFaceRecognitionScreen();
-      //                         }
-      //                       : null,
-      //                   child: const Text('Recognize'),
-      //                 ),
-      //               ),
-      //             ),
-      //              Expanded(
-      //               child: ListView(
-      //                 children: const [
-      //                   Divider(
-      //                     color: Colors.blue,
-      //                     thickness: 2.0,
-      //                   ),
-      //                   Card(
-      //                     child: ListTile(
-      //                       leading: Icon(Icons.calendar_today),
-      //                       title: Text('Upcoming Events'),
-      //                       subtitle: Column(
-      //                         crossAxisAlignment: CrossAxisAlignment.start,
-      //                         children: [
-      //                           Text('Weekly Meeting at: 4 PM'),
-      //                           Text('Holiday: 15th July 2024'),
-      //                           Text('Leave: 12th July 2024'),
-      //                         ],
-      //                       ),
-      //                     ),
-      //                   ),
-      //                   Card(
-      //                     child: ListTile(
-      //                       leading: Icon(Icons.history),
-      //                       title: Text('Recent Activities'),
-      //                       subtitle: Column(
-      //                         crossAxisAlignment: CrossAxisAlignment.start,
-      //                         children: [
-      //                           Text('Meeting with team at 11:00 AM'),
-      //                           Text('Submitted report at 2:00 PM'),
-      //                         ],
-      //                       ),
-      //                     ),
-      //                   ),
-      //                 ],
-      //               ),
-      //             ),
-                  
-      //           // const Divider(), // Add a divider line
-      //           const Padding(
-      //             // padding: const EdgeInsets.all(60.0),
-      //             padding: EdgeInsets.only(top:60),
-      //             child: Text(
-      //               'History',
-      //               style: TextStyle(
-      //                 fontSize: 20,
-      //                 fontWeight: FontWeight.bold,
-      //               ),
-      //             ),
-      //           ),
-      //           Expanded(
-      //             child: ListView.builder(
-      //               itemCount: employeeDetails.length,
-      //               itemBuilder: (context, index) {
-      //                 return buildEmployeeCard(employeeDetails[index]);
-      //               },
-      //             ),
-      //           ),
-      //         ],
-      //       ),
-
-      body: isLoading
-  ? Center(child: CircularProgressIndicator())
-  : Column(
-      children: [
-        // if (!isRegistered)
-        //   Padding(
-        //     padding: const EdgeInsets.all(16.0),
-        //     child: ElevatedButton(
-        //       onPressed: () {
-        //         Navigator.push(
-        //           context,
-        //           MaterialPageRoute(
-        //               builder: (context) =>
-        //                   RegistrationScreen(siteManagerId: employeeId!)),
-        //         );
-        //       },
-        //       child: Text('Register Face'),
-        //     ),
-        //   ),
-        if (isWithinRange)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20.0),
-            child: Center(
-              child: ElevatedButton(
-                onPressed: isWithinRange
-                    ? () {
-                        navigateToFaceRecognitionScreen();
-                      }
-                    : null,
-                child: const Text('Attendance'),
-              ),
-            ),
-          ),
-        Expanded(
+        drawer: Drawer(
           child: ListView(
             children: [
-              const Divider(
-                color: Colors.blue,
-                thickness: 2.0,
-              ),
-             const Card(
-                          elevation: 5,
-                            color: Color.fromARGB(255, 222, 200, 174),
-                          child: ListTile(
-                            leading: Icon(Icons.calendar_today),
-                            title: Text('Upcoming Events',style: TextStyle(fontWeight: FontWeight.bold ,fontSize: 20),),
-                            
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Weekly Meeting at: 3 PM'),
-                                Text('Holiday: 20th July 2024'),
-                                Text('Leave: 17th July 2024'),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const Card(
-                          elevation: 5,
-                            color: Color.fromARGB(255, 222, 200, 174),
-                          child: ListTile(
-                            leading: Icon(Icons.message),
-                            title: Text('Global Communitcation',style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Dear OORIBA Family,'),
-                                Text('We are having Puja in our Company, So all are invited with famiy at 9:30am'),
-                                Text('Thankyou'),
-
-                              ],
-                            ),
-                          ),
-                          // margin: EdgeInsets.all(5),
-                        ),
-              // const Padding(
-              //   padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
-              //   child: Text(
-              //     'History',
-              //     style: TextStyle(
-              //       fontSize: 20,
-              //       fontWeight: FontWeight.bold,
-              //     ),
-              //   ),
-              // ),
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
-                child: Center(
-                  child: Text(
-                    'Attendance for the Day',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+              UserAccountsDrawerHeader(
+                accountName: Text(employeeName ?? 'Loading...'),
+                accountEmail: Text(employeePhoneNumber ?? 'Loading...'),
+                currentAccountPicture: CircleAvatar(
+                  backgroundImage:
+                      dpImageUrl != null ? NetworkImage(dpImageUrl!) : null,
+                  child: dpImageUrl == null ? Icon(Icons.person) : null,
                 ),
               ),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                itemCount: employeeDetails.length,
-                itemBuilder: (context, index) {
-                  return buildEmployeeCard(employeeDetails[index]);
+              ListTile(
+                leading: Icon(Icons.emoji_emotions_outlined),
+                title: Text('Profile'),
+                onTap: () {
+                  // Handle Profile tap
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.app_registration_outlined),
+                title: Text('Register'),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          RegistrationScreen(siteManagerId: employeeId!),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.event_available),
+                title: Text('Attendance'),
+                onTap: () {
+                  // Handle Attendance tap
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.settings),
+                title: Text('Settings'),
+                onTap: () {
+                  // Handle Settings tap
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.logout),
+                title: Text('Logout'),
+                onTap: () async {
+                  await _saveLastLoginTime();
+                  await AuthService().signout(context: context);
                 },
               ),
             ],
           ),
         ),
-      ],
-    )
-    );
+        // body: isLoading
+        //     ? Center(child: CircularProgressIndicator())
+        //     : Column(
+        //         children: [
+        //           if (!isRegistered)
+        //             ElevatedButton(
+        //               onPressed: () {
+        //                 Navigator.push(
+        //                   context,
+        //                   MaterialPageRoute(
+        //                       builder: (context) =>
+        //                           RegistrationScreen(siteManagerId: employeeId!)),
+        //                 );
+        //               },
+        //               child: Text('Register Face'),
+        //             ),
+        //           if (isRegistered && isWithinRange)
+        //             Padding(
+        //               padding: const EdgeInsets.only(top: 40.0, bottom: 40), // Add top padding as needed
+        //               child: Center(
+        //                 child: ElevatedButton(
+        //                   onPressed: isWithinRange
+        //                       ? () {
+        //                           navigateToFaceRecognitionScreen();
+        //                         }
+        //                       : null,
+        //                   child: const Text('Recognize'),
+        //                 ),
+        //               ),
+        //             ),
+        //              Expanded(
+        //               child: ListView(
+        //                 children: const [
+        //                   Divider(
+        //                     color: Colors.blue,
+        //                     thickness: 2.0,
+        //                   ),
+        //                   Card(
+        //                     child: ListTile(
+        //                       leading: Icon(Icons.calendar_today),
+        //                       title: Text('Upcoming Events'),
+        //                       subtitle: Column(
+        //                         crossAxisAlignment: CrossAxisAlignment.start,
+        //                         children: [
+        //                           Text('Weekly Meeting at: 4 PM'),
+        //                           Text('Holiday: 15th July 2024'),
+        //                           Text('Leave: 12th July 2024'),
+        //                         ],
+        //                       ),
+        //                     ),
+        //                   ),
+        //                   Card(
+        //                     child: ListTile(
+        //                       leading: Icon(Icons.history),
+        //                       title: Text('Recent Activities'),
+        //                       subtitle: Column(
+        //                         crossAxisAlignment: CrossAxisAlignment.start,
+        //                         children: [
+        //                           Text('Meeting with team at 11:00 AM'),
+        //                           Text('Submitted report at 2:00 PM'),
+        //                         ],
+        //                       ),
+        //                     ),
+        //                   ),
+        //                 ],
+        //               ),
+        //             ),
+
+        //           // const Divider(), // Add a divider line
+        //           const Padding(
+        //             // padding: const EdgeInsets.all(60.0),
+        //             padding: EdgeInsets.only(top:60),
+        //             child: Text(
+        //               'History',
+        //               style: TextStyle(
+        //                 fontSize: 20,
+        //                 fontWeight: FontWeight.bold,
+        //               ),
+        //             ),
+        //           ),
+        //           Expanded(
+        //             child: ListView.builder(
+        //               itemCount: employeeDetails.length,
+        //               itemBuilder: (context, index) {
+        //                 return buildEmployeeCard(employeeDetails[index]);
+        //               },
+        //             ),
+        //           ),
+        //         ],
+        //       ),
+
+        body: isLoading
+            ? Center(child: CircularProgressIndicator())
+            : Column(
+                children: [
+                  // if (!isRegistered)
+                  //   Padding(
+                  //     padding: const EdgeInsets.all(16.0),
+                  //     child: ElevatedButton(
+                  //       onPressed: () {
+                  //         Navigator.push(
+                  //           context,
+                  //           MaterialPageRoute(
+                  //               builder: (context) =>
+                  //                   RegistrationScreen(siteManagerId: employeeId!)),
+                  //         );
+                  //       },
+                  //       child: Text('Register Face'),
+                  //     ),
+                  //   ),
+                  if (isWithinRange)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 20.0),
+                      child: Center(
+                        child: ElevatedButton(
+                          onPressed: isWithinRange
+                              ? () {
+                                  navigateToFaceRecognitionScreen();
+                                }
+                              : null,
+                          child: const Text('Attendance'),
+                        ),
+                      ),
+                    ),
+                  Expanded(
+                    child: ListView(
+                      children: [
+                        const Divider(
+                          color: Colors.blue,
+                          thickness: 2.0,
+                        ),
+                        const Card(
+                          elevation: 5,
+                          color: Color.fromARGB(255, 222, 200, 174),
+                          child: ListTile(
+                            leading: Icon(Icons.calendar_today),
+                            title: Text(
+                              'Upcoming Events',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 20),
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Weekly Meeting at: 3 PM'),
+                                Text('Holiday: 20th July 2024'),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Card(
+                          elevation: 5,
+                          color: Color.fromARGB(255, 222, 200, 174),
+                          child: ListTile(
+                            leading: Icon(Icons.message),
+                            title: const Text(
+                              'Global Communication',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 25),
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(broadcastMessage!),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        // const Padding(
+                        //   padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+                        //   child: Text(
+                        //     'History',
+                        //     style: TextStyle(
+                        //       fontSize: 20,
+                        //       fontWeight: FontWeight.bold,
+                        //     ),
+                        //   ),
+                        // ),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(
+                              vertical: 20.0, horizontal: 16.0),
+                          child: Center(
+                            child: Text(
+                              'Attendance for the Day',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemCount: employeeDetails.length,
+                          itemBuilder: (context, index) {
+                            return buildEmployeeCard(employeeDetails[index]);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ));
   }
 }

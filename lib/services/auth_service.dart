@@ -471,6 +471,7 @@ class AuthService {
   }) async {
     try {
       if(identifier=="Admin" && password=="Admin"){
+        await saveUserSession(identifier, "Admin");
          Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -625,6 +626,14 @@ class AuthService {
         context,
         MaterialPageRoute(
           builder: (BuildContext context) => const HRDashboardPage(),
+        ),
+      );
+      return true;
+    } else if (role == "Admin") {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (BuildContext context) => const AdminDashboardPage(),
         ),
       );
       return true;
