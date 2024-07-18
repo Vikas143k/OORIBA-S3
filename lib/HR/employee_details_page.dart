@@ -37,6 +37,7 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
    DepartmentService departmentService=DepartmentService();
   List<String> locationNames = [];
   List<String> departmentNames = [];
+  List<String> designationName= [];
 
   @override
   void initState() {
@@ -65,6 +66,12 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
     List<String> department = await departmentService.getDepartments();
     setState(() {
       departmentNames = department;
+    });
+  }
+ Future<void> fetchDesignation() async {
+    List<String> department = await departmentService.getDepartments();
+    setState(() {
+      designationName = department;
     });
   }
 
@@ -759,13 +766,7 @@ Future<void> _downloadImage(String url, String fileName) async {
                 ),
               ),
               _buildDropdownRow('Department', 'department',departmentNames),
-              _buildDropdownRow('Designation', 'designation', [
-                'Manager',
-                'Senior Engineer',
-                'Junior Engineer',
-                'Technician',
-                'Executive'
-              ]),
+              _buildDropdownRow('Designation', 'designation', designationName),
               _buildDropdownRow(
                   'Employee Type', 'employeeType', ['On-site', 'Off-site']),
               _buildDropdownRow(

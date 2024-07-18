@@ -1,8 +1,11 @@
+
 // import 'dart:ffi';
 // import 'dart:io';
+// import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'package:flutter/material.dart';
 // import 'package:geolocator/geolocator.dart';
 // import 'package:intl/intl.dart';
+// import 'package:ooriba_s3/services/employee_location_service.dart';
 // import 'package:ooriba_s3/services/retrieveDataByEmployeeId.dart'; // Updated import
 // import 'package:ooriba_s3/services/retrieveFromDates_service.dart';
 // import 'package:firebase_storage/firebase_storage.dart';
@@ -11,6 +14,8 @@
 // import 'package:ooriba_s3/services/geo_service.dart';
 // import 'package:fluttertoast/fluttertoast.dart';
 // import 'package:url_launcher/url_launcher.dart';
+// import 'package:ooriba_s3/services/employee_location_service.dart';
+
 
 // class DatePickerButton extends StatefulWidget {
 //   const DatePickerButton({super.key});
@@ -28,6 +33,7 @@
 //   final List<String> _locations = [];
 //   // String _selectedLocation = 'Default Location';
 //   // final List<String> _locations = ['Default Location'];
+//   final FirestoreService retrieveAllEmployee = FirestoreService();
 
 //   @override
 //   void initState() {
@@ -84,6 +90,7 @@
 //       }
 //     });
 //   }
+  
 
 //   List<Map<String, dynamic>> _filterEmployeesByLocation() {
 //     return _allEmployees.where((e) => 
@@ -104,6 +111,17 @@
 //       return '';
 //     }
 //   }
+//    Future<void> toggleCheckInCheckOut(String employeeId, now) async {
+//     // DateTime now = DateTime.now();
+//     await retrieveAllEmployee.toggleCheckInCheckOut(employeeId, now);
+//     setState(() {
+     
+//     _selectedDate = DateTime.now();
+//     // _fetchAllEmployees();
+//     _fetchData(DateFormat('yyyy-MM-dd').format(_selectedDate!));
+    
+//     });
+//   }
 
 //   Future<void> _downloadCsv() async {
 //     List<Map<String, dynamic>> filteredEmployees = _filterEmployeesByLocation();
@@ -120,7 +138,7 @@
 //       Map<String, String> empData = isPresent ? _data[empId]! : {'checkIn': 'N/A', 'checkOut': 'N/A'};
 //       String checkIn = empData['checkIn']!;
 //       String checkOut = empData['checkOut']!;
-//       String status = isPresent ? 'present' : 'absent';
+//       String status = isPresent ? 'Present' : 'Absent';
 //       String Hours="Upcoming";
 
 //       csvContent.writeln('$empId,$name,$location,$checkIn,$checkOut,$status,$phoneNo,$Hours');
@@ -144,257 +162,222 @@
 //       openAppSettings();
 //     }
 //   }
-// //   Future<void> _downloadCsv() async {
-// //   List<Map<String, dynamic>> filteredEmployees = _filterEmployeesByLocation();
-// //   StringBuffer csvContent = StringBuffer();
-// //   csvContent.writeln("Date, ${DateFormat('dd-MM-yyyy').format(_selectedDate!)}");
-// //   csvContent.writeln('EmployeeId,Name,Location,Check-in,Check-out,Status,Phone No,Hours');
 
-// //   for (var employee in filteredEmployees) {
-// //     String empId = employee['employeeId'] ?? 'Null';
-// //     String name = '${employee['firstName']} ${employee['lastName']}' ?? 'Null';
-// //     String location = employee['location'] ?? '';
-// //     String phoneNo = employee['phoneNo'] ?? 'Null';
-// //     bool isPresent = _data.containsKey(empId);
-// //     Map<String, String> empData = isPresent ? _data[empId]! : {'checkIn': 'N/A', 'checkOut': 'N/A'};
-// //     String checkIn = empData['checkIn']!;
-// //     String checkOut = empData['checkOut']!;
-// //     String status = isPresent ? 'present' : 'absent';
 
-// //     // Calculate hours
-// //     int hours = 0;
-// //     if (checkIn != 'N/A' && checkOut != 'N/A') {
-// //       try {
-// //         // Debug output
-// //         print('Parsing times for employee $empId: checkIn: $checkIn, checkOut: $checkOut');
-        
-// //         DateTime checkInTime = DateFormat('HH:mm').parse(checkIn);
-// //         DateTime checkOutTime = DateFormat('HH:mm').parse(checkOut);
-        
-// //         // Debug output
-// //         print('Parsed times: checkInTime: $checkInTime, checkOutTime: $checkOutTime');
-        
-// //         hours = checkOutTime.difference(checkInTime).inHours;
-
-// //         // Debug output
-// //         print('Calculated hours: $hours');
-// //       } catch (e) {
-// //         print('Error parsing time for employee $empId: $e');
-// //       }
-// //     }
-
-// //     csvContent.writeln('$empId,$name,$location,$checkIn,$checkOut,$status,$phoneNo,$hours');
-// //   }
-
-// //   if (await Permission.storage.request().isGranted || await Permission.manageExternalStorage.request().isGranted) {
-// //     Directory? directory = await getExternalStorageDirectory();
-// //     String? downloadPath = Platform.isAndroid ? '/storage/emulated/0/Download' : directory?.path;
-
-// //     if (downloadPath != null) {
-// //       String path = '$downloadPath/attendance_${DateFormat('yyyyMMdd').format(_selectedDate!)}.csv';
-// //       File file = File(path);
-// //       await file.writeAsString(csvContent.toString());
-// //       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('CSV saved to $path')));
-// //     } else {
-// //       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Unable to access storage directory')));
-// //     }
-// //   } else if (await Permission.storage.isDenied || await Permission.manageExternalStorage.isDenied) {
-// //     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Storage permission denied')));
-// //   } else if (await Permission.storage.isPermanentlyDenied || await Permission.manageExternalStorage.isPermanentlyDenied) {
-// //     openAppSettings();
-// //   }
-// // }
 // void _openLocationOnMap(String employeeId) async {
-//     try {
-//       GeoService geoService = GeoService();
-//       Position position = await geoService.determinePosition();
+//   try {
+//     EmployeeLocationService geoService = EmployeeLocationService();
+//     Map<String, dynamic> latestLocation = await geoService.fetchEmployeeCoordinates(employeeId);
 
-//       // You need to fetch latitude and longitude of the employee from your Firestore database
-//       // Assuming employee details have `latitude` and `longitude` fields
-//       var employee = _allEmployees.firstWhere((e) => e['employeeId'] == employeeId);
-//       double employeeLatitude = 16.52154568524242;
-//       double employeeLongitude = 80.52320068916423;
+//     GeoPoint geoPoint = latestLocation['location'];
+//     double latitude = geoPoint.latitude;
+//     double longitude = geoPoint.longitude;
 
-//       String googleMapsUrl = "https://www.google.com/maps/search/?api=1&query=$employeeLatitude,$employeeLongitude";
+//     final Uri googleMapsUrl = Uri.parse("https://www.google.com/maps/search/?api=1&query=$latitude,$longitude");
 
-//       if (await canLaunch(googleMapsUrl)) {
-//         await launch(googleMapsUrl);
-//       } else {
-//         throw 'Could not launch $googleMapsUrl';
-//       }
-//     } catch (e) {
-//       print(e);
-//       Fluttertoast.showToast(msg: 'Error opening map: $e');
+//     if (await canLaunchUrl(googleMapsUrl)) {
+//       await launchUrl(googleMapsUrl);
+//     } else {
+//       throw 'Could not launch $googleMapsUrl';
 //     }
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     List<Map<String, dynamic>> filteredEmployees = _filterEmployeesByLocation();
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: const Text('Attendance Page'),
-//         actions: [
-//           IconButton(
-//             icon: const Icon(Icons.download),
-//             onPressed: _downloadCsv,
-//           ),
-//         ],
-//       ),
-//       body: Column(
-//         children: [
-//           Row(
-//             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//             children: [
-//               ElevatedButton(
-//                 onPressed: () {
-//                   _selectDate(context);
-//                 },
-//                 child: Text(
-//                     ' ${_selectedDate != null ? DateFormat('dd-MM-yyyy').format(_selectedDate!) : 'Select a date'}'),
-//               ),
-//               DropdownButton<String>(
-//                 value: _selectedLocation,
-//                 onChanged: (String? newValue) {
-//                   setState(() {
-//                     _selectedLocation = newValue!;
-//                   });
-//                 },
-//                 items: _locations.map<DropdownMenuItem<String>>((String value) {
-//                   return DropdownMenuItem<String>(
-//                     value: value,
-//                     child: Text(value),
-//                   );
-//                 }).toList(),
-//               ),
-//               IconButton(
-//                 icon: Icon(_sortOrder ? Icons.arrow_upward : Icons.arrow_downward),
-//                 onPressed: () {
-//                   setState(() {
-//                     _sortOrder = !_sortOrder;
-//                     _sortEmployees();
-//                   });
-//                 },
-//               ),
-//             ],
-//           ),
-//           Expanded(
-//             child: ListView.builder(
-//               itemCount: filteredEmployees.length,
-//               itemBuilder: (context, index) {
-//                 String capitalize(String x) { 
-//                   return "${x[0].toUpperCase()}${x.substring(1)}"; 
-//                 } 
-//                 String employeeId = filteredEmployees[index]['employeeId'];
-//                 String firstName = capitalize(filteredEmployees[index]['firstName']) ?? '';
-//                 String lastName = filteredEmployees[index]['lastName'] ?? '';
-//                 String location = filteredEmployees[index]['location'] ?? '';
-//                 bool isPresent = _data.containsKey(employeeId);
-//                 Map<String, String> empData = isPresent
-//                     ? _data[employeeId]!
-//                     : {'checkIn': 'N/A', 'checkOut': 'N/A'};
-
-//                 return Card(
-//                   margin:
-//                       const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-//                   child: ListTile(
-//                     title: Text('$firstName : $employeeId'),
-//                     subtitle: Column(
-//                       crossAxisAlignment: CrossAxisAlignment.start,
-//                       children: [
-//                         Row(
-//                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                           children: [
-//                             Text('Location: $location'),
-//                             IconButton(
-//                               icon: const Icon(Icons.location_on),
-//                               onPressed: () {
-//                                 _openLocationOnMap(employeeId);
-//                                 // Add your onPressed functionality here, if needed.
-//                               },
-//                             ),
-//                           ],
-//                         ),
-//                         Row(
-//                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                           children: [
-//                             Expanded(
-//                                 child: Text('Check-in: ${empData['checkIn']}')),
-//                             Expanded(
-//                                 child: Text('Check-out: ${empData['checkOut']}')),
-//                           ],
-//                         ),
-//                         const SizedBox(height: 4),
-//                         RichText(
-//                           text: TextSpan(
-//                             children: [
-//                               const TextSpan(
-//                                 text: 'Status: ',
-//                                 style: TextStyle(color: Colors.black),
-//                               ),
-//                               TextSpan(
-//                                 text: isPresent ? 'Present' : 'Absent',
-//                                 style: TextStyle(
-//                                     color:
-//                                         isPresent ? Colors.green : Colors.red),
-//                               ),
-//                             ],
-//                           ),
-//                         ),
-//                       ],
-//                     ),
-//                     trailing: isPresent
-//                         ? FutureBuilder<String>(
-//                             future: getImageUrl(employeeId),
-//                             builder: (context, snapshot) {
-//                               if (snapshot.connectionState ==
-//                                   ConnectionState.waiting) {
-//                                 return const CircularProgressIndicator();
-//                               } else if (snapshot.hasError ||
-//                                   !snapshot.hasData ||
-//                                   snapshot.data!.isEmpty) {
-//                                 return const Text('No image');
-//                               } else {
-//                                 return InkWell(
-//                                   onTap: () {
-//                                     showDialog(
-//                                       context: context,
-//                                       builder: (context) => AlertDialog(
-//                                         content: Image.network(snapshot.data!),
-//                                         actions: <Widget>[
-//                                           TextButton(
-//                                             child: const Text('Close'),
-//                                             onPressed: () {
-//                                               Navigator.of(context).pop();
-//                                             },
-//                                           ),
-//                                         ],
-//                                       ),
-//                                     );
-//                                   },
-//                                   child: Image.network(
-//                                     snapshot.data!,
-//                                     width: 60,
-//                                     height: 60,
-//                                     fit: BoxFit.fill,
-//                                   ),
-//                                 );
-//                               }
-//                             },
-//                           )
-//                         : const Icon(Icons.image_not_supported, size: 60),
-//                   ),
-//                 );
-//               },
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
+//   } catch (e) {
+//     print('Error: $e');
+//     Fluttertoast.showToast(msg: 'Error opening map: $e');
 //   }
 // }
 
+// Widget build(BuildContext context) {
+//   List<Map<String, dynamic>> filteredEmployees = _filterEmployeesByLocation();
+//   return Scaffold(
+//     appBar: AppBar(
+//       title: const Text('Attendance Page'),
+//       actions: [
+//         IconButton(
+//           icon: const Icon(Icons.download),
+//           onPressed: _downloadCsv,
+//         ),
+//       ],
+//     ),
+//     body: Column(
+//       children: [
+//         Row(
+//           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//           children: [
+//             ElevatedButton(
+//               onPressed: () {
+//                 _selectDate(context);
+//               },
+//               child: Text(
+//                 '${_selectedDate != null ? DateFormat('dd-MM-yyyy').format(_selectedDate!) : 'Select a date'}',
+//               ),
+//             ),
+//             DropdownButton<String>(
+//               value: _selectedLocation,
+//               onChanged: (String? newValue) {
+//                 setState(() {
+//                   _selectedLocation = newValue!;
+//                 });
+//               },
+//               items: _locations.map<DropdownMenuItem<String>>((String value) {
+//                 return DropdownMenuItem<String>(
+//                   value: value,
+//                   child: Text(value),
+//                 );
+//               }).toList(),
+//             ),
+//             IconButton(
+//               icon: Icon(_sortOrder ? Icons.arrow_upward : Icons.arrow_downward),
+//               onPressed: () {
+//                 setState(() {
+//                   _sortOrder = !_sortOrder;
+//                   _sortEmployees();
+//                 });
+//               },
+//             ),
+//           ],
+//         ),
+//         Expanded(
+//           child: ListView.builder(
+//             itemCount: filteredEmployees.length,
+//             itemBuilder: (context, index) {
+//               String capitalize(String x) {
+//                 return "${x[0].toUpperCase()}${x.substring(1)}";
+//               }
+//               String employeeId = filteredEmployees[index]['employeeId'];
+//               String firstName = capitalize(filteredEmployees[index]['firstName']) ?? '';
+//               String lastName = filteredEmployees[index]['lastName'] ?? '';
+//               String location = filteredEmployees[index]['location'] ?? '';
+//               bool isPresent = _data.containsKey(employeeId);
+//               Map<String, String> empData = isPresent
+//                   ? _data[employeeId]!
+//                   : {'checkIn': '', 'checkOut': ''};
 
+//               return Card(
+//                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+//                 child: Row(
+//                   children: [
+//                     Expanded(
+//                       flex: 2,
+//                       child: Padding(
+//                         padding: const EdgeInsets.all(8.0),
+//                         child: Column(
+//                           crossAxisAlignment: CrossAxisAlignment.start,
+//                           children: [
+//                             Text('$firstName : $employeeId'),
+//                             Row(
+//                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                               children: [
+//                                 Text('Location: $location'),
+//                                 IconButton(
+//                                   icon: const Icon(Icons.location_on),
+//                                   onPressed: () {
+//                                     _openLocationOnMap(employeeId);
+//                                   },
+//                                 ),
+//                               ],
+//                             ),
+//                             Row(
+//                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                               children: [
+//                                 Expanded(child: Text('Check-in: ${empData['checkIn']}')),
+//                                 Expanded(child: Text('Check-out: ${empData['checkOut']}')),
+//                               ],
+//                             ),
+//                             const SizedBox(height: 4),
+//                             RichText(
+//                               text: TextSpan(
+//                                 children: [
+//                                   const TextSpan(
+//                                     text: 'Status: ',
+//                                     style: TextStyle(color: Colors.black),
+//                                   ),
+//                                   TextSpan(
+//                                     text: isPresent ? 'Present' : 'Absent',
+//                                     style: TextStyle(
+//                                       color: isPresent ? Colors.green : Colors.red,
+//                                     ),
+//                                   ),
+//                                 ],
+//                               ),
+//                             ),
+//                           ],
+//                         ),
+//                       ),
+//                     ),
+//                     Expanded(
+//                       flex: 1,
+//                       child: Column(
+//                         children: [
+//                           isPresent
+//                               ? 
+//                               FutureBuilder<String>(
+//                                   future: getImageUrl(employeeId),
+//                                   builder: (context, snapshot) {
+//                                     if (snapshot.connectionState == ConnectionState.waiting) {
+//                                       return const CircularProgressIndicator();
+//                                     } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+//                                       return const Text('No image');
+//                                     } else {
+//                                       return InkWell(
+//                                         onTap: () {
+//                                           showDialog(
+//                                             context: context,
+//                                             builder: (context) => AlertDialog(
+//                                               content: Image.network(snapshot.data!),
+//                                               actions: <Widget>[
+//                                                 TextButton(
+//                                                   child: const Text('Close'),
+//                                                   onPressed: () {
+//                                                     Navigator.of(context).pop();
+//                                                   },
+//                                                 ),
+//                                               ],
+//                                             ),
+//                                           );
+//                                         },
+//                                         child: Image.network(
+//                                           snapshot.data!,
+//                                           width: 60,
+//                                           height: 60,
+//                                           fit: BoxFit.fill,
+//                                         ),
+//                                       );
+//                                     }
+//                                   },
+//                                 )
+//                               : const Icon(Icons.image_not_supported, size: 60),
+//                           const SizedBox(height: 8),
+//                            if (_selectedDate?.day == DateTime.now().day &&
+//     _selectedDate?.month == DateTime.now().month &&
+//     _selectedDate?.year == DateTime.now().year)
+//                           ElevatedButton(
+//                             onPressed: () {
+//                               // Add check-in/check-out functionality here
+//                               toggleCheckInCheckOut(employeeId,_selectedDate);
+//                             },
+//                             child: Text(isPresent ? 'Check Out' : 'Check In'),
+//                             style: ElevatedButton.styleFrom(
+//                               // backgroundColor: Colors.orange,
+//                               backgroundColor:(isPresent ? Colors.green:Colors.orange),
+//                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+//                               textStyle: const TextStyle(fontSize: 12),
+//                             ),
+//                           ),
+//                         ],
+//                       ),
+//                     ),
+//                   ],
+//                 ),
+//               );
+//             },
+//           ),
+//         ),
+//       ],
+//     ),
+//   );
+// }
+
+// }
 
 import 'dart:ffi';
 import 'dart:io';
@@ -413,7 +396,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:ooriba_s3/services/employee_location_service.dart';
 
-
 class DatePickerButton extends StatefulWidget {
   const DatePickerButton({super.key});
 
@@ -430,6 +412,7 @@ class _DatePickerButtonState extends State<DatePickerButton> {
   final List<String> _locations = [];
   // String _selectedLocation = 'Default Location';
   // final List<String> _locations = ['Default Location'];
+  final FirestoreService retrieveAllEmployee = FirestoreService();
 
   @override
   void initState() {
@@ -444,11 +427,13 @@ class _DatePickerButtonState extends State<DatePickerButton> {
     _allEmployees = await firestoreService.getAllEmployees();
     _locations.addAll(_allEmployees.map((e) => e['location'] ?? '').toSet().cast<String>());
     _locations.removeWhere((element) => element == '');
+    if (_locations.isEmpty || !_locations.contains(_selectedLocation)) {
+      _locations.insert(0, _selectedLocation);
+    }
     setState(() {
       _sortEmployees();
     });
   }
-  
 
   void _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -507,6 +492,16 @@ class _DatePickerButtonState extends State<DatePickerButton> {
     }
   }
 
+  Future<void> toggleCheckInCheckOut(String employeeId) async {
+    DateTime now = DateTime.now();
+    await retrieveAllEmployee.toggleCheckInCheckOut(employeeId, now);
+    setState(() {
+      _selectedDate = DateTime.now();
+      // _fetchAllEmployees();
+      _fetchData(DateFormat('yyyy-MM-dd').format(_selectedDate!));
+    });
+  }
+
   Future<void> _downloadCsv() async {
     List<Map<String, dynamic>> filteredEmployees = _filterEmployeesByLocation();
     StringBuffer csvContent = StringBuffer();
@@ -522,8 +517,8 @@ class _DatePickerButtonState extends State<DatePickerButton> {
       Map<String, String> empData = isPresent ? _data[empId]! : {'checkIn': 'N/A', 'checkOut': 'N/A'};
       String checkIn = empData['checkIn']!;
       String checkOut = empData['checkOut']!;
-      String status = isPresent ? 'present' : 'absent';
-      String Hours="Upcoming";
+      String status = isPresent ? 'Present' : 'Absent';
+      String Hours = "Upcoming";
 
       csvContent.writeln('$empId,$name,$location,$checkIn,$checkOut,$status,$phoneNo,$Hours');
     }
@@ -546,89 +541,28 @@ class _DatePickerButtonState extends State<DatePickerButton> {
       openAppSettings();
     }
   }
-//   Future<void> _downloadCsv() async {
-//   List<Map<String, dynamic>> filteredEmployees = _filterEmployeesByLocation();
-//   StringBuffer csvContent = StringBuffer();
-//   csvContent.writeln("Date, ${DateFormat('dd-MM-yyyy').format(_selectedDate!)}");
-//   csvContent.writeln('EmployeeId,Name,Location,Check-in,Check-out,Status,Phone No,Hours');
 
-//   for (var employee in filteredEmployees) {
-//     String empId = employee['employeeId'] ?? 'Null';
-//     String name = '${employee['firstName']} ${employee['lastName']}' ?? 'Null';
-//     String location = employee['location'] ?? '';
-//     String phoneNo = employee['phoneNo'] ?? 'Null';
-//     bool isPresent = _data.containsKey(empId);
-//     Map<String, String> empData = isPresent ? _data[empId]! : {'checkIn': 'N/A', 'checkOut': 'N/A'};
-//     String checkIn = empData['checkIn']!;
-//     String checkOut = empData['checkOut']!;
-//     String status = isPresent ? 'present' : 'absent';
+  void _openLocationOnMap(String employeeId) async {
+    try {
+      EmployeeLocationService geoService = EmployeeLocationService();
+      Map<String, dynamic> latestLocation = await geoService.fetchEmployeeCoordinates(employeeId);
 
-//     // Calculate hours
-//     int hours = 0;
-//     if (checkIn != 'N/A' && checkOut != 'N/A') {
-//       try {
-//         // Debug output
-//         print('Parsing times for employee $empId: checkIn: $checkIn, checkOut: $checkOut');
-        
-//         DateTime checkInTime = DateFormat('HH:mm').parse(checkIn);
-//         DateTime checkOutTime = DateFormat('HH:mm').parse(checkOut);
-        
-//         // Debug output
-//         print('Parsed times: checkInTime: $checkInTime, checkOutTime: $checkOutTime');
-        
-//         hours = checkOutTime.difference(checkInTime).inHours;
+      GeoPoint geoPoint = latestLocation['location'];
+      double latitude = geoPoint.latitude;
+      double longitude = geoPoint.longitude;
 
-//         // Debug output
-//         print('Calculated hours: $hours');
-//       } catch (e) {
-//         print('Error parsing time for employee $empId: $e');
-//       }
-//     }
+      final Uri googleMapsUrl = Uri.parse("https://www.google.com/maps/search/?api=1&query=$latitude,$longitude");
 
-//     csvContent.writeln('$empId,$name,$location,$checkIn,$checkOut,$status,$phoneNo,$hours');
-//   }
-
-//   if (await Permission.storage.request().isGranted || await Permission.manageExternalStorage.request().isGranted) {
-//     Directory? directory = await getExternalStorageDirectory();
-//     String? downloadPath = Platform.isAndroid ? '/storage/emulated/0/Download' : directory?.path;
-
-//     if (downloadPath != null) {
-//       String path = '$downloadPath/attendance_${DateFormat('yyyyMMdd').format(_selectedDate!)}.csv';
-//       File file = File(path);
-//       await file.writeAsString(csvContent.toString());
-//       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('CSV saved to $path')));
-//     } else {
-//       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Unable to access storage directory')));
-//     }
-//   } else if (await Permission.storage.isDenied || await Permission.manageExternalStorage.isDenied) {
-//     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Storage permission denied')));
-//   } else if (await Permission.storage.isPermanentlyDenied || await Permission.manageExternalStorage.isPermanentlyDenied) {
-//     openAppSettings();
-//   }
-// }
-
-void _openLocationOnMap(String employeeId) async {
-  try {
-    EmployeeLocationService geoService = EmployeeLocationService();
-    Map<String, dynamic> latestLocation = await geoService.fetchEmployeeCoordinates(employeeId);
-
-    GeoPoint geoPoint = latestLocation['location'];
-    double latitude = geoPoint.latitude;
-    double longitude = geoPoint.longitude;
-
-    final Uri googleMapsUrl = Uri.parse("https://www.google.com/maps/search/?api=1&query=$latitude,$longitude");
-
-    if (await canLaunchUrl(googleMapsUrl)) {
-      await launchUrl(googleMapsUrl);
-    } else {
-      throw 'Could not launch $googleMapsUrl';
+      if (await canLaunchUrl(googleMapsUrl)) {
+        await launchUrl(googleMapsUrl);
+      } else {
+        throw 'Could not launch $googleMapsUrl';
+      }
+    } catch (e) {
+      print('Error: $e');
+      Fluttertoast.showToast(msg: 'Error opening map: $e');
     }
-  } catch (e) {
-    print('Error: $e');
-    Fluttertoast.showToast(msg: 'Error opening map: $e');
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -653,7 +587,8 @@ void _openLocationOnMap(String employeeId) async {
                   _selectDate(context);
                 },
                 child: Text(
-                    ' ${_selectedDate != null ? DateFormat('dd-MM-yyyy').format(_selectedDate!) : 'Select a date'}'),
+                  '${_selectedDate != null ? DateFormat('dd-MM-yyyy').format(_selectedDate!) : 'Select a date'}',
+                ),
               ),
               DropdownButton<String>(
                 value: _selectedLocation,
@@ -684,9 +619,9 @@ void _openLocationOnMap(String employeeId) async {
             child: ListView.builder(
               itemCount: filteredEmployees.length,
               itemBuilder: (context, index) {
-                String capitalize(String x) { 
-                  return "${x[0].toUpperCase()}${x.substring(1)}"; 
-                } 
+                String capitalize(String x) {
+                  return "${x[0].toUpperCase()}${x.substring(1)}";
+                }
                 String employeeId = filteredEmployees[index]['employeeId'];
                 String firstName = capitalize(filteredEmployees[index]['firstName']) ?? '';
                 String lastName = filteredEmployees[index]['lastName'] ?? '';
@@ -694,98 +629,122 @@ void _openLocationOnMap(String employeeId) async {
                 bool isPresent = _data.containsKey(employeeId);
                 Map<String, String> empData = isPresent
                     ? _data[employeeId]!
-                    : {'checkIn': 'N/A', 'checkOut': 'N/A'};
+                    : {'checkIn': '', 'checkOut': ''};
 
                 return Card(
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: ListTile(
-                    title: Text('$firstName : $employeeId'),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text('Location: $location'),
-                            IconButton(
-                              icon: const Icon(Icons.location_on),
-                              onPressed: () {
-                             // Add your onPressed functionality here, if needed.
-                             _openLocationOnMap(employeeId);
-                                
-                              },
-                            ),
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                                child: Text('Check-in: ${empData['checkIn']}')),
-                            Expanded(
-                                child: Text('Check-out: ${empData['checkOut']}')),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        RichText(
-                          text: TextSpan(
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const TextSpan(
-                                text: 'Status: ',
-                                style: TextStyle(color: Colors.black),
+                              Text('$firstName : $employeeId'),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('Location: $location'),
+                                  IconButton(
+                                    icon: const Icon(Icons.location_on),
+                                    onPressed: () {
+                                      _openLocationOnMap(employeeId);
+                                    },
+                                  ),
+                                ],
                               ),
-                              TextSpan(
-                                text: isPresent ? 'Present' : 'Absent',
-                                style: TextStyle(
-                                    color:
-                                        isPresent ? Colors.green : Colors.red),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(child: Text('Check-in: ${empData['checkIn']}')),
+                                  Expanded(child: Text('Check-out: ${empData['checkOut']}')),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              RichText(
+                                text: TextSpan(
+                                  children: [
+                                    const TextSpan(
+                                      text: 'Status: ',
+                                      style: TextStyle(color: Colors.black),
+                                    ),
+                                    TextSpan(
+                                      text: isPresent ? 'Present' : 'Absent',
+                                      style: TextStyle(
+                                        color: isPresent ? Colors.green : Colors.red,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
                         ),
-                      ],
-                    ),
-                    trailing: isPresent
-                        ? FutureBuilder<String>(
-                            future: getImageUrl(employeeId),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const CircularProgressIndicator();
-                              } else if (snapshot.hasError ||
-                                  !snapshot.hasData ||
-                                  snapshot.data!.isEmpty) {
-                                return const Text('No image');
-                              } else {
-                                return InkWell(
-                                  onTap: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (context) => AlertDialog(
-                                        content: Image.network(snapshot.data!),
-                                        actions: <Widget>[
-                                          TextButton(
-                                            child: const Text('Close'),
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
+                      ),
+                      Expanded(
+                        flex: 1,
+                        child: Column(
+                          children: [
+                            isPresent
+                                ? FutureBuilder<String>(
+                                    future: getImageUrl(employeeId),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState == ConnectionState.waiting) {
+                                        return const CircularProgressIndicator();
+                                      } else if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+                                        return const Text('No image');
+                                      } else {
+                                        return InkWell(
+                                          onTap: () {
+                                            showDialog(
+                                              context: context,
+                                              builder: (context) => AlertDialog(
+                                                content: Image.network(snapshot.data!),
+                                                actions: <Widget>[
+                                                  TextButton(
+                                                    child: const Text('Close'),
+                                                    onPressed: () {
+                                                      Navigator.of(context).pop();
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          },
+                                          child: Image.network(
+                                            snapshot.data!,
+                                            width: 60,
+                                            height: 60,
+                                            fit: BoxFit.fill,
                                           ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                  child: Image.network(
-                                    snapshot.data!,
-                                    width: 60,
-                                    height: 60,
-                                    fit: BoxFit.fill,
-                                  ),
-                                );
-                              }
-                            },
-                          )
-                        : const Icon(Icons.image_not_supported, size: 60),
+                                        );
+                                      }
+                                    },
+                                  )
+                                : const Icon(Icons.image_not_supported, size: 60),
+                            const SizedBox(height: 8),
+                            if (_selectedDate?.day == DateTime.now().day &&
+                                _selectedDate?.month == DateTime.now().month &&
+                                _selectedDate?.year == DateTime.now().year)
+                              ElevatedButton(
+                                onPressed: () {
+                                  // Add check-in/check-out functionality here
+                                  toggleCheckInCheckOut(employeeId);
+                                },
+                                child: Text(isPresent ? 'Check Out' : 'Check In'),
+                                style: ElevatedButton.styleFrom(
+                                  // backgroundColor: Colors.orange,
+                                  backgroundColor: (isPresent ? Colors.green : Colors.orange),
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  textStyle: const TextStyle(fontSize: 12),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 );
               },

@@ -5,10 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
+import 'package:ooriba_s3/Admin/BroadcastMessagePage.dart';
 import 'package:ooriba_s3/facial/DB/DatabaseHelper.dart';
 import 'package:ooriba_s3/facial/RecognitionScreen.dart';
 import 'package:ooriba_s3/facial/RegistrationScreen.dart';
 import 'package:ooriba_s3/leave.dart';
+import 'package:ooriba_s3/services/admin/broadcast_service.dart';
 import 'package:ooriba_s3/services/auth_service.dart';
 import 'package:ooriba_s3/services/geo_service.dart';
 import 'package:ooriba_s3/services/retrieveDataByEmail.dart'
@@ -46,9 +48,11 @@ class _PostLoginPageState extends State<PostLoginPage> {
   final GeoService geoService = GeoService();
   bool isWithinRange = false;
   bool isLoadingForLocation = false;
-  final EmployeeLocationService employeeLocationService = EmployeeLocationService();
+  final EmployeeLocationService employeeLocationService =
+      EmployeeLocationService();
   Timer? _autoCheckOutTimer;
-
+  final BroadcastService _broadcastService = BroadcastService();
+  String? broadcastMessage;
 
   @override
   void initState() {
@@ -58,14 +62,24 @@ class _PostLoginPageState extends State<PostLoginPage> {
     _checkIfFaceIsRegistered();
     _checkLocation();
     _loadLocalCheckInCheckOutTimes();
+    _fetchMessage();
   }
 
-    @override
+  @override
   void dispose() {
     _autoCheckOutTimer?.cancel();
     super.dispose();
   }
 
+  Future<void> _fetchMessage() async {
+    String? message = await _broadcastService.getCurrentBroadcastMessage();
+    setState(() {
+      message != null
+          ? broadcastMessage = message
+          : broadcastMessage = "No Message";
+      isLoading = false;
+    });
+  }
 
   Future<void> _loadLocalCheckInCheckOutTimes() async {
     final prefs = await SharedPreferences.getInstance();
@@ -132,9 +146,10 @@ class _PostLoginPageState extends State<PostLoginPage> {
       });
 
       Fluttertoast.showToast(
-          msg: isWithinRange
-              ? "You are within the location"
-          : "You are away from the location",
+
+        msg:employeeType != "Off-site"? (isWithinRange
+            ? "You are within the location"
+            : "You are away from the location"):"",
       );
     } catch (e) {
       print(e);
@@ -250,8 +265,10 @@ class _PostLoginPageState extends State<PostLoginPage> {
     DateTime now = DateTime.now();
     await firestoreService.addCheckInOutData(employeeId!, now, null, now);
 
-    Position position = await geoService.determinePosition(); // Get current position
-    await employeeLocationService.saveEmployeeLocation(employeeId!, position, now, 'check-in'); // Save location
+    Position position =
+        await geoService.determinePosition(); // Get current position
+    await employeeLocationService.saveEmployeeLocation(
+        employeeId!, position, now, 'check-in'); // Save location
 
     setState(() {
       isCheckedIn = true;
@@ -264,17 +281,19 @@ class _PostLoginPageState extends State<PostLoginPage> {
     await _clearLocalCheckInCheckOutTimes();
 
     _autoCheckOutTimer = Timer(Duration(hours: 9), () {
-    _checkOut();
-  });
-}
+      _checkOut();
+    });
+  }
 
   Future<void> _checkOut() async {
     DateTime now = DateTime.now();
     await firestoreService.addCheckInOutData(
         employeeId!, checkInTime!, now, now);
 
-    Position position = await geoService.determinePosition(); // Get current position
-    await employeeLocationService.saveEmployeeLocation(employeeId!, position, now, 'check-in'); // Save location
+    Position position =
+        await geoService.determinePosition(); // Get current position
+    await employeeLocationService.saveEmployeeLocation(
+        employeeId!, position, now, 'check-in'); // Save location
 
     setState(() {
       isCheckedIn = false;
@@ -533,9 +552,7 @@ class _PostLoginPageState extends State<PostLoginPage> {
       appBar: AppBar(
         title: Row(
           children: [
-            
             if (dpImageUrl != null)
-            
               CircleAvatar(
                 backgroundImage: NetworkImage(dpImageUrl!),
               ),
@@ -556,7 +573,6 @@ class _PostLoginPageState extends State<PostLoginPage> {
                     Text(
                       'Last login: ${formatTimeWithoutSeconds(lastLoginTime)}',
                       style: TextStyle(fontSize: 14),
-                      
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                       softWrap: false,
@@ -599,7 +615,8 @@ class _PostLoginPageState extends State<PostLoginPage> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => LeavePage(employeeId:employeeId)),
+                  MaterialPageRoute(
+                      builder: (context) => LeavePage(employeeId: employeeId)),
                 );
               },
             ),
@@ -635,8 +652,9 @@ class _PostLoginPageState extends State<PostLoginPage> {
                         ElevatedButton(
                           onPressed: () {
                             if (isRegistered) {
-                              if (employeeType == "Off-site" || (employeeType == "On-site" && isWithinRange)) {
-                                
+                              if (employeeType == "Off-site" ||
+                                  (employeeType == "On-site" &&
+                                      isWithinRange)) {
                                 navigateToFaceRecognitionScreen();
                               }
                             } else {
@@ -651,7 +669,7 @@ class _PostLoginPageState extends State<PostLoginPage> {
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: isRegistered
-                                ? (isCheckedIn ? Colors.green : Colors.orange)
+                                ? (isWithinRange ||employeeType == "Off-site"?(isCheckedIn ? Colors.green : Colors.orange):null)
                                 : null,
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 20, vertical: 15),
@@ -747,45 +765,50 @@ class _PostLoginPageState extends State<PostLoginPage> {
                   const SizedBox(height: 80),
                   Expanded(
                     child: ListView(
-                      children: const [
+                      children: [
                         Divider(
                           color: Colors.blue,
                           thickness: 2.0,
                         ),
                         Card(
                           elevation: 5,
-                            color: Color.fromARGB(255, 222, 200, 174),
+                          // color: Color.fromARGB(255, 222, 200, 174),
+                          color: Color.fromARGB(255, 255, 255, 255),
                           child: ListTile(
                             leading: Icon(Icons.calendar_today),
-                            title: Text('Upcoming Events',style: TextStyle(fontWeight: FontWeight.bold ,fontSize: 20),),
-                            
+                            title: Text(
+                              'Upcoming Events',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 20),
+                            ),
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text('Weekly Meeting at: 3 PM'),
                                 Text('Holiday: 20th July 2024'),
-                                Text('Leave: 17th July 2024'),
                               ],
                             ),
                           ),
                         ),
                         Card(
                           elevation: 5,
-                            color: Color.fromARGB(255, 222, 200, 174),
+                          // color: Color.fromARGB(255, 222, 200, 174),
+                          color: Color.fromARGB(255, 255, 255, 255),
+
                           child: ListTile(
                             leading: Icon(Icons.message),
-                            title: Text('Global Communitcation',style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),),
+                            title: const Text(
+                              'Global Communication',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 25),
+                            ),
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Dear OORIBA Family,'),
-                                Text('We are having Puja in our Company, So all are invited with famiy at 9:30am'),
-                                Text('Thankyou'),
-
+                                Text(broadcastMessage!),
                               ],
                             ),
                           ),
-                          // margin: EdgeInsets.all(5),
                         ),
                       ],
                     ),
