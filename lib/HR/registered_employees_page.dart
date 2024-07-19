@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ooriba_s3/services/admin/department_service.dart';
+import 'package:ooriba_s3/services/admin/designation_service.dart';
+import 'package:ooriba_s3/services/admin/retrieveLocation_service.dart';
 
 class RegisteredEmployeesPage extends StatefulWidget {
   const RegisteredEmployeesPage({super.key});
@@ -10,6 +13,7 @@ class RegisteredEmployeesPage extends StatefulWidget {
 }
 
 class _RegisteredEmployeesPageState extends State<RegisteredEmployeesPage> {
+    
   @override
   // Widget build(BuildContext context) {
   //   return Scaffold(
@@ -174,6 +178,33 @@ class EmployeeDetailsDialog extends StatefulWidget {
 }
 
 class _EmployeeDetailsDialogState extends State<EmployeeDetailsDialog> {
+
+   LocationService locationService = LocationService();
+   DepartmentService departmentService=DepartmentService();
+   DesignationService designationService=DesignationService();
+    List<String> locationNames = [];
+  List<String> departmentNames = [];
+  List<String> designationName= [];
+  Future<void> fetchLocations() async {
+    List<String> locations = await locationService.getAllLocations();
+    setState(() {
+      locationNames = locations;
+      // print(locationNames);
+    });
+  }
+ Future<void> fetchDepartment() async {
+    List<String> department = await departmentService.getDepartments();
+    setState(() {
+      departmentNames = department;
+      print(departmentNames);
+    });
+  }
+ Future<void> fetchDesignation() async {
+    List<String> designation= await designationService.getDesignations();
+    setState(() {
+      designationName = designation;
+    });
+  }
   bool _isEditing = false;
 
   late TextEditingController _firstNameController;
@@ -207,6 +238,9 @@ class _EmployeeDetailsDialogState extends State<EmployeeDetailsDialog> {
   @override
   void initState() {
     super.initState();
+    fetchLocations();
+     fetchDepartment();
+     fetchDesignation();
     _firstNameController =
         TextEditingController(text: widget.data['firstName']);
     _lastNameController = TextEditingController(text: widget.data['lastName']);
@@ -378,22 +412,10 @@ class _EmployeeDetailsDialogState extends State<EmployeeDetailsDialog> {
               _buildRow('Bank Name', _bankNameController),
               _buildRow('Account Number', _accountNumberController),
               _buildRow('IFSC Code', _ifscCodeController),
-              _buildDropdown('Department', _selectedDepartment, [
-                'Sales',
-                'Services',
-                'Spares',
-                'Administration',
-                'Board of Directors'
-              ]),
-              _buildDropdown('Designation', _selectedDesignation, [
-                'Manager',
-                'Senior Engineer',
-                'Junior Engineer',
-                'Technician',
-                'Executive'
-              ]),
+              _buildDropdown('Department', _selectedDepartment, departmentNames),
+              _buildDropdown('Designation', _selectedDesignation, designationName),
               _buildDropdown('Location', _selectedLocation,
-                  ['Jaypore', 'Berhampur', 'Raigada']),
+                  locationNames),
               _buildDropdown('Status', _selectedStatus, ['Active', 'Inactive']),
               _buildDropdown('Role', _selectedRole, ['Standard', 'HR']),
               _buildDropdown('Employee Type', _selectedEmployeeType,

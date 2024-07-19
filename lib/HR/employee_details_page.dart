@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ooriba_s3/employee_id_generator.dart';
 import 'package:ooriba_s3/services/accept_mail_service.dart';
 import 'package:ooriba_s3/services/admin/department_service.dart';
+import 'package:ooriba_s3/services/admin/designation_service.dart';
 import 'package:ooriba_s3/services/admin/retrieveLocation_service.dart';
 import 'package:ooriba_s3/services/registered_service.dart';
 import 'package:ooriba_s3/services/reject_service.dart';
@@ -35,6 +36,7 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
   final TextEditingController _joiningDateController = TextEditingController();
    LocationService locationService = LocationService();
    DepartmentService departmentService=DepartmentService();
+   DesignationService designationService=DesignationService();
   List<String> locationNames = [];
   List<String> departmentNames = [];
   List<String> designationName= [];
@@ -44,6 +46,7 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
     super.initState();
      fetchLocations();
      fetchDepartment();
+     fetchDesignation();
     employeeData = Map<String, dynamic>.from(widget.employeeData);
     _joiningDateController.text = employeeData['joiningDate'] ?? '';
 
@@ -66,12 +69,13 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
     List<String> department = await departmentService.getDepartments();
     setState(() {
       departmentNames = department;
+      print(departmentNames);
     });
   }
  Future<void> fetchDesignation() async {
-    List<String> department = await departmentService.getDepartments();
+    List<String> designation= await designationService.getDesignations();
     setState(() {
-      designationName = department;
+      designationName = designation;
     });
   }
 
