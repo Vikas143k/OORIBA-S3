@@ -383,6 +383,7 @@ import 'dart:ffi';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:ooriba_s3/services/employee_location_service.dart';
@@ -506,21 +507,40 @@ class _DatePickerButtonState extends State<DatePickerButton> {
     List<Map<String, dynamic>> filteredEmployees = _filterEmployeesByLocation();
     StringBuffer csvContent = StringBuffer();
     csvContent.writeln("Date, ${DateFormat('dd-MM-yyyy').format(_selectedDate!)}");
-    csvContent.writeln('EmployeeId,Name,Location,Check-in,Check-out,Status,Phone No,Hours');
-
+    csvContent.writeln('EmployeeId,Name,Location,Check-in,Check-out,Status,Phone No,Hours,Location_Status');
+    double lat=0;
+    double long=0;
     for (var employee in filteredEmployees) {
       String empId = employee['employeeId'] ?? 'Null';
       String name = '${employee['firstName']} ${employee['lastName']}' ?? 'Null';
       String location = employee['location'] ?? '';
       String phoneNo = employee['phoneNo'] ?? 'Null';
       bool isPresent = _data.containsKey(empId);
-      Map<String, String> empData = isPresent ? _data[empId]! : {'checkIn': 'N/A', 'checkOut': 'N/A'};
+      if(isPresent){
+      EmployeeLocationService geoService = EmployeeLocationService();
+      try{
+      Map<String, dynamic> latestLocation = await geoService.fetchEmployeeCoordinates(empId);
+      GeoPoint geoPoint = latestLocation['location'];
+         lat= geoPoint.latitude;
+       long = geoPoint.longitude;
+      }catch(e){
+          lat= 0;
+            long = 0;
+      }
+
+      }
+      Map<String, String> empData = isPresent ? _data[empId]! : {'checkIn': '', 'checkOut': ''};
       String checkIn = empData['checkIn']!;
       String checkOut = empData['checkOut']!;
       String status = isPresent ? 'Present' : 'Absent';
-      String Hours = "Upcoming";
+      if(isPresent){
+        
+      }
+      String hours = "Upcoming";
+      String locationS='$lat-$long';
+      // String locationS="hello";
 
-      csvContent.writeln('$empId,$name,$location,$checkIn,$checkOut,$status,$phoneNo,$Hours');
+      csvContent.writeln('$empId,$name,$location,$checkIn,$checkOut,$status,$phoneNo,$hours,$locationS');
     }
 
     if (await Permission.storage.request().isGranted || await Permission.manageExternalStorage.request().isGranted) {
@@ -542,27 +562,54 @@ class _DatePickerButtonState extends State<DatePickerButton> {
     }
   }
 
+  // void _openLocationOnMap(String employeeId) async {
+  //   try {
+  //     GeoService geoService = GeoService();
+  //     Position position = await geoService.determinePosition();
+
+  //     // You need to fetch latitude and longitude of the employee from your Firestore database
+  //     // Assuming employee details have `latitude` and `longitude` fields
+  //     var employee = _allEmployees.firstWhere((e) => e['employeeId'] == employeeId);
+  //     double employeeLatitude = 16.52154568524242;
+  //     double employeeLongitude = 80.52320068916423;
+
+  //     Uri googleMapsUrl = Uri.parse("https://www.google.com/maps/search/?api=1&query=$employeeLatitude,$employeeLongitude");
+
+  //     if (await canLaunchUrl(googleMapsUrl)) {
+  //       await launchUrl(googleMapsUrl);
+  //     } else {
+  //       throw 'Could not launch $googleMapsUrl';
+  //     }
+  //   } catch (e) {
+  //     print(e);
+  //     Fluttertoast.showToast(msg: 'Error opening map: $e');
+  //   }
+  // }
+
   void _openLocationOnMap(String employeeId) async {
-    try {
-      EmployeeLocationService geoService = EmployeeLocationService();
-      Map<String, dynamic> latestLocation = await geoService.fetchEmployeeCoordinates(employeeId);
+  try {
+    EmployeeLocationService geoService = EmployeeLocationService();
+    print(employeeId);
+    Map<String, dynamic> latestLocation = await geoService.fetchEmployeeCoordinates(employeeId);
 
-      GeoPoint geoPoint = latestLocation['location'];
-      double latitude = geoPoint.latitude;
-      double longitude = geoPoint.longitude;
+    GeoPoint geoPoint = latestLocation['location'];
+    // double latitude = 16.52154568524242;
+    // double longitude = 80.52320068916423;
+    double latitude = geoPoint.latitude;
+    double longitude = geoPoint.longitude;
 
-      final Uri googleMapsUrl = Uri.parse("https://www.google.com/maps/search/?api=1&query=$latitude,$longitude");
+    final Uri googleMapsUrl = Uri.parse("https://www.google.com/maps/search/?api=1&query=$latitude,$longitude");
 
-      if (await canLaunchUrl(googleMapsUrl)) {
-        await launchUrl(googleMapsUrl);
-      } else {
-        throw 'Could not launch $googleMapsUrl';
-      }
-    } catch (e) {
-      print('Error: $e');
-      Fluttertoast.showToast(msg: 'Error opening map: $e');
+    if (await canLaunchUrl(googleMapsUrl)) {
+      await launchUrl(googleMapsUrl);
+    } else {
+      throw 'Could not launch $googleMapsUrl';
     }
+  } catch (e) {
+    print('Error: $e');
+    Fluttertoast.showToast(msg: 'Error opening map: $e');
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -733,10 +780,10 @@ class _DatePickerButtonState extends State<DatePickerButton> {
                                   // Add check-in/check-out functionality here
                                   toggleCheckInCheckOut(employeeId);
                                 },
-                                child: Text(isPresent ? 'Check Out' : 'Check In'),
+                                child: Text(isPresent &&empData['checkOut']==null? 'Check Out' : 'Check In'),
                                 style: ElevatedButton.styleFrom(
                                   // backgroundColor: Colors.orange,
-                                  backgroundColor: (isPresent ? Colors.green : Colors.orange),
+                                  backgroundColor: (isPresent &&empData['checkOut']==null? Colors.green : Colors.orange),
                                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                   textStyle: const TextStyle(fontSize: 12),
                                 ),

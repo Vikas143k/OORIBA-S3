@@ -105,12 +105,11 @@ class LoginPage extends StatelessWidget {
 
   final TextEditingController _identifierController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
 
   @override
-  Widget build(BuildContext context) {
-    final darkModeService =
-        Provider.of<DarkModeService>(context, listen: false);
+  
+ Widget build(BuildContext context) {
+    final darkModeService = Provider.of<DarkModeService>(context, listen: false);
     final companyNameService = Provider.of<CompanyNameService>(context);
     final logoService = Provider.of<LogoService>(context);
     return Scaffold(
@@ -118,158 +117,151 @@ class LoginPage extends StatelessWidget {
         title: Text(companyNameService.companyName),
         actions: [
           IconButton(
-            icon: Icon(darkModeService.isDarkMode
-                ? Icons.light_mode
-                : Icons.dark_mode),
+            icon: Icon(darkModeService.isDarkMode ? Icons.light_mode : Icons.dark_mode),
             onPressed: () {
               darkModeService.toggleDarkMode();
             },
           ),
         ],
       ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          return SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    maxWidth: 400, // Limit the width for larger screens
-                  ),
-                  child: Container(
-                    padding: const EdgeInsets.all(16.0),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 10,
-                          offset: Offset(0, 5),
-                        ),
-                      ],
+      body: Container(
+        // color: Colors.blue, // Background color set to blue
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxWidth: 400, // Limit the width for larger screens
                     ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Text(
-                          'Welcome To ${companyNameService.companyName}',
-                          style: const TextStyle(
-                              fontSize: 24, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            logoService.logo != null
-                                ? Image.file(
-                                    logoService.logo!,
-                                    width: 200,
-                                    height: 190,
-                                  )
-                                : Image.asset(
-                                    'assets/images/companyLogo.png',
-                                    width: 200,
-                                    height: 190,
-                                  ),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-                        TextField(
-                          controller: _identifierController,
-                          decoration: const InputDecoration(
-                            filled: true,
-                            labelText: 'Email ID or Phone Number',
-                            border: OutlineInputBorder(),
+                    child: Container(
+                      padding: const EdgeInsets.all(16.0),
+                      decoration: BoxDecoration(
+                        color: Colors.white, // Inner container color set to white
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 10,
+                            offset: Offset(0, 5),
                           ),
-                        ),
-                        const SizedBox(height: 20),
-                        TextField(
-                          controller: _passwordController,
-                          decoration: const InputDecoration(
-                            labelText: 'Password',
-                            border: OutlineInputBorder(),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Text(
+                            'Welcome To ${companyNameService.companyName}',
+                            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                           ),
-                          obscureText: true,
-                        ),
-                        const SizedBox(height: 10),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: () {
-                              _showForgotPasswordDialog(context);
-                            },
-                            child: const Text('Forgot Password'),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: () async {
-                            bool success = await AuthService().signin(
-                              identifier: _identifierController.text,
-                              password: _passwordController.text,
-                              context: context,
-                            );
-                            if (success) {
-                              // Navigation is handled within AuthService
-                            }
-                          },
-                          child: const Text('Sign In'),
-                        ),
-                        const SizedBox(height: 20),
-                        RichText(
-                          text: TextSpan(
-                            text: "Don't have an account? ",
-                            style: TextStyle(
-                                color: Theme.of(context)
-                                    .textTheme
-                                    .bodyLarge!
-                                    .color),
-                            children: [
-                              TextSpan(
-                                text: 'Sign Up here',
-                                style: const TextStyle(
-                                  color: Colors.blue,
-                                  decoration: TextDecoration.underline,
-                                ),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              const SignUpPage()),
-                                    );
-                                  },
-                              ),
+                          const SizedBox(height: 20),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              logoService.logo != null
+                                  ? Image.file(
+                                      logoService.logo!,
+                                      width: 200,
+                                      height: 190,
+                                    )
+                                  : Image.asset(
+                                      'assets/images/companyLogo.png',
+                                      width: 200,
+                                      height: 190,
+                                    ),
                             ],
                           ),
-                        ),
-                        const SizedBox(height: 20),
-                        // ElevatedButton(
-                        //   onPressed: () {
-                        //     Navigator.push(
-                        //       context,
-                        //       MaterialPageRoute(
-                        //         builder: (context) => AdminDashboardPage(),
-                        //       ),
-                        //     );
-                        //   },
-                        //   child: const Text('Admin'),
-                        // ),
-                      ],
+                          const SizedBox(height: 20),
+                          TextField(
+                            controller: _identifierController,
+                            decoration: const InputDecoration(
+                              filled: true,
+                              labelText: 'Email ID or Phone Number',
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          TextField(
+                            controller: _passwordController,
+                            decoration: const InputDecoration(
+                              labelText: 'Password',
+                              border: OutlineInputBorder(),
+                            ),
+                            obscureText: true,
+                          ),
+                          const SizedBox(height: 10),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: () {
+                                _showForgotPasswordDialog(context);
+                              },
+                              child: const Text('Forgot Password'),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          ElevatedButton(
+                            onPressed: () async {
+                              bool success = await AuthService().signin(
+                                identifier: _identifierController.text,
+                                password: _passwordController.text,
+                                context: context,
+                              );
+                              if (success) {
+                                // Navigation is handled within AuthService
+                              }
+                            },
+                            child: const Text('Sign In'),
+                          ),
+                          const SizedBox(height: 20),
+                          RichText(
+                            text: TextSpan(
+                              text: "Don't have an account? ",
+                              style: TextStyle(
+                                color: Theme.of(context).textTheme.bodyLarge!.color,
+                              ),
+                              children: [
+                                TextSpan(
+                                  text: 'Sign Up here',
+                                  style: const TextStyle(
+                                    color: Colors.blue,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(builder: (context) => const SignUpPage()),
+                                      );
+                                    },
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
+      ),
+      bottomNavigationBar: Container(
+        color: Color.fromARGB(255, 206, 236, 241), // Bottom navigation bar background color set to blue
+        padding: const EdgeInsets.all(0.0),
+        child: Text(
+          'Copyright © 2024 Ooriba motors Pvt Ltd,Ganjam Odisha',
+          style: const TextStyle(color: Colors.black), // Text color set to white
+          textAlign: TextAlign.center,
+        ),
       ),
     );
   }
-
   void _showForgotPasswordDialog(BuildContext context) {
     final TextEditingController emailController = TextEditingController();
     showDialog(
