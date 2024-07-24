@@ -21,6 +21,46 @@ class HRDashboardPage extends StatefulWidget {
 class _HRDashboardPageState extends State<HRDashboardPage> {
   final RegisteredService _registeredService = RegisteredService();
 
+
+  @override
+  // void initState() {
+  //   super.initState();
+  //   setState(() {}); 
+  // }
+  final FirebaseFirestore _db=FirebaseFirestore.instance; 
+ Future<List<Map<String, dynamic>>> _fetchRequestedEmployees() async {
+    QuerySnapshot querySnapshot = await _db
+        .collection('SiteManagerAuth')
+        .where('status', isEqualTo: 'requested')
+        .get();
+
+    return querySnapshot.docs
+        .map((doc) => {'employeeId': doc.id, ...doc.data() as Map<String, dynamic>})
+        .toList();
+  }
+Future<void> _approveEmployee(String employeeId) async {
+    await _db.collection('SiteManagerAuth').doc(employeeId).update({
+      'status': 'approved',
+      'set':'1'
+    });
+  }
+
+ void _showImageDialog(BuildContext context, String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: Image.network(imageUrl),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('Close'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      ),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -80,20 +120,6 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
                 );
               },
             ),
-            //  ListTile(
-            //   leading: const Icon(Icons.time_to_leave),
-            //   title: const Text('Leave Report'),
-            //   onTap: () {
-            //     Navigator.pop(context);
-            //     Navigator.push(
-            //       context,
-            //       MaterialPageRoute(
-            //         builder: (context) =>
-            //             LeaveReportPage(), // Navigate to LeaveApprovalPage
-            //       ),
-            //     );
-            //   },
-            // ),
             ListTile(
               leading: const Icon(Icons.checklist_outlined),
               title: const Text('Provide Attendance'),
@@ -158,16 +184,6 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
                       _showRegisteredEmployees,
                     ),
                   ),
-                  // SizedBox(width: 16.0),
-                  // Expanded(
-                  //   child: _buildDashboardBlock(
-                  //     context,
-                  //     'New Applicants',
-                  //     Icons.person_add,
-                  //     Colors.green,
-                  //     _showNewApplicants,
-                  //   ),
-                  // ),
                   const SizedBox(width: 16.0),
                   Expanded(
                     child: _buildDashboardBlock(
@@ -191,6 +207,52 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
+            ),
+             FutureBuilder<List<Map<String, dynamic>>>(
+              future: _fetchRequestedEmployees(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text(''));
+                } else {
+                  List<Map<String, dynamic>> employees = snapshot.data!;
+                  return Column(
+                    children: employees.map((data) {
+                      String employeeId = data['employeeId'] ?? '';
+                      String imageUrl = data['imageUrl'] ?? '';
+                      String status = data['status'] ?? '';
+
+                     return Card(
+                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: ListTile(
+                          leading: InkWell(
+                            onTap: () {
+                              if (imageUrl.isNotEmpty) {
+                                _showImageDialog(context, imageUrl);
+                              }
+                            },
+                            child: imageUrl.isNotEmpty
+                                ? Image.network(imageUrl, width: 50, height: 50, fit: BoxFit.cover)
+                                : Icon(Icons.image_not_supported, size: 50),
+                          ),
+                          title: Text(employeeId),
+                          subtitle: Text('Status: $status'),
+                          trailing: ElevatedButton(
+                            onPressed: () async {
+                              await _approveEmployee(employeeId);
+                              setState(() {}); // Refresh the UI
+                            },
+                            child: const Text('Approve'),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  );
+                }
+              },
             ),
             StreamBuilder<QuerySnapshot>(
               stream:
@@ -337,25 +399,6 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
     );
   }
 
-  // void _showNewApplicants(BuildContext context) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         title: const Text('New Applicants'),
-  //         content: const Text('List of new applicants...'),
-  //         actions: <Widget>[
-  //           TextButton(
-  //             child: const Text('Close'),
-  //             onPressed: () {
-  //               Navigator.of(context).pop();
-  //             },
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
 
   void _showRejectedApplications(BuildContext context) {
     Navigator.of(context).push(

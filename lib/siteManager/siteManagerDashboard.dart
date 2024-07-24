@@ -479,11 +479,12 @@ class _SitemanagerdashboardState extends State<Sitemanagerdashboard> {
   void initState() {
     super.initState();
     dbHelper = DatabaseHelper();
+     _fetchMessage();
     fetchEmployeeData();
     _checkIfFaceIsRegistered();
     _checkLocation();
     _fetchAllEmployees();
-    _fetchMessage();
+   
   }
 
   Future<void> _fetchMessage() async {
@@ -990,7 +991,7 @@ class _SitemanagerdashboardState extends State<Sitemanagerdashboard> {
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(broadcastMessage!),
+                                Text("broadcastMessage"),
                               ],
                             ),
                           ),

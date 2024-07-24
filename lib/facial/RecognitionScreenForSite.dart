@@ -157,7 +157,7 @@ class _RecognitionScreenState extends State<RecognitionScreen> {
   }
 
   bool isFaceRecognized() {
-    return recognitions.any((recognition) => recognition.distance < 1);
+    return recognitions.any((recognition) => recognition.distance < 1 &&recognition.distance > -4);
   }
 
   void goback() async {
@@ -246,6 +246,7 @@ class _RecognitionScreenState extends State<RecognitionScreen> {
                     ),
                   ),
                 ),
+                if(_image != null && isFaceRecognized()&& !isLoading&& recognitions.first.name!="Unknown")
                 Card(
                   shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(200))),
