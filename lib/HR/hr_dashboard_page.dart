@@ -28,16 +28,58 @@ class _HRDashboardPageState extends State<HRDashboardPage> {
   //   setState(() {}); 
   // }
   final FirebaseFirestore _db=FirebaseFirestore.instance; 
- Future<List<Map<String, dynamic>>> _fetchRequestedEmployees() async {
-    QuerySnapshot querySnapshot = await _db
+  Future<Map<String, dynamic>?> fetchEmployeeDetails(String employeeId) async {
+  try {
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('Regemp')
+        .where('employeeId', isEqualTo: employeeId)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      // Assuming there's only one document for the given employeeId
+      return querySnapshot.docs.first.data() as Map<String, dynamic>?;
+    }
+  } catch (e) {
+    print('Failed to fetch employee details: $e');
+  }
+  return null;
+}
+
+Future<List<Map<String, dynamic>>> _fetchRequestedEmployees() async {
+  List<Map<String, dynamic>> employees = [];
+
+  try {
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('SiteManagerAuth')
         .where('status', isEqualTo: 'requested')
         .get();
 
-    return querySnapshot.docs
-        .map((doc) => {'employeeId': doc.id, ...doc.data() as Map<String, dynamic>})
-        .toList();
+    for (var doc in querySnapshot.docs) {
+      String employeeId = doc.id;
+      String imageUrl = doc['imageUrl'];
+
+      // Fetch additional details from Regemp
+      var employeeDetails = await fetchEmployeeDetails(employeeId);
+      String name = (employeeDetails?['firstName']) ?? '';
+      String location=(employeeDetails?['location']) ?? '';
+      String phoneNo=(employeeDetails?['phoneNo']) ?? '';
+
+      employees.add({
+        'employeeId': employeeId,
+        'imageUrl': imageUrl,
+        'name': name,
+        'location':location,
+        'phoneNo':phoneNo
+      });
+    }
+  } catch (e) {
+    print('Failed to fetch requested employees: $e');
   }
+
+  return employees;
+}
+
+
 Future<void> _approveEmployee(String employeeId) async {
     await _db.collection('SiteManagerAuth').doc(employeeId).update({
       'status': 'approved',
@@ -201,7 +243,7 @@ Future<void> _approveEmployee(String employeeId) async {
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(
-                'Applicant Details',
+                'Applicant Details/ Face Registration',
                 style: TextStyle(
                   fontSize: 18.0,
                   fontWeight: FontWeight.bold,
@@ -223,33 +265,40 @@ Future<void> _approveEmployee(String employeeId) async {
                     children: employees.map((data) {
                       String employeeId = data['employeeId'] ?? '';
                       String imageUrl = data['imageUrl'] ?? '';
-                      String status = data['status'] ?? '';
-
+                      String status = "Face registration request";
+                       String name = data['name'] ?? 'Unknown';
+                       String location=data['location'];
+                       String phoneNo=data['phoneNo'];
+                       
                      return Card(
-                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        child: ListTile(
-                          leading: InkWell(
-                            onTap: () {
-                              if (imageUrl.isNotEmpty) {
-                                _showImageDialog(context, imageUrl);
-                              }
-                            },
-                            child: imageUrl.isNotEmpty
-                                ? Image.network(imageUrl, width: 50, height: 50, fit: BoxFit.cover)
-                                : Icon(Icons.image_not_supported, size: 50),
-                          ),
-                          title: Text(employeeId),
-                          subtitle: Text('Status: $status'),
-                          trailing: ElevatedButton(
-                            onPressed: () async {
-                              await _approveEmployee(employeeId);
-                              setState(() {}); // Refresh the UI
-                            },
-                            child: const Text('Approve'),
-                          ),
-                        ),
-                      );
-                    }).toList(),
+                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                child: ListTile(
+                  leading: InkWell(
+                    onTap: () {
+                      if (imageUrl.isNotEmpty) {
+                        _showImageDialog(context, imageUrl);
+                      }
+                    },
+                    child: imageUrl.isNotEmpty
+                        ? Image.network(imageUrl, width: 50, height: 50, fit: BoxFit.cover)
+                        : const Icon(Icons.image_not_supported, size: 50),
+                  ),
+                  title: Text("$name:$employeeId", style: const TextStyle(
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.bold,
+                      ),),
+                  subtitle: Text('Location: $location\nPhone:$phoneNo\n$status'),
+                  
+                  trailing: ElevatedButton(
+                    onPressed: () async {
+                      await _approveEmployee(employeeId);
+                      setState(() {}); // Refresh the UI
+                    },
+                    child: const Text('Approve'),
+                  ),
+                ),
+              );
+            }).toList(),
                   );
                 }
               },

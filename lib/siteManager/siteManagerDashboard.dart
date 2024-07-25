@@ -986,12 +986,12 @@ class _SitemanagerdashboardState extends State<Sitemanagerdashboard> {
                             title: const Text(
                               'Global Communication',
                               style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 25),
+                                  fontWeight: FontWeight.bold, fontSize: 20),
                             ),
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text("broadcastMessage"),
+                                Text(broadcastMessage ?? "No message"),
                               ],
                             ),
                           ),
