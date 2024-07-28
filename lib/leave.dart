@@ -1,306 +1,8 @@
-
-// import 'package:flutter/material.dart';
-// import 'package:intl/intl.dart';
-// import 'services/leave_service.dart'; // Import the leave service
-
-// class LeavePage extends StatefulWidget {
-//   final String? employeeId;
-
-//   const LeavePage({super.key, required this.employeeId});
-//   @override
-//   _LeavePageState createState() => _LeavePageState();
-// }
-
-// class _LeavePageState extends State<LeavePage> {
-//   final _formKey = GlobalKey<FormState>();
-//   late String empid;
-//   final LeaveService _leaveService =
-//       LeaveService(); // Instantiate the leave service
-
-//   List<String> leaveTypes = [
-//     'Sick Leave',
-//     'Casual Leave',
-//     'Earned Leave',
-//     'Partial Leave'
-//   ];
-//   String selectedLeaveType = 'Sick Leave'; // Default value
-
-//   TextEditingController employeeIdController = TextEditingController();
-//   TextEditingController fromDateController = TextEditingController();
-//   TextEditingController toDateController = TextEditingController();
-//   TextEditingController leaveReasonController = TextEditingController();
-//   TextEditingController numberOfDaysController = TextEditingController();
-
-//   DateFormat dateFormat = DateFormat('dd-MM-yyyy');
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     numberOfDaysController.text = '0';
-//   }
-
-//   void calculateDays() {
-//     if (fromDateController.text.isNotEmpty &&
-//         toDateController.text.isNotEmpty) {
-//       DateTime from = dateFormat.parse(fromDateController.text);
-//       DateTime to = dateFormat.parse(toDateController.text);
-//       int days = to.difference(from).inDays + 1; // Including the start date
-//       setState(() {
-//         numberOfDaysController.text = days.toString();
-//       });
-//     }
-//   }
-
-//   void fetchLeaveRequests() async {
-//     try {
-//       // Fetch all leave requests for the current employeeId
-//       List<Map<String, dynamic>> leaveRequests =
-//           await _leaveService.fetchAllLeaveRequests();
-
-//       // Display the fetched leave requests in debug console
-//       print('Fetched Leave Requests: $leaveRequests');
-
-//       // Optionally, you can display the leave requests in UI as needed
-//       // For simplicity, let's print them in the debug console
-//     } catch (e) {
-//       print('Error fetching leave requests: $e');
-//       // Handle error as needed
-//     }
-//   }
-
-//   Widget _buildLabelWithStar(String label) {
-//     return RichText(
-//       text: TextSpan(
-//         text: label,
-//         style: TextStyle(color: Colors.black),
-//         children: [
-//           TextSpan(
-//             text: ' *',
-//             style: TextStyle(color: Colors.red),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('Leave Application'),
-//       ),
-//       body: SingleChildScrollView(
-//         padding: EdgeInsets.all(16.0), // Reduced padding
-//         child: Form(
-//           key: _formKey,
-//           child: Column(
-//             crossAxisAlignment: CrossAxisAlignment.stretch,
-//             children: <Widget>[
-//               TextFormField(
-//                 controller: TextEditingController(text: widget.employeeId),
-//                 decoration:
-//                     InputDecoration(label: _buildLabelWithStar('Employee ID')),
-//                 enabled: false,
-//               ),
-
-//               SizedBox(height: 12.0), // Reduced spacing
-//               DropdownButtonFormField(
-//                 value: selectedLeaveType,
-//                 items: leaveTypes.map((String type) {
-//                   return DropdownMenuItem(
-//                     value: type,
-//                     child: Text(type),
-//                   );
-//                 }).toList(),
-//                 onChanged: (value) {
-//                   setState(() {
-//                     selectedLeaveType = value.toString();
-//                     if (selectedLeaveType == 'Partial Leave') {
-//                       numberOfDaysController.text = '0.5';
-//                       fromDateController.text = '';
-//                       toDateController.text = '';
-//                     } else {
-//                       numberOfDaysController.text = '0';
-//                     }
-//                   });
-//                 },
-//                 decoration:
-//                     InputDecoration(label: _buildLabelWithStar('Leave Type')),
-//                 validator: (value) {
-//                   if (value == null || value.isEmpty) {
-//                     return 'Please select a leave type';
-//                   }
-//                   return null;
-//                 },
-//               ),
-//               SizedBox(height: 12.0), // Reduced spacing
-//               if (selectedLeaveType != 'Partial Leave') ...[
-//                 TextFormField(
-//                   controller: fromDateController,
-//                   decoration:
-//                       InputDecoration(label: _buildLabelWithStar('From Date')),
-//                   readOnly: true,
-//                   onTap: () async {
-//                     DateTime? pickedDate = await showDatePicker(
-//                       context: context,
-//                       initialDate: DateTime.now(),
-//                       firstDate: DateTime.now().subtract(Duration(days: 365)),
-//                       lastDate: DateTime.now().add(Duration(days: 365)),
-//                     );
-//                     if (pickedDate != null) {
-//                       setState(() {
-//                         fromDateController.text = dateFormat.format(pickedDate);
-//                         calculateDays();
-//                       });
-//                     }
-//                   },
-//                   validator: (value) {
-//                     if (value == null || value.isEmpty) {
-//                       return 'Please select a from date';
-//                     }
-//                     return null;
-//                   },
-//                 ),
-//                 SizedBox(height: 12.0), // Reduced spacing
-//                 TextFormField(
-//                   controller: toDateController,
-//                   decoration:
-//                       InputDecoration(label: _buildLabelWithStar('To Date')),
-//                   readOnly: true,
-//                   onTap: () async {
-//                     DateTime? pickedDate = await showDatePicker(
-//                       context: context,
-//                       initialDate: DateTime.now(),
-//                       firstDate: DateTime.now().subtract(Duration(days: 365)),
-//                       lastDate: DateTime.now().add(Duration(days: 365)),
-//                     );
-//                     if (pickedDate != null) {
-//                       setState(() {
-//                         toDateController.text = dateFormat.format(pickedDate);
-//                         calculateDays();
-//                       });
-//                     }
-//                   },
-//                   validator: (value) {
-//                     if (value == null || value.isEmpty) {
-//                       return 'Please select a to date';
-//                     }
-//                     return null;
-//                   },
-//                 ),
-//                 SizedBox(height: 12.0), // Reduced spacing
-//               ],
-//               TextFormField(
-//                 controller: numberOfDaysController,
-//                 decoration: InputDecoration(labelText: 'Number of Days'),
-//                 readOnly: true,
-//               ),
-//               SizedBox(height: 12.0), // Reduced spacing
-//               TextFormField(
-//                 controller: leaveReasonController,
-//                 maxLines: null,
-//                 keyboardType: TextInputType.multiline,
-//                 decoration: InputDecoration(labelText: 'Leave Reason'),
-//               ),
-//               SizedBox(height: 12.0), // Reduced spacing
-//               Center(
-//                 // Centered Apply Button
-//                 child: ElevatedButton(
-//                   onPressed: () async {
-//                     if (_formKey.currentState?.validate() ?? false) {
-//                       try {
-//                         if (widget.employeeId == null) {
-//                           empid = "null";
-//                         } else {
-//                           empid = widget.employeeId!;
-//                         }
-//                         await _leaveService.applyLeave(
-//                           employeeId: empid,
-//                           leaveType: selectedLeaveType,
-//                           fromDate: selectedLeaveType == 'Partial Leave'
-//                               ? null
-//                               : dateFormat.parse(fromDateController.text),
-//                           toDate: selectedLeaveType == 'Partial Leave'
-//                               ? null
-//                               : dateFormat.parse(toDateController.text),
-//                           numberOfDays:
-//                               double.parse(numberOfDaysController.text),
-//                           leaveReason: leaveReasonController.text,
-//                         );
-//                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-//                             content: Text('Leave applied successfully')));
-//                       } catch (e) {
-//                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-//                             content: Text('Failed to apply leave: $e')));
-//                       }
-//                     }
-//                   },
-//                   child: Text('Apply'),
-//                   style: ElevatedButton.styleFrom(
-//                     minimumSize: Size(120, 40), // Adjusted button size
-//                   ),
-//                 ),
-//               ),
-//               SizedBox(height: 20.0), // Added space before leave details
-//               FutureBuilder(
-//                 future: _leaveService.fetchAllLeaveRequests(),
-//                 builder: (BuildContext context,
-//                     AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
-//                   if (snapshot.connectionState == ConnectionState.waiting) {
-//                     return CircularProgressIndicator();
-//                   } else {
-//                     if (snapshot.hasError) {
-//                       return Text('Error: ${snapshot.error}');
-//                     } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-//                       return Text('No leave requests found.');
-//                     } else {
-//                       // Display fetched leave details
-//                       return Column(
-//                         crossAxisAlignment: CrossAxisAlignment.stretch,
-//                         children: snapshot.data!.map((leaveRequest) {
-//                           return Card(
-//                             margin: EdgeInsets.symmetric(vertical: 8.0),
-//                             child: Padding(
-//                               padding: EdgeInsets.all(8.0),
-//                               child: Column(
-//                                 crossAxisAlignment: CrossAxisAlignment.start,
-//                                 children: <Widget>[
-//                                   Text(
-//                                       'Employee ID: ${leaveRequest['employeeId']}'),
-//                                   Text(
-//                                       'Leave Type: ${leaveRequest['leaveType']}'),
-//                                   Text(
-//                                       'From Date: ${leaveRequest['fromDate']}'),
-//                                   Text('To Date: ${leaveRequest['toDate']}'),
-//                                   Text(
-//                                       'Number of Days: ${leaveRequest['numberOfDays']}'),
-//                                   Text(
-//                                       'Leave Reason: ${leaveRequest['leaveReason']}'),
-//                                 ],
-//                               ),
-//                             ),
-//                           );
-//                         }).toList(),
-//                       );
-//                     }
-//                   }
-//                 },
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-
-//   void main() => runApp(MaterialApp(
-//         home: LeavePage(employeeId: widget.employeeId),
-//       ));
-// }
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:ooriba_s3/services/HR/LeaveTypes.dart';
+import 'package:table_calendar/table_calendar.dart';
 import 'services/leave_service.dart'; // Import the leave service
 
 class LeavePage extends StatefulWidget {
@@ -316,13 +18,9 @@ class _LeavePageState extends State<LeavePage> {
   late String empid;
   final LeaveService _leaveService =
       LeaveService(); // Instantiate the leave service
+  final LeaveTypesService _leaveTypesService = LeaveTypesService();
 
-  List<String> leaveTypes = [
-    'Sick Leave',
-    'Casual Leave',
-    'Earned Leave',
-    'Partial Leave'
-  ];
+  List<String> leaveTypes = [];
   String selectedLeaveType = 'Sick Leave'; // Default value
 
   TextEditingController employeeIdController = TextEditingController();
@@ -332,11 +30,24 @@ class _LeavePageState extends State<LeavePage> {
   TextEditingController numberOfDaysController = TextEditingController();
 
   DateFormat dateFormat = DateFormat('dd-MM-yyyy');
+  Map<String, Map<String, int>> leaveTypeDetails = {};
 
   @override
   void initState() {
     super.initState();
     numberOfDaysController.text = '0';
+    _fetchEmployeeLeaveDates();
+    _fetchLeaveTypes();
+  }
+
+  Future<void> _fetchLeaveTypes() async {
+    List<String> types = await _leaveTypesService.fetchLeaveTypes();
+    setState(() {
+      leaveTypes = types;
+      if (leaveTypes.isNotEmpty) {
+        selectedLeaveType = leaveTypes[0]; // Set default to first leave type
+      }
+    });
   }
 
   void calculateDays() {
@@ -351,34 +62,73 @@ class _LeavePageState extends State<LeavePage> {
     }
   }
 
-  Future<void> searchLeaveRequests() async {
-    try {
-      DateTime? fromDate = fromDateController.text.isNotEmpty
-          ? dateFormat.parse(fromDateController.text)
-          : null;
-      DateTime? toDate = toDateController.text.isNotEmpty
-          ? dateFormat.parse(toDateController.text)
-          : null;
+  Future<void> _applyLeave() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      try {
+        double numberOfDays = double.parse(numberOfDaysController.text);
 
-      // Fetch leave requests for the specific employeeId within the date range
-      List<Map<String, dynamic>> leaveRequests =
-          await _leaveService.fetchLeaveRequests(
-        employeeId: widget.employeeId!,
-        fromDate: fromDate,
-        toDate: toDate,
+        await _leaveService.applyLeave(
+          employeeId: widget.employeeId!,
+          leaveType: selectedLeaveType,
+          fromDate: dateFormat.parse(fromDateController.text),
+          toDate: dateFormat.parse(toDateController.text),
+          numberOfDays: numberOfDays,
+          leaveReason: leaveReasonController.text,
+        );
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Leave applied successfully')),
+        );
+
+        // Fetch leave dates again to update the calendar
+        await _fetchEmployeeLeaveDates();
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Insufficient leave balance')),
+        );
+      }
+    }
+  }
+
+  void _showLeaveDetails(DateTime selectedDay) async {
+    final leaveDetails = await _leaveService.fetchLeaveDetailsByDate(
+        widget.employeeId!, selectedDay);
+    if (leaveDetails != null) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Leave Details'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text('Leave Type: ${leaveDetails['leaveType']}'),
+                Text(
+                    'From Date: ${DateFormat('dd-MM-yyyy').format((leaveDetails['fromDate'] as Timestamp).toDate())}'),
+                Text(
+                    'To Date: ${DateFormat('dd-MM-yyyy').format((leaveDetails['toDate'] as Timestamp).toDate())}'),
+                Text('Number of Days: ${leaveDetails['numberOfDays']}'),
+                Text('Leave Reason: ${leaveDetails['leaveReason']}'),
+                Text('Approved: ${leaveDetails['isApproved'] ? 'Yes' : 'No'}'),
+              ],
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: Text('Close'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
       );
-
-      // Display the filtered leave requests in debug console
-      print('Filtered Leave Requests: $leaveRequests');
-
-      // Optionally, you can display the leave requests in UI as needed
-      // For simplicity, let's print them in the debug console
-      setState(() {
-        _filteredLeaveRequests = leaveRequests;
-      });
-    } catch (e) {
-      print('Error fetching leave requests: $e');
-      // Handle error as needed
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('No leave details found for the selected date.')),
+      );
     }
   }
 
@@ -398,223 +148,277 @@ class _LeavePageState extends State<LeavePage> {
   }
 
   List<Map<String, dynamic>> _filteredLeaveRequests = [];
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDay;
+  Set<DateTime> _employeeLeaveDates = {};
+  Map<DateTime, Map<String, dynamic>> _leaveDetailsMap = {};
+
+  Future<void> _fetchEmployeeLeaveDates() async {
+    try {
+      List<Map<String, dynamic>> leaveRequests =
+          await _leaveService.fetchLeaveRequests(
+        employeeId: widget.employeeId!,
+      );
+
+      Set<DateTime> leaveDates = {};
+      for (var request in leaveRequests) {
+        DateTime fromDate = (request['fromDate'] as Timestamp).toDate();
+        DateTime toDate = (request['toDate'] as Timestamp).toDate();
+        for (DateTime date = fromDate;
+            date.isBefore(toDate) || date.isAtSameMomentAs(toDate);
+            date = date.add(Duration(days: 1))) {
+          leaveDates.add(date);
+          _leaveDetailsMap[date] = request;
+        }
+      }
+
+      print('Leave Dates: $leaveDates'); // Debug statement
+
+      setState(() {
+        _employeeLeaveDates = leaveDates;
+      });
+    } catch (e) {
+      print('Error fetching leave dates: $e');
+    }
+  }
+
+  Map<String, dynamic>? _selectedLeaveDetails;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Leave Application'),
-      ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0), // Reduced padding
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              TextFormField(
-                controller: TextEditingController(text: widget.employeeId),
-                decoration:
-                    InputDecoration(label: _buildLabelWithStar('Employee ID')),
-                enabled: false,
-              ),
-              SizedBox(height: 12.0), // Reduced spacing
-              DropdownButtonFormField(
-                value: selectedLeaveType,
-                items: leaveTypes.map((String type) {
-                  return DropdownMenuItem(
-                    value: type,
-                    child: Text(type),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedLeaveType = value.toString();
-                    if (selectedLeaveType == 'Partial Leave') {
-                      numberOfDaysController.text = '0.5';
-                      fromDateController.text = '';
-                      toDateController.text = '';
-                    } else {
-                      numberOfDaysController.text = '0';
-                    }
-                  });
-                },
-                decoration:
-                    InputDecoration(label: _buildLabelWithStar('Leave Type')),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please select a leave type';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 12.0), // Reduced spacing
-              if (selectedLeaveType != 'Partial Leave') ...[
-                TextFormField(
-                  controller: fromDateController,
-                  decoration:
-                      InputDecoration(label: _buildLabelWithStar('From Date')),
-                  readOnly: true,
-                  onTap: () async {
-                    DateTime? pickedDate = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime.now(),
-                      firstDate: DateTime.now().subtract(Duration(days: 365)),
-                      lastDate: DateTime.now().add(Duration(days: 365)),
-                    );
-                    if (pickedDate != null) {
-                      setState(() {
-                        fromDateController.text = dateFormat.format(pickedDate);
-                        calculateDays();
-                      });
-                    }
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please select a from date';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 12.0), // Reduced spacing
-                TextFormField(
-                  controller: toDateController,
-                  decoration:
-                      InputDecoration(label: _buildLabelWithStar('To Date')),
-                  readOnly: true,
-                  onTap: () async {
-                    DateTime? pickedDate = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime.now(),
-                      firstDate: DateTime.now().subtract(Duration(days: 365)),
-                      lastDate: DateTime.now().add(Duration(days: 365)),
-                    );
-                    if (pickedDate != null) {
-                      setState(() {
-                        toDateController.text = dateFormat.format(pickedDate);
-                        calculateDays();
-                      });
-                    }
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please select a to date';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 12.0), // Reduced spacing
-              ],
-              TextFormField(
-                controller: numberOfDaysController,
-                decoration: InputDecoration(labelText: 'Number of Days'),
-                readOnly: true,
-              ),
-              SizedBox(height: 12.0), // Reduced spacing
-              TextFormField(
-                controller: leaveReasonController,
-                maxLines: null,
-                keyboardType: TextInputType.multiline,
-                decoration: InputDecoration(labelText: 'Leave Reason'),
-              ),
-              SizedBox(height: 12.0), // Reduced spacing
-              Center(
-                // Centered Apply Button
-                child: ElevatedButton(
-                  onPressed: () async {
-                    if (_formKey.currentState?.validate() ?? false) {
-                      try {
-                        if (widget.employeeId == null) {
-                          empid = "null";
-                        } else {
-                          empid = widget.employeeId!;
-                        }
-                        await _leaveService.applyLeave(
-                          employeeId: empid,
-                          leaveType: selectedLeaveType,
-                          fromDate: selectedLeaveType == 'Partial Leave'
-                              ? null
-                              : dateFormat.parse(fromDateController.text),
-                          toDate: selectedLeaveType == 'Partial Leave'
-                              ? null
-                              : dateFormat.parse(toDateController.text),
-                          numberOfDays:
-                              double.parse(numberOfDaysController.text),
-                          leaveReason: leaveReasonController.text,
-                        );
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text('Leave applied successfully')));
-                      } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text('Failed to apply leave: $e')));
-                      }
-                    }
-                  },
-                  child: Text('Apply'),
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: Size(120, 40), // Adjusted button size
-                  ),
-                ),
-              ),
-              SizedBox(height: 20.0), // Added space before search button
-              Center(
-                // Centered Search Button
-                child: ElevatedButton(
-                  onPressed: () async {
-                    await searchLeaveRequests();
-                  },
-                  child: Text('Search'),
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: Size(120, 40), // Adjusted button size
-                  ),
-                ),
-              ),
-              SizedBox(height: 20.0), // Added space before leave details
-              if (_filteredLeaveRequests.isNotEmpty)
-                ..._filteredLeaveRequests.map((leaveRequest) {
-                  return Card(
-                    margin: EdgeInsets.symmetric(vertical: 8.0),
-                    child: Padding(
-                      padding: EdgeInsets.all(8.0),
+        appBar: AppBar(
+          title: Text('Leave Application'),
+        ),
+        body: SingleChildScrollView(
+            padding: EdgeInsets.all(16.0), // Reduced padding
+            child: Form(
+              key: _formKey,
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    SizedBox(height: 20.0),
+                    Container(
+                      padding: EdgeInsets.all(
+                          16.0), // Add padding inside the container
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey), // Border color
+                        borderRadius:
+                            BorderRadius.circular(8.0), // Rounded corners
+                        color: Colors.white, // Background color
+                      ),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: <Widget>[
-                          Text(
-                            'Employee ID: ${leaveRequest['employeeId']}',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
+                          TextFormField(
+                            controller:
+                                TextEditingController(text: widget.employeeId),
+                            decoration: InputDecoration(
+                                label: _buildLabelWithStar('Employee ID')),
+                            enabled: false,
+                          ),
+                          SizedBox(height: 12.0), // Reduced spacing
+                          DropdownButtonFormField(
+                            value: selectedLeaveType,
+                            items: leaveTypes.map((String type) {
+                              return DropdownMenuItem(
+                                value: type,
+                                child: Text(type),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                selectedLeaveType = value.toString();
+                                numberOfDaysController.text = '0';
+                              });
+                            },
+                            decoration: InputDecoration(
+                                label: _buildLabelWithStar('Leave Type')),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please select a leave type';
+                              }
+                              return null;
+                            },
+                          ),
+                          SizedBox(height: 12.0), // Reduced spacing
+                          TextFormField(
+                            controller: fromDateController,
+                            decoration: InputDecoration(
+                                label: _buildLabelWithStar('From Date')),
+                            readOnly: true,
+                            onTap: () async {
+                              DateTime? pickedDate = await showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime.now()
+                                    .subtract(Duration(days: 365)),
+                                lastDate:
+                                    DateTime.now().add(Duration(days: 365)),
+                              );
+                              if (pickedDate != null) {
+                                setState(() {
+                                  fromDateController.text =
+                                      dateFormat.format(pickedDate);
+                                  calculateDays();
+                                });
+                              }
+                            },
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please select a from date';
+                              }
+                              return null;
+                            },
+                          ),
+                          SizedBox(height: 12.0), // Reduced spacing
+                          TextFormField(
+                            controller: toDateController,
+                            decoration: InputDecoration(
+                                label: _buildLabelWithStar('To Date')),
+                            readOnly: true,
+                            onTap: () async {
+                              DateTime? pickedDate = await showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime.now()
+                                    .subtract(Duration(days: 365)),
+                                lastDate:
+                                    DateTime.now().add(Duration(days: 365)),
+                              );
+                              if (pickedDate != null) {
+                                setState(() {
+                                  toDateController.text =
+                                      dateFormat.format(pickedDate);
+                                  calculateDays();
+                                });
+                              }
+                            },
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please select a to date';
+                              }
+                              return null;
+                            },
+                          ),
+                          SizedBox(height: 12.0), // Reduced spacing
+                          TextFormField(
+                            controller: numberOfDaysController,
+                            decoration:
+                                InputDecoration(labelText: 'Number of Days'),
+                            readOnly: true,
+                          ),
+                          SizedBox(height: 12.0), // Reduced spacing
+                          TextFormField(
+                            controller: leaveReasonController,
+                            maxLines: null,
+                            keyboardType: TextInputType.multiline,
+                            decoration:
+                                InputDecoration(labelText: 'Leave Reason'),
+                          ),
+                          SizedBox(height: 12.0),
+                          Center(
+                            child: ElevatedButton(
+                              onPressed: _applyLeave,
+                              child: Text('Apply'),
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: Size(120, 40),
+                              ),
                             ),
                           ),
-                          Text('Leave Type: ${leaveRequest['leaveType']}'),
-                          Text(
-                            'From Date: ${dateFormat.format((leaveRequest['fromDate'] as Timestamp).toDate())}',
-                          ),
-                          Text(
-                            'To Date: ${dateFormat.format((leaveRequest['toDate'] as Timestamp).toDate())}',
-                          ),
-                          Text(
-                              'Number of Days: ${leaveRequest['numberOfDays']}'),
-                          Text('Leave Reason: ${leaveRequest['leaveReason']}'),
                         ],
                       ),
                     ),
-                  );
-                }).toList(),
-              if (_filteredLeaveRequests.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 20.0),
-                  child: Center(
-                    // child: Text(
-                    //   'Please select the date range to see the leave history',
-                    //   style: TextStyle(fontSize: 16.0),
-                    // ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
+                    SizedBox(height: 20.0),
+                    Container(
+                      padding: EdgeInsets.all(
+                          16.0), // Add padding inside the container
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey), // Border color
+                        borderRadius:
+                            BorderRadius.circular(8.0), // Rounded corners
+                        color: Colors.white, // Background color
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          TableCalendar(
+                            focusedDay: _focusedDay,
+                            firstDay: DateTime(2000),
+                            lastDay: DateTime(2100),
+                            selectedDayPredicate: (day) {
+                              return isSameDay(_selectedDay, day);
+                            },
+                            onDaySelected: (selectedDay, focusedDay) {
+                              setState(() {
+                                _selectedDay = selectedDay;
+                                _focusedDay = focusedDay;
+                                _showLeaveDetails(
+                                    selectedDay); // Show leave details for the selected day
+                              });
+                            },
+                            calendarStyle: CalendarStyle(
+                              todayDecoration: BoxDecoration(
+                                color: Colors.blue,
+                                shape: BoxShape.circle,
+                              ),
+                              selectedDecoration: BoxDecoration(
+                                color: Colors.orange,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            calendarBuilders: CalendarBuilders(
+                              defaultBuilder: (context, day, focusedDay) {
+                                bool isOnLeave = _employeeLeaveDates.any(
+                                    (leaveDate) =>
+                                        leaveDate.year == day.year &&
+                                        leaveDate.month == day.month &&
+                                        leaveDate.day == day.day);
+                                if (isOnLeave) {
+                                  return Container(
+                                    margin: const EdgeInsets.all(6.0),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        '${day.day}',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    ),
+                                  );
+                                }
+                                return null;
+                              },
+                              markerBuilder: (context, date, events) {
+                                if (_employeeLeaveDates.contains(date)) {
+                                  return Positioned(
+                                    bottom: 1,
+                                    child: Container(
+                                      width: 7,
+                                      height: 7,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Colors.blue,
+                                      ),
+                                    ),
+                                  );
+                                }
+                                return null;
+                              },
+                            ),
+                            headerStyle: HeaderStyle(
+                              formatButtonVisible: false,
+                              titleCentered: true,
+                              formatButtonShowsNext: false,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ]),
+            )));
   }
 
   void main() => runApp(MaterialApp(

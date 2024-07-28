@@ -1,523 +1,12 @@
-// import 'package:flutter/material.dart';
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:ooriba_s3/services/company_name_service.dart';
-// import 'package:ooriba_s3/services/location_service.dart';
-// import 'package:provider/provider.dart';
-
-// class StandardSettingsPage extends StatefulWidget {
-//   @override
-//   _StandardSettingsPageState createState() => _StandardSettingsPageState();
-// }
-
-// class _StandardSettingsPageState extends State<StandardSettingsPage> {
-//   final TextEditingController _companyNameController = TextEditingController();
-//   final TextEditingController _locationNameController = TextEditingController();
-//   final TextEditingController _locationPrefixController =
-//       TextEditingController();
-//   final TextEditingController _locationLatController = TextEditingController();
-//   final TextEditingController _locationLngController = TextEditingController();
-//   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-//   List<Map<String, dynamic>> _locations = [];
-//   late LocationService _locationService;
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     _locationService = LocationService();
-//     _loadCompanyName();
-//     _loadLocations();
-//   }
-
-//   Future<void> _loadCompanyName() async {
-//     DocumentSnapshot documentSnapshot =
-//         await _firestore.collection('Config').doc('company_name').get();
-
-//     if (documentSnapshot.exists) {
-//       _companyNameController.text = documentSnapshot['name'];
-//     }
-//   }
-
-//   Future<void> _loadLocations() async {
-//     QuerySnapshot querySnapshot =
-//         await _firestore.collection('Locations').get();
-//     setState(() {
-//       _locations = querySnapshot.docs.map((doc) {
-//         return {
-//           'name': doc.id,
-//           'prefix': doc['prefix'],
-//           'coordinates': doc['coordinates'],
-//         };
-//       }).toList();
-//     });
-//   }
-
-//   Future<void> _saveCompanyName() async {
-//     await _firestore.collection('Config').doc('company_name').set({
-//       'name': _companyNameController.text,
-//     });
-
-//     final companyNameService =
-//         Provider.of<CompanyNameService>(context, listen: false);
-//     companyNameService.setCompanyName(_companyNameController.text);
-
-//     ScaffoldMessenger.of(context).showSnackBar(
-//       const SnackBar(content: Text('Company name updated')),
-//     );
-//   }
-
-//   Future<void> _addLocation() async {
-//     String locationName = _locationNameController.text;
-//     String prefix = _locationPrefixController.text;
-//     double latitude = double.parse(_locationLatController.text);
-//     double longitude = double.parse(_locationLngController.text);
-
-//     await _firestore.collection('Locations').doc(locationName).set({
-//       'prefix': prefix,
-//       'coordinates': GeoPoint(latitude, longitude),
-//     });
-
-//     setState(() {
-//       _locations.add({
-//         'name': locationName,
-//         'prefix': prefix,
-//         'coordinates': GeoPoint(latitude, longitude),
-//       });
-//       _locationNameController.clear();
-//       _locationPrefixController.clear();
-//       _locationLatController.clear();
-//       _locationLngController.clear();
-//     });
-//   }
-
-//   Future<void> _deleteLocation(String name) async {
-//     await _firestore.collection('Locations').doc(name).delete();
-
-//     setState(() {
-//       _locations.removeWhere((location) => location['name'] == name);
-//     });
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: const Text('Standard Settings'),
-//       ),
-//       body: Padding(
-//         padding: const EdgeInsets.all(16.0),
-//         child: Column(
-//           children: <Widget>[
-//             TextField(
-//               controller: _companyNameController,
-//               decoration: const InputDecoration(labelText: 'Company Name'),
-//             ),
-//             const SizedBox(height: 20),
-//             ElevatedButton(
-//               onPressed: () async {
-//                 await _saveCompanyName();
-//               },
-//               child: const Text('Save'),
-//             ),
-//             const SizedBox(height: 20),
-//             TextField(
-//               controller: _locationNameController,
-//               decoration: const InputDecoration(labelText: 'Location Name'),
-//             ),
-//             TextField(
-//               controller: _locationPrefixController,
-//               decoration: const InputDecoration(labelText: 'Location Prefix'),
-//             ),
-//             TextField(
-//               controller: _locationLatController,
-//               decoration: const InputDecoration(labelText: 'Latitude'),
-//             ),
-//             TextField(
-//               controller: _locationLngController,
-//               decoration: const InputDecoration(labelText: 'Longitude'),
-//             ),
-//             const SizedBox(height: 20),
-//             ElevatedButton(
-//               onPressed: () async {
-//                 await _addLocation();
-//               },
-//               child: const Text('Add Location'),
-//             ),
-//             const SizedBox(height: 20),
-//             Expanded(
-//               child: ListView.builder(
-//                 itemCount: _locations.length,
-//                 itemBuilder: (context, index) {
-//                   final location = _locations[index];
-//                   return ListTile(
-//                     title: Text(location['name']),
-//                     subtitle: Text(
-//                       'Prefix: ${location['prefix']}\nCoordinates: ${location['coordinates'].latitude}, ${location['coordinates'].longitude}',
-//                     ),
-//                     trailing: IconButton(
-//                       icon: const Icon(Icons.delete),
-//                       onPressed: () async {
-//                         await _deleteLocation(location['name']);
-//                       },
-//                     ),
-//                   );
-//                 },
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
-// import 'package:flutter/material.dart';
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:ooriba_s3/services/admin/company_name_service.dart';
-// import 'package:ooriba_s3/services/admin/department_service.dart';
-// import 'package:ooriba_s3/services/admin/leave_type_service.dart';
-// import 'package:ooriba_s3/services/admin/logo_service.dart';
-// import 'package:ooriba_s3/services/location_service.dart';
-// import 'package:provider/provider.dart';
-
-// class StandardSettingsPage extends StatefulWidget {
-//   @override
-//   _StandardSettingsPageState createState() => _StandardSettingsPageState();
-// }
-
-// class _StandardSettingsPageState extends State<StandardSettingsPage> {
-//   final TextEditingController _companyNameController = TextEditingController();
-//   final TextEditingController _locationNameController = TextEditingController();
-//   final TextEditingController _locationPrefixController = TextEditingController();
-//   final TextEditingController _locationLatController = TextEditingController();
-//   final TextEditingController _locationLngController = TextEditingController();
-//   final TextEditingController _departmentController = TextEditingController();
-//   final TextEditingController _leaveTypeController = TextEditingController();
-
-//   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-//   List<Map<String, dynamic>> _locations = [];
-//   List<String> _departments = [];
-//   List<String> _leaveTypes = [];
-//   late LocationService _locationService;
-//   late DepartmentService _departmentService;
-//   late LeaveTypeService _leaveTypeService;
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     _locationService = LocationService();
-//     _departmentService = DepartmentService();
-//     _leaveTypeService = LeaveTypeService();
-//     _loadCompanyName();
-//     _loadLocations();
-//     _loadDepartments();
-//     _loadLeaveTypes();
-//   }
-
-//   Future<void> _loadCompanyName() async {
-//     DocumentSnapshot documentSnapshot = await _firestore.collection('Config').doc('company_name').get();
-
-//     if (documentSnapshot.exists) {
-//       _companyNameController.text = documentSnapshot['name'];
-//     }
-//   }
-
-//   Future<void> _loadLocations() async {
-//     QuerySnapshot querySnapshot = await _firestore.collection('Locations').get();
-//     setState(() {
-//       _locations = querySnapshot.docs.map((doc) {
-//         return {
-//           'name': doc.id,
-//           'prefix': doc['prefix'],
-//           'coordinates': doc['coordinates'],
-//         };
-//       }).toList();
-//     });
-//   }
-
-//   Future<void> _loadDepartments() async {
-//     List<String> departments = await _departmentService.getDepartments();
-//     setState(() {
-//       _departments = departments;
-//     });
-//   }
-
-//   Future<void> _loadLeaveTypes() async {
-//     List<String> leaveTypes = await _leaveTypeService.getLeaveTypes();
-//     setState(() {
-//       _leaveTypes = leaveTypes;
-//     });
-//   }
-
-//   Future<void> _saveCompanyName() async {
-//     await _firestore.collection('Config').doc('company_name').set({
-//       'name': _companyNameController.text,
-//     });
-
-//     final companyNameService = Provider.of<CompanyNameService>(context, listen: false);
-//     companyNameService.setCompanyName(_companyNameController.text);
-
-//     ScaffoldMessenger.of(context).showSnackBar(
-//       const SnackBar(content: Text('Company name updated')),
-//     );
-//   }
-
-//   Future<void> _addLocation() async {
-//     String locationName = _locationNameController.text;
-//     String prefix = _locationPrefixController.text;
-//     double latitude = double.parse(_locationLatController.text);
-//     double longitude = double.parse(_locationLngController.text);
-
-//     await _firestore.collection('Locations').doc(locationName).set({
-//       'prefix': prefix,
-//       'coordinates': GeoPoint(latitude, longitude),
-//     });
-
-//     setState(() {
-//       _locations.add({
-//         'name': locationName,
-//         'prefix': prefix,
-//         'coordinates': GeoPoint(latitude, longitude),
-//       });
-//       _locationNameController.clear();
-//       _locationPrefixController.clear();
-//       _locationLatController.clear();
-//       _locationLngController.clear();
-//     });
-//   }
-
-//   Future<void> _deleteLocation(String name) async {
-//     if (_locations.indexWhere((location) => location['name'] == name) < 3) {
-//       _showImportantElementAlert();
-//       return;
-//     }
-
-//     await _firestore.collection('Locations').doc(name).delete();
-
-//     setState(() {
-//       _locations.removeWhere((location) => location['name'] == name);
-//     });
-//   }
-
-//   Future<void> _addDepartment() async {
-//     String departmentName = _departmentController.text;
-
-//     await _departmentService.addDepartment(departmentName);
-
-//     setState(() {
-//       _departments.add(departmentName);
-//       _departmentController.clear();
-//     });
-//   }
-
-//   Future<void> _deleteDepartment(String name) async {
-//     if (_departments.indexOf(name) < 3) {
-//       _showImportantElementAlert();
-//       return;
-//     }
-
-//     await _departmentService.deleteDepartment(name);
-
-//     setState(() {
-//       _departments.removeWhere((department) => department == name);
-//     });
-//   }
-
-//   Future<void> _addLeaveType() async {
-//     String leaveTypeName = _leaveTypeController.text;
-
-//     await _leaveTypeService.addLeaveType(leaveTypeName);
-
-//     setState(() {
-//       _leaveTypes.add(leaveTypeName);
-//       _leaveTypeController.clear();
-//     });
-//   }
-
-//   Future<void> _deleteLeaveType(String name) async {
-//     if (_leaveTypes.indexOf(name) < 3) {
-//       _showImportantElementAlert();
-//       return;
-//     }
-
-//     await _leaveTypeService.deleteLeaveType(name);
-
-//     setState(() {
-//       _leaveTypes.removeWhere((leaveType) => leaveType == name);
-//     });
-//   }
-
-//   void _showImportantElementAlert() {
-//     showDialog(
-//       context: context,
-//       builder: (BuildContext context) {
-//         return AlertDialog(
-//           title: const Text('Cannot Delete'),
-//           content: const Text('This element is already in use.'),
-//           actions: <Widget>[
-//             TextButton(
-//               child: const Text('OK'),
-//               onPressed: () {
-//                 Navigator.of(context).pop();
-//               },
-//             ),
-//           ],
-//         );
-//       },
-//     );
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final logoService = Provider.of<LogoService>(context);
-
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: const Text('Standard Settings'),
-//       ),
-//       body: Padding(
-//         padding: const EdgeInsets.all(16.0),
-//         child: SingleChildScrollView(
-//           child: Column(
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             children: <Widget>[
-//               const Text(
-//                 'Company Name',
-//                 style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-//               ),
-//               TextField(
-//                 controller: _companyNameController,
-//                 decoration: const InputDecoration(labelText: 'Company Name'),
-//               ),
-//               const SizedBox(height: 10),
-//               ElevatedButton(
-//                 onPressed: () async {
-//                   await _saveCompanyName();
-//                 },
-//                 child: const Text('Save'),
-//               ),
-//               const SizedBox(height: 20),
-//               const Text(
-//                 'Company Logo',
-//                 style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-//               ),
-//               logoService.logo != null
-//                   ? Image.file(
-//                       logoService.logo!,
-//                       width: 200,
-//                       height: 200,
-//                     )
-//                   : const Text('No logo selected'),
-//               const SizedBox(height: 10),
-//               ElevatedButton(
-//                 onPressed: () async {
-//                   await logoService.pickLogo();
-//                 },
-//                 child: const Text('Upload Logo'),
-//               ),
-//               const SizedBox(height: 20),
-//               const Text(
-//                 'Locations',
-//                 style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-//               ),
-//               TextField(
-//                 controller: _locationNameController,
-//                 decoration: const InputDecoration(labelText: 'Location Name'),
-//               ),
-//               TextField(
-//                 controller: _locationPrefixController,
-//                 decoration: const InputDecoration(labelText: 'Location Prefix'),
-//               ),
-//               TextField(
-//                 controller: _locationLatController,
-//                 decoration: const InputDecoration(labelText: 'Latitude'),
-//               ),
-//               TextField(
-//                 controller: _locationLngController,
-//                 decoration: const InputDecoration(labelText: 'Longitude'),
-//               ),
-//               const SizedBox(height: 10),
-//               ElevatedButton(
-//                 onPressed: () async {
-//                   await _addLocation();
-//                 },
-//                 child: const Text('Add Location'),
-//               ),
-//               const SizedBox(height: 10),
-//               _buildListView(_locations, 'Locations', _deleteLocation),
-//               const SizedBox(height: 20),
-//               const Text(
-//                 'Departments',
-//                 style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-//               ),
-//               TextField(
-//                 controller: _departmentController,
-//                 decoration: const InputDecoration(labelText: 'Department'),
-//               ),
-//               const SizedBox(height: 10),
-//               ElevatedButton(
-//                 onPressed: () async {
-//                   await _addDepartment();
-//                 },
-//                 child: const Text('Add Department'),
-//               ),
-//               const SizedBox(height: 10),
-//               _buildListView(_departments, 'Departments', _deleteDepartment),
-//               const SizedBox(height: 20),
-//               const Text(
-//                 'Leave Types',
-//                 style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-//               ),
-//               TextField(
-//                 controller: _leaveTypeController,
-//                 decoration: const InputDecoration(labelText: 'Leave Type'),
-//               ),
-//               const SizedBox(height: 10),
-//               ElevatedButton(
-//                 onPressed: () async {
-//                   await _addLeaveType();
-//                 },
-//                 child: const Text('Add Leave Type'),
-//               ),
-//               const SizedBox(height: 10),
-//               _buildListView(_leaveTypes, 'Leave Types', _deleteLeaveType),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-
-//   Widget _buildListView(List items, String label, Function(String) deleteFunction) {
-//     return ListView.builder(
-//       shrinkWrap: true,
-//       physics: NeverScrollableScrollPhysics(),
-//       itemCount: items.length,
-//       itemBuilder: (context, index) {
-//         final item = items[index];
-//         return ListTile(
-//           title: item is String ? Text(item) : Text(item['name']),
-//           subtitle: item is Map ? Text(
-//             'Prefix: ${item['prefix']}\nCoordinates: ${item['coordinates'].latitude}, ${item['coordinates'].longitude}',
-//           ) : null,
-//           trailing: IconButton(
-//             icon: const Icon(Icons.delete),
-//             onPressed: () async {
-//               await deleteFunction(item is String ? item : item['name']);
-//             },
-//           ),
-//         );
-//       },
-//     );
-//   }
-// }
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ooriba_s3/services/admin/company_name_service.dart';
-import 'package:ooriba_s3/services/admin/department_service.dart';
-import 'package:ooriba_s3/services/admin/designation_service.dart';
 import 'package:ooriba_s3/services/admin/leave_type_service.dart';
 import 'package:ooriba_s3/services/admin/logo_service.dart';
+import 'package:ooriba_s3/services/designation_service.dart';
 import 'package:ooriba_s3/services/location_service.dart';
 import 'package:provider/provider.dart';
+import '../services/admin/department_service.dart';
 
 class StandardSettingsPage extends StatefulWidget {
   @override
@@ -527,36 +16,40 @@ class StandardSettingsPage extends StatefulWidget {
 class _StandardSettingsPageState extends State<StandardSettingsPage> {
   final TextEditingController _companyNameController = TextEditingController();
   final TextEditingController _locationNameController = TextEditingController();
-  final TextEditingController _locationCodeController = TextEditingController();
+  final TextEditingController _locationPrefixController =
+      TextEditingController();
   final TextEditingController _locationLatController = TextEditingController();
   final TextEditingController _locationLngController = TextEditingController();
+  final TextEditingController _locationMaxLeaveController =
+      TextEditingController();
+  final TextEditingController _locationWorkingDaysController =
+      TextEditingController();
+  final TextEditingController _locationRestrictedAttendanceRadiusController =
+      TextEditingController();
   final TextEditingController _departmentController = TextEditingController();
   final TextEditingController _leaveTypeController = TextEditingController();
-  final TextEditingController _workingDaysController = TextEditingController();
-  final TextEditingController _designationController = TextEditingController(); // Add designation controller
+  final TextEditingController _designationController = TextEditingController();
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   List<Map<String, dynamic>> _locations = [];
   List<String> _departments = [];
   List<String> _leaveTypes = [];
-  List<String> _designations = []; // Add designation list
+  List<String> _designations = [];
   late LocationService _locationService;
   late DepartmentService _departmentService;
   late LeaveTypeService _leaveTypeService;
-  late DesignationService _designationService; // Add designation service
+  late DesignationService _designationService;
 
-  String _selectedHoliday = 'Sunday';
-  List<String> _daysOfWeek = [
-    'Sunday',
+  String _selectedHoliday = 'Monday';
+  final List<String> _weekDays = [
     'Monday',
     'Tuesday',
     'Wednesday',
     'Thursday',
     'Friday',
-    'Saturday'
+    'Saturday',
+    'Sunday'
   ];
-
-  String? _editingLocationName;
 
   @override
   void initState() {
@@ -564,16 +57,17 @@ class _StandardSettingsPageState extends State<StandardSettingsPage> {
     _locationService = LocationService();
     _departmentService = DepartmentService();
     _leaveTypeService = LeaveTypeService();
-    _designationService = DesignationService(); // Initialize designation service
+    _designationService = DesignationService();
     _loadCompanyName();
     _loadLocations();
     _loadDepartments();
     _loadLeaveTypes();
-    _loadDesignations(); // Load designations
+    _loadDesignations();
   }
 
   Future<void> _loadCompanyName() async {
-    DocumentSnapshot documentSnapshot = await _firestore.collection('Config').doc('company_name').get();
+    DocumentSnapshot documentSnapshot =
+        await _firestore.collection('Config').doc('company_name').get();
 
     if (documentSnapshot.exists) {
       _companyNameController.text = documentSnapshot['name'];
@@ -581,20 +75,22 @@ class _StandardSettingsPageState extends State<StandardSettingsPage> {
   }
 
   Future<void> _loadLocations() async {
-    QuerySnapshot querySnapshot = await _firestore.collection('Locations').get();
+    QuerySnapshot querySnapshot =
+        await _firestore.collection('Locations').get();
     setState(() {
       _locations = querySnapshot.docs.map((doc) {
         return {
           'name': doc.id,
-          'code': doc['code'],
+          'prefix': doc['prefix'],
           'coordinates': doc['coordinates'],
-          'working_days': doc['working_days'],
+          'max_leave': doc['max_leave'],
           'holiday': doc['holiday'],
+          'working_days': doc['working_days'],
+          'restricted_radius': doc['restricted_radius'],
         };
       }).toList();
     });
   }
-
 
   Future<void> _loadDepartments() async {
     List<String> departments = await _departmentService.getDepartments();
@@ -622,7 +118,8 @@ class _StandardSettingsPageState extends State<StandardSettingsPage> {
       'name': _companyNameController.text,
     });
 
-    final companyNameService = Provider.of<CompanyNameService>(context, listen: false);
+    final companyNameService =
+        Provider.of<CompanyNameService>(context, listen: false);
     companyNameService.setCompanyName(_companyNameController.text);
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -632,77 +129,65 @@ class _StandardSettingsPageState extends State<StandardSettingsPage> {
 
   Future<void> _addLocation() async {
     String locationName = _locationNameController.text;
-    String code = _locationCodeController.text;
+    String prefix = _locationPrefixController.text;
     double latitude = double.parse(_locationLatController.text);
     double longitude = double.parse(_locationLngController.text);
-    int workingDays = int.parse(_workingDaysController.text);
-    String holiday = _selectedHoliday;
+    int maxLeave = int.parse(_locationMaxLeaveController.text);
+    int workingDays = int.parse(_locationWorkingDaysController.text);
+    int restrictedRadius =
+        int.parse(_locationRestrictedAttendanceRadiusController.text);
 
     await _firestore.collection('Locations').doc(locationName).set({
-      'code': code,
+      'prefix': prefix,
       'coordinates': GeoPoint(latitude, longitude),
+      'max_leave': maxLeave,
+      'holiday': _selectedHoliday,
       'working_days': workingDays,
-      'holiday': holiday,
+      'restricted_radius': restrictedRadius,
     });
 
     setState(() {
       _locations.add({
         'name': locationName,
-        'code': code,
+        'prefix': prefix,
         'coordinates': GeoPoint(latitude, longitude),
+        'max_leave': maxLeave,
+        'holiday': _selectedHoliday,
         'working_days': workingDays,
-        'holiday': holiday,
+        'restricted_radius': restrictedRadius,
       });
       _locationNameController.clear();
-      _locationCodeController.clear();
+      _locationPrefixController.clear();
       _locationLatController.clear();
       _locationLngController.clear();
-      _workingDaysController.clear();
-      _selectedHoliday = 'Sunday';
+      _locationMaxLeaveController.clear();
+      _locationWorkingDaysController.clear();
+      _locationRestrictedAttendanceRadiusController.clear();
+      _selectedHoliday = 'Monday';
     });
   }
 
-  Future<void> _editLocation(String locationName) async {
-    if (_editingLocationName == null) return;
-
-    String code = _locationCodeController.text;
-    double latitude = double.parse(_locationLatController.text);
-    double longitude = double.parse(_locationLngController.text);
-    int workingDays = int.parse(_workingDaysController.text);
-    String holiday = _selectedHoliday;
-
-    await _firestore.collection('Locations').doc(_editingLocationName).update({
-      'code': code,
-      'coordinates': GeoPoint(latitude, longitude),
-      'working_days': workingDays,
-      'holiday': holiday,
-    });
+  Future<void> _editLocation(Map<String, dynamic> location) async {
+    _locationNameController.text = location['name'];
+    _locationPrefixController.text = location['prefix'];
+    _locationLatController.text = location['coordinates'].latitude.toString();
+    _locationLngController.text = location['coordinates'].longitude.toString();
+    _locationMaxLeaveController.text = location['max_leave'].toString();
+    _locationWorkingDaysController.text = location['working_days'].toString();
+    _locationRestrictedAttendanceRadiusController.text =
+        location['restricted_radius'].toString();
+    _selectedHoliday = location['holiday'];
 
     setState(() {
-      int index = _locations.indexWhere((location) => location['name'] == _editingLocationName);
-      _locations[index] = {
-        'name': locationName,
-        'code': code,
-        'coordinates': GeoPoint(latitude, longitude),
-        'working_days': workingDays,
-        'holiday': holiday,
-      };
-      _locationNameController.clear();
-      _locationCodeController.clear();
-      _locationLatController.clear();
-      _locationLngController.clear();
-      _workingDaysController.clear();
-      _selectedHoliday = 'Sunday';
-      _editingLocationName = null;
+      _locations.remove(location);
     });
   }
 
   Future<void> _deleteLocation(String name) async {
-    // Ensure the location is not used before deleting
-    if (_locations.indexWhere((location) => location['name'] == name) < 3) {
-      _showImportantElementAlert();
-      return;
-    }
+    // if (_locations.indexWhere((location) => location['name'] == name) < 3) {
+    //   _showImportantElementAlert();
+    //   return;
+    // }
 
     await _firestore.collection('Locations').doc(name).delete();
 
@@ -723,10 +208,10 @@ class _StandardSettingsPageState extends State<StandardSettingsPage> {
   }
 
   Future<void> _deleteDepartment(String name) async {
-    if (_departments.indexOf(name) < 3) {
-      _showImportantElementAlert();
-      return;
-    }
+    // if (_departments.indexOf(name) < 3) {
+    //   _showImportantElementAlert();
+    //   return;
+    // }
 
     await _departmentService.deleteDepartment(name);
 
@@ -747,10 +232,10 @@ class _StandardSettingsPageState extends State<StandardSettingsPage> {
   }
 
   Future<void> _deleteLeaveType(String name) async {
-    if (_leaveTypes.indexOf(name) < 3) {
-      _showImportantElementAlert();
-      return;
-    }
+    // if (_leaveTypes.indexOf(name) < 3) {
+    //   _showImportantElementAlert();
+    //   return;
+    // }
 
     await _leaveTypeService.deleteLeaveType(name);
 
@@ -771,10 +256,10 @@ class _StandardSettingsPageState extends State<StandardSettingsPage> {
   }
 
   Future<void> _deleteDesignation(String name) async {
-    if (_designations.indexOf(name) < 3) {
-      _showImportantElementAlert();
-      return;
-    }
+    // if (_designations.indexOf(name) < 3) {
+    //   _showImportantElementAlert();
+    //   return;
+    // }
 
     await _designationService.deleteDesignation(name);
 
@@ -783,25 +268,25 @@ class _StandardSettingsPageState extends State<StandardSettingsPage> {
     });
   }
 
-  void _showImportantElementAlert() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Cannot Delete'),
-          content: const Text('This element is already in use.'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+  // void _showImportantElementAlert() {
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         title: const Text('Cannot Delete'),
+  //         content: const Text('This element is already in use.'),
+  //         actions: <Widget>[
+  //           TextButton(
+  //             child: const Text('OK'),
+  //             onPressed: () {
+  //               Navigator.of(context).pop();
+  //             },
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -832,187 +317,201 @@ class _StandardSettingsPageState extends State<StandardSettingsPage> {
                 },
                 child: const Text('Save'),
               ),
-              const SizedBox(height: 20),
-              const Text(
-                'Company Logo',
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-              ),
-              logoService.logo != null
-                  ? Image.file(
-                      logoService.logo!,
-                      width: 200,
-                      height: 200,
-                    )
-                  : const Text('No logo selected'),
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () async {
-                  await logoService.pickLogo();
-                },
-                child: const Text('Upload Logo'),
-              ),
-              const SizedBox(height: 20),
+              const Divider(),
               const Text(
                 'Locations',
                 style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
               ),
+              const SizedBox(height: 10),
+              for (var location in _locations)
+                ListTile(
+                  title: Text(location['name']),
+                  subtitle: Text(
+                      // 'Code: ${location['code']}\nCoordinates: ${location['coordinates'].latitude}, ${location['coordinates'].longitude}\nMax Leave: ${location['max_leave']}\nHoliday: ${location['holiday']}\nWorking Days: ${location['working_days']}\nRestricted Attendance Radius: ${location['restricted_radius']}'),
+                      'Code: ${location['prefix']}\nCoordinates: ${location['coordinates'].latitude}, ${location['coordinates'].longitude}\nMax sick Leave: ${location['max_leave']}\nHoliday: ${location['holiday']}\nWorking Days: ${location['working_days']}\nRestricted Attendance Radius: ${location['restricted_radius']}'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () {
+                          _editLocation(location);
+                        },
+                        //),
+                        //IconButton(
+                        //  icon: const Icon(Icons.delete),
+                        //  onPressed: () {
+                        //    _deleteLocation(location['name']);
+                        //  },
+                      ),
+                    ],
+                  ),
+                ),
               TextField(
                 controller: _locationNameController,
                 decoration: const InputDecoration(labelText: 'Location Name'),
               ),
               TextField(
-                controller: _locationCodeController,
+                controller: _locationPrefixController,
                 decoration: const InputDecoration(labelText: 'Location Code'),
               ),
               TextField(
                 controller: _locationLatController,
-                decoration: const InputDecoration(labelText: 'Latitude'),
+                decoration:
+                    const InputDecoration(labelText: 'Location Latitude'),
               ),
               TextField(
                 controller: _locationLngController,
-                decoration: const InputDecoration(labelText: 'Longitude'),
+                decoration:
+                    const InputDecoration(labelText: 'Location Longitude'),
               ),
               TextField(
-                controller: _workingDaysController,
-                decoration: const InputDecoration(labelText: 'No. of Working Days'),
+                controller: _locationMaxLeaveController,
+                decoration: const InputDecoration(labelText: 'Max sick Leave'),
               ),
-              const SizedBox(height: 10),
-              DropdownButtonFormField<String>(
+              TextField(
+                controller: _locationWorkingDaysController,
+                decoration: const InputDecoration(labelText: 'Working Days'),
+              ),
+              TextField(
+                controller: _locationRestrictedAttendanceRadiusController,
+                decoration: const InputDecoration(
+                    labelText: 'Restricted Attendance Radius in meters (only numbers)'),
+              ),
+              DropdownButtonFormField(
                 value: _selectedHoliday,
-                decoration: const InputDecoration(labelText: 'Holiday of the Week'),
-                items: _daysOfWeek.map((String day) {
-                  return DropdownMenuItem<String>(
-                    value: day,
-                    child: Text(day),
-                  );
-                }).toList(),
                 onChanged: (String? newValue) {
                   setState(() {
                     _selectedHoliday = newValue!;
                   });
                 },
+                items: _weekDays.map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
               ),
-              const SizedBox(height: 10),
               ElevatedButton(
                 onPressed: () async {
-                  if (_locationNameController.text.isEmpty) {
-                    // Handle empty location name error
-                    return;
-                  }
-
-                  if (_editingLocationName != null) {
-                    // Edit existing location
-                    await _editLocation(_locationNameController.text);
-                  } else {
-                    // Add new location
-                    await _addLocation();
-                  }
+                  await _addLocation();
                 },
-                child: const Text('Save Location'),
+                child: const Text('Add Location'),
               ),
-              const SizedBox(height: 10),
-              _buildListView(_locations, 'Locations', _deleteLocation, _editLocation),
-              const SizedBox(height: 20),
+              const Divider(),
               const Text(
                 'Departments',
                 style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
               ),
+              const SizedBox(height: 10),
+              for (var department in _departments)
+                ListTile(
+                  title: Text(department),
+                  //trailing: IconButton(
+                  //  icon: const Icon(Icons.delete),
+                  //  onPressed: () {
+                  //    _deleteDepartment(department);
+                  //  },
+                  //),
+                ),
               TextField(
                 controller: _departmentController,
-                decoration: const InputDecoration(labelText: 'Department'),
+                decoration: const InputDecoration(labelText: 'Department Name'),
               ),
-              const SizedBox(height: 10),
               ElevatedButton(
                 onPressed: () async {
                   await _addDepartment();
                 },
                 child: const Text('Add Department'),
               ),
-              const SizedBox(height: 10),
-              _buildListView(_departments, 'Departments', _deleteDepartment, null),
-              const SizedBox(height: 20),
-              const Text(
-                'Designations',
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-              ),
-              TextField(
-                controller: _designationController,
-                decoration: const InputDecoration(labelText: 'Designation'),
-              ),
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () async {
-                  await _addDesignation();
-                },
-                child: const Text('Add Designation'),
-              ),
-              const SizedBox(height: 10),
-              _buildListView(_designations, 'Designations', _deleteDesignation, null),
-              const SizedBox(height: 20),
+              const Divider(),
               const Text(
                 'Leave Types',
                 style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
               ),
+              const SizedBox(height: 10),
+              for (var leaveType in _leaveTypes)
+                ListTile(
+                  title: Text(leaveType),
+                  //trailing: IconButton(
+                  //  icon: const Icon(Icons.delete),
+                  //  onPressed: () {
+                  //    _deleteLeaveType(leaveType);
+                  //  },
+                  //),
+                ),
               TextField(
                 controller: _leaveTypeController,
-                decoration: const InputDecoration(labelText: 'Leave Type'),
+                decoration: const InputDecoration(labelText: 'Leave Type Name'),
               ),
-              const SizedBox(height: 10),
               ElevatedButton(
                 onPressed: () async {
                   await _addLeaveType();
                 },
                 child: const Text('Add Leave Type'),
               ),
+              const Divider(),
+              const Text(
+                'Designations',
+                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 10),
-              _buildListView(_leaveTypes, 'Leave Types', _deleteLeaveType, null),
+              for (var designation in _designations)
+                ListTile(
+                  title: Text(designation),
+                  //trailing: IconButton(
+                  //  icon: const Icon(Icons.delete),
+                  //  onPressed: () {
+                  //    _deleteDesignation(designation);
+                  //  },
+                  //),
+                ),
+              TextField(
+                controller: _designationController,
+                decoration:
+                    const InputDecoration(labelText: 'Designation Name'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  await _addDesignation();
+                },
+                child: const Text('Add Designation'),
+              ),
+              const Divider(),
+              const Text(
+                'Company Logo',
+                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              Center(
+                child: GestureDetector(
+                  onTap: () async {
+                    await logoService.pickLogo();
+                    setState(() {});
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Logo uploaded')),
+                    );
+                  },
+                  child: logoService.logo != null
+                      ? Image.file(
+                          logoService.logo!,
+                          height: 200,
+                        )
+                      : Container(
+                          width: 200,
+                          height: 200,
+                          color: Colors.grey[300],
+                          child: const Icon(
+                            Icons.add_a_photo,
+                            size: 50,
+                          ),
+                        ),
+                ),
+              ),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildListView(List items, String label, Function(String) deleteFunction, Function(String)? editFunction) {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        final item = items[index];
-        return ListTile(
-          title: item is String ? Text(item) : Text(item['name']),
-          subtitle: item is Map ? Text(
-            'Code: ${item['code']}\nCoordinates: ${item['coordinates'].latitude}, ${item['coordinates'].longitude}\nWorking Days: ${item['working_days']}\nHoliday: ${item['holiday']}',
-          ) : null,
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (editFunction != null)
-                IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () {
-                    setState(() {
-                      _editingLocationName = item['name'];
-                      _locationNameController.text = item['name'];
-                      _locationCodeController.text = item['code'];
-                      _locationLatController.text = item['coordinates'].latitude.toString();
-                      _locationLngController.text = item['coordinates'].longitude.toString();
-                      _workingDaysController.text = item['working_days'].toString();
-                      _selectedHoliday = item['holiday'];
-                    });
-                  },
-                ),
-              IconButton(
-                icon: const Icon(Icons.delete),
-                onPressed: () async {
-                  await deleteFunction(item is String ? item : item['name']);
-                },
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 }

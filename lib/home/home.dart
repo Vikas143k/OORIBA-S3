@@ -2,7 +2,7 @@ import 'package:ooriba_s3/facial/RegistrationScreen.dart';
 import 'package:ooriba_s3/services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';// Import registration screen
+import 'package:google_fonts/google_fonts.dart'; // Import registration screen
 
 class Home extends StatelessWidget {
   const Home({super.key});
@@ -27,7 +27,9 @@ class Home extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 10,),
+              const SizedBox(
+                height: 10,
+              ),
               Text(
                 FirebaseAuth.instance.currentUser!.email!.toString(),
                 style: GoogleFonts.raleway(
@@ -38,9 +40,13 @@ class Home extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 30,),
+              const SizedBox(
+                height: 30,
+              ),
               _logout(context),
-              const SizedBox(height: 20,),
+              const SizedBox(
+                height: 20,
+              ),
               _navigateToRegistration(context),
             ],
           ),

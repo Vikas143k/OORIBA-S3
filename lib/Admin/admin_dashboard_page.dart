@@ -316,25 +316,25 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                 _showRegisteredEmployees(context);
               },
             ),
-            ListTile(
-              leading: const Icon(Icons.time_to_leave),
-              title: const Text('Leave'),
-              onTap: () {
-                Navigator.pop(context);
-                // Navigate to Leave Page
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.access_time),
-              title: const Text('Attendance'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => DatePickerButton()),
-                );
-              },
-            ),
+            // ListTile(
+            //   leading: const Icon(Icons.time_to_leave),
+            //   title: const Text('Leave'),
+            //   onTap: () {
+            //     Navigator.pop(context);
+            //     // Navigate to Leave Page
+            //   },
+            // ),
+            // ListTile(
+            //   leading: const Icon(Icons.access_time),
+            //   title: const Text('Attendance'),
+            //   onTap: () {
+            //     Navigator.pop(context);
+            //     Navigator.push(
+            //       context,
+            //       MaterialPageRoute(builder: (context) => DatePickerButton()),
+            //     );
+            //   },
+            // ),
             ListTile(
               leading: const Icon(Icons.settings),
               title: const Text('Settings'),
@@ -342,7 +342,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => StandardSettingsPage()),
+                  MaterialPageRoute(
+                      builder: (context) => StandardSettingsPage()),
                 );
               },
             ),
@@ -357,17 +358,18 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                 );
               },
             ),
-            ListTile(
-              leading: const Icon(Icons.message),
-              title: const Text('Broadcast Message'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => BroadcastMessagePage()),
-                );
-              },
-            ),
+            // ListTile(
+            //   leading: const Icon(Icons.message),
+            //   title: const Text('Broadcast Message'),
+            //   onTap: () {
+            //     Navigator.pop(context);
+            //     Navigator.push(
+            //       context,
+            //       MaterialPageRoute(
+            //           builder: (context) => BroadcastMessagePage()),
+            //     );
+            //   },
+            // ),
             ListTile(
               leading: const Icon(Icons.logout),
               title: const Text('Log Out'),
@@ -398,7 +400,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
@@ -509,7 +512,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   void _showEmployeeDetails(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => EmployeeDetailsPage(employeeData: {})),
+      MaterialPageRoute(
+          builder: (context) => EmployeeDetailsPage(employeeData: {})),
     );
   }
 }

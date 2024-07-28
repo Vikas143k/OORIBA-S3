@@ -68,8 +68,10 @@ class _HomePageState extends State<RegistrationScreen> {
         Rect faceRect = face.boundingBox;
         num left = faceRect.left < 0 ? 0 : faceRect.left;
         num top = faceRect.top < 0 ? 0 : faceRect.top;
-        num right = faceRect.right > image.width ? image.width - 1 : faceRect.right;
-        num bottom = faceRect.bottom > image.height ? image.height - 1 : faceRect.bottom;
+        num right =
+            faceRect.right > image.width ? image.width - 1 : faceRect.right;
+        num bottom =
+            faceRect.bottom > image.height ? image.height - 1 : faceRect.bottom;
         num width = right - left;
         num height = bottom - top;
 
@@ -83,7 +85,8 @@ class _HomePageState extends State<RegistrationScreen> {
         );
 
         Recognition recognition = recognizer.recognize(faceImg2, faceRect);
-        showFaceRegistrationDialogue(Uint8List.fromList(img.encodeBmp(faceImg2)), recognition);
+        showFaceRegistrationDialogue(
+            Uint8List.fromList(img.encodeBmp(faceImg2)), recognition);
       }
 
       drawRectangleAroundFaces();
@@ -100,7 +103,8 @@ class _HomePageState extends State<RegistrationScreen> {
 
   TextEditingController textEditingController = TextEditingController();
 
-  void showFaceRegistrationDialogue(Uint8List croppedFace, Recognition recognition) {
+  void showFaceRegistrationDialogue(
+      Uint8List croppedFace, Recognition recognition) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -121,13 +125,17 @@ class _HomePageState extends State<RegistrationScreen> {
                 width: 200,
                 child: TextField(
                   controller: textEditingController,
-                  decoration: const InputDecoration(fillColor: Colors.white, filled: true, hintText: "Enter Name"),
+                  decoration: const InputDecoration(
+                      fillColor: Colors.white,
+                      filled: true,
+                      hintText: "Enter Name"),
                 ),
               ),
               const SizedBox(height: 10),
               ElevatedButton(
                 onPressed: () async {
-                  recognizer.registerFaceInDB(textEditingController.text, recognition.embeddings);
+                  recognizer.registerFaceInDB(
+                      textEditingController.text, recognition.embeddings);
                   textEditingController.text = "";
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -135,7 +143,9 @@ class _HomePageState extends State<RegistrationScreen> {
                   ));
                   await AuthService().signout(context: context);
                 },
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.blue, minimumSize: const Size(200, 40)),
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    minimumSize: const Size(200, 40)),
                 child: const Text("Register"),
               ),
             ],
@@ -167,13 +177,15 @@ class _HomePageState extends State<RegistrationScreen> {
         children: [
           image != null
               ? Container(
-                  margin: const EdgeInsets.only(top: 60, left: 30, right: 30, bottom: 0),
+                  margin: const EdgeInsets.only(
+                      top: 60, left: 30, right: 30, bottom: 0),
                   child: FittedBox(
                     child: SizedBox(
                       width: image.width.toDouble(),
                       height: image.width.toDouble(),
                       child: CustomPaint(
-                        painter: FacePainter(facesList: faces, imageFile: image),
+                        painter:
+                            FacePainter(facesList: faces, imageFile: image),
                       ),
                     ),
                   ),
@@ -200,7 +212,8 @@ class _HomePageState extends State<RegistrationScreen> {
                     child: SizedBox(
                       width: screenWidth / 2 - 70,
                       height: screenWidth / 2 - 70,
-                      child: Icon(Icons.image, color: Colors.blue, size: screenWidth / 7),
+                      child: Icon(Icons.image,
+                          color: Colors.blue, size: screenWidth / 7),
                     ),
                   ),
                 ),
@@ -212,7 +225,8 @@ class _HomePageState extends State<RegistrationScreen> {
                     child: SizedBox(
                       width: screenWidth / 2 - 70,
                       height: screenWidth / 2 - 70,
-                      child: Icon(Icons.camera, color: Colors.blue, size: screenWidth / 7),
+                      child: Icon(Icons.camera,
+                          color: Colors.blue, size: screenWidth / 7),
                     ),
                   ),
                 ),

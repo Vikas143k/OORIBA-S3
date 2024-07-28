@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:ooriba_s3/services/retrieveDataByEmployeeId.dart';
+import 'dart:async';
 
 class ProvideattendancePage extends StatefulWidget {
   @override
@@ -15,6 +16,7 @@ class _ProvideattendancePageState extends State<ProvideattendancePage> {
   bool hasError = false;
   List<Map<String, dynamic>> allEmployees = [];
   Map<String, Map<String, dynamic>> checkInOutData = {};
+  Map<String, Timer?> autoCheckoutTimers = {};
 
   @override
   void initState() {
@@ -95,7 +97,24 @@ class _ProvideattendancePageState extends State<ProvideattendancePage> {
 
   Future<void> toggleCheckInCheckOut(String employeeId) async {
     DateTime now = DateTime.now();
-    await retrieveAllEmployee.toggleCheckInCheckOut(employeeId, now);
+    Map<String, dynamic> data = checkInOutData[employeeId] ?? {};
+
+    if (data['checkIn'] != null && data['checkOut'] == null) {
+      // Check out the employee
+      await retrieveAllEmployee.toggleCheckInCheckOut(employeeId, now);
+      autoCheckoutTimers[employeeId]?.cancel(); // Cancel any existing timer
+    } else {
+      // Check in the employee
+      await retrieveAllEmployee.toggleCheckInCheckOut(employeeId, now);
+      autoCheckoutTimers[employeeId] = Timer(Duration(hours: 9), () async {
+        await retrieveAllEmployee.toggleCheckInCheckOut(
+            employeeId, DateTime.now());
+        setState(() {
+          fetchAllLeaveRequests();
+        });
+      });
+    }
+
     setState(() {
       fetchAllLeaveRequests();
     });
@@ -127,75 +146,76 @@ class _ProvideattendancePageState extends State<ProvideattendancePage> {
           return Text('Employee data not found');
         } else {
           Map<String, dynamic> employeeData = snapshot.data!;
-          String first=employeeData['firstName']??'null';
-          String last=employeeData['lastName']??'null';
+          String first = employeeData['firstName'] ?? 'null';
+          String last = employeeData['lastName'] ?? 'null';
           String employeeName =
               '${(first)[0].toUpperCase()}${first.substring(1).toLowerCase()} ${(last)[0].toUpperCase()}${last.substring(1).toLowerCase()}';
           String employeeRole = employeeData['role'] ?? 'Role not specified';
           String employeeDp = employeeData['dpImageUrl'] ?? "null";
-return Container(
-  width: 300,
-  child: Card(
-    child: Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              employeeDp != "null"
-                  ? CircleAvatar(
-                      backgroundImage: NetworkImage(employeeDp),
-                      radius: 25.0,
-                    )
-                  : CircleAvatar(
-                      backgroundImage: null,
-                      radius: 25.0,
-                    ),
-              SizedBox(width: 8.0),
-              Expanded(
+          return Container(
+            width: 300,
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(employeeName,
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 14.0)),
-                    Text('$employeeId', style: TextStyle(fontSize: 12.0)),
-                    Text(employeeRole, style: TextStyle(fontSize: 12.0)),
+                    Row(
+                      children: [
+                        employeeDp != "null"
+                            ? CircleAvatar(
+                                backgroundImage: NetworkImage(employeeDp),
+                                radius: 25.0,
+                              )
+                            : CircleAvatar(
+                                backgroundImage: null,
+                                radius: 25.0,
+                              ),
+                        SizedBox(width: 8.0),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(employeeName,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14.0)),
+                              Text('$employeeId',
+                                  style: TextStyle(fontSize: 12.0)),
+                              Text(employeeRole,
+                                  style: TextStyle(fontSize: 12.0)),
+                            ],
+                          ),
+                        ),
+                        SizedBox(width: 8.0),
+                        Align(
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              await toggleCheckInCheckOut(employeeId);
+                            },
+                            child: Text(
+                              isCheckedIn ? 'Check Out' : 'Check In ',
+                              style: TextStyle(fontSize: 12.0),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 16.0, vertical: 8.0),
+                              backgroundColor: isCheckedIn
+                                  ? const Color.fromARGB(255, 107, 241, 112)
+                                  : Colors.orange,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8.0),
+                    Text('Check-In: $checkInTime'),
+                    Text('Check-Out: $checkOutTime'),
                   ],
                 ),
               ),
-              SizedBox(width: 8.0),
-              Align(
-                
-                child: ElevatedButton(
-                  onPressed: () async {
-                    await toggleCheckInCheckOut(employeeId);
-                  },
-                  child: Text(
-                    isCheckedIn ? 'Check Out' : 'Check In ',
-                    style: TextStyle(fontSize: 12.0),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                    backgroundColor: isCheckedIn
-                        ? const Color.fromARGB(255, 107, 241, 112)
-                        : Colors.orange,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 8.0),
-          Text('Check-In: $checkInTime'),
-          Text('Check-Out: $checkOutTime'),
-        ],
-      ),
-    ),
-  ),
-);
-
+            ),
+          );
         }
       },
     );
@@ -203,6 +223,7 @@ return Container(
 
   @override
   Widget build(BuildContext context) {
+    // <--- @override for build method added
     return Scaffold(
       appBar: AppBar(
         title: Text('Provide Attendance'),

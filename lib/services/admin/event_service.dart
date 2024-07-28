@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class EventService {
-  final CollectionReference _eventCollection = FirebaseFirestore.instance.collection('Events');
-  final CollectionReference _holidayCollection = FirebaseFirestore.instance.collection('Holidays');
+  final CollectionReference _eventCollection =
+      FirebaseFirestore.instance.collection('Events');
+  final CollectionReference _holidayCollection =
+      FirebaseFirestore.instance.collection('Holidays');
 
   Future<Map<DateTime, List<Map<String, dynamic>>>> loadEvents() async {
     QuerySnapshot querySnapshot = await _eventCollection.get();

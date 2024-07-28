@@ -18,6 +18,7 @@ import 'package:ooriba_s3/services/retrieveDataByEmail.dart'
 import 'package:ooriba_s3/services/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ooriba_s3/services/employee_location_service.dart';
+import 'package:ooriba_s3/services/location_service.dart';
 
 class PostLoginPage extends StatefulWidget {
   final String phoneNumber;
@@ -50,9 +51,10 @@ class _PostLoginPageState extends State<PostLoginPage> {
   bool isLoadingForLocation = false;
   final EmployeeLocationService employeeLocationService =
       EmployeeLocationService();
-  Timer? _autoCheckOutTimer;
+  //Timer? _autoCheckOutTimer;
   final BroadcastService _broadcastService = BroadcastService();
   String? broadcastMessage;
+  final LocationService locationService = LocationService();
 
   @override
   void initState() {
@@ -65,11 +67,11 @@ class _PostLoginPageState extends State<PostLoginPage> {
     _fetchMessage();
   }
 
-  @override
-  void dispose() {
-    _autoCheckOutTimer?.cancel();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   _autoCheckOutTimer?.cancel();
+  //   super.dispose();
+  // }
 
   Future<void> _fetchMessage() async {
     String? message = await _broadcastService.getCurrentBroadcastMessage();
@@ -137,23 +139,53 @@ class _PostLoginPageState extends State<PostLoginPage> {
     });
 
     try {
-      Position position = await geoService.determinePosition();
-      bool withinRange = await geoService.isWithin50m(position);
+      Position position = await locationService.determinePosition();
+      String Prefix = employeeId!.substring(0, 3);
 
-      setState(() {
-        isWithinRange = withinRange;
-        isLoading = false;
-      });
+      if (Prefix.isEmpty) {
+        setState(() {
+          isLoading = false;
+        });
+        Fluttertoast.showToast(msg: 'Invalid employee ID');
+        return;
+      }
 
-      Fluttertoast.showToast(
+      Map<String, dynamic> locationDetails =
+          await locationService.getLocationByPrefix(Prefix);
 
-        msg:employeeType != "Off-site"? (isWithinRange
-            ? "You are within the location"
-            : "You are away from the location"):"",
-      );
+      if (locationDetails.isNotEmpty) {
+        GeoPoint coordinates = locationDetails['coordinates'];
+        double restrictedRadius =
+            (locationDetails['restricted_radius'] as num).toDouble();
+
+        print('Location Details: $locationDetails');
+        print('Coordinates: ${coordinates.latitude}, ${coordinates.longitude}');
+        print('Restricted Radius: $restrictedRadius');
+
+        bool withinRange = await locationService.isWithinRadius(
+            position, restrictedRadius, coordinates);
+
+        setState(() {
+          isWithinRange = withinRange;
+          isLoading = false;
+        });
+
+        Fluttertoast.showToast(
+          msg: employeeType != "Off-site"
+              ? (isWithinRange
+                  ? "You are within the location"
+                  : "You are not within the location")
+              : "you are away from the location",
+        );
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+        Fluttertoast.showToast(msg: 'Location details not found');
+      }
     } catch (e) {
       print(e);
-      Fluttertoast.showToast(msg: 'Error: $e');
+      Fluttertoast.showToast(msg: 'Error determining location');
       setState(() {
         isLoading = false;
       });
@@ -280,9 +312,9 @@ class _PostLoginPageState extends State<PostLoginPage> {
     await _saveLocalCheckInTime(now);
     await _clearLocalCheckInCheckOutTimes();
 
-    _autoCheckOutTimer = Timer(Duration(hours: 9), () {
-      _checkOut();
-    });
+    // _autoCheckOutTimer = Timer(Duration(hours: 9), () {
+    //   _checkOut();
+    // });
   }
 
   Future<void> _checkOut() async {
@@ -347,206 +379,6 @@ class _PostLoginPageState extends State<PostLoginPage> {
     }
   }
 
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Row(
-//           children: [
-//             if (dpImageUrl != null)
-//               CircleAvatar(
-//                 backgroundImage: NetworkImage(dpImageUrl!),
-//               ),
-//             SizedBox(width: 8),
-//             Column(
-//               crossAxisAlignment: CrossAxisAlignment.start,
-//               children: [
-//                 Text(employeeName != null
-//                     ? 'Welcome, $employeeName-$employeeId'
-//                     : "Loading"),
-//                 if (lastLoginTime != null)
-//                   Text(
-//                     'Last login: ${formatTimeWithoutSeconds(lastLoginTime)}',
-//                     style: TextStyle(fontSize: 14),
-//                   ),
-//               ],
-//             ),
-//           ],
-//         ),
-//         actions: [
-//           IconButton(
-//             icon: const Icon(Icons.logout),
-//             onPressed: () async {
-//               await _saveLastLoginTime();
-//               await AuthService().signout(context: context);
-//             },
-//           ),
-//         ],
-//       ),
-//       body: isLoading
-//           ? const Center(child: CircularProgressIndicator())
-//           : Padding(
-//               padding: const EdgeInsets.all(8.0),
-//               child: Column(
-//                 children: [
-//                   Center(
-//                     child: Row(
-//                       mainAxisAlignment: MainAxisAlignment.center,
-//                       crossAxisAlignment: CrossAxisAlignment.center,
-//                       children: [
-
-//                         ElevatedButton(
-//                           onPressed: () {
-//                             if (isRegistered) {
-//                               if (isWithinRange) {
-//                                 navigateToFaceRecognitionScreen();
-//                               }
-//                             } else {
-//                               Navigator.push(
-//                                 context,
-//                                 MaterialPageRoute(
-//                                   builder: (context) =>
-//                                       const RegistrationScreen(),
-//                                 ),
-//                               );
-//                             }
-//                           },
-//                           style: ElevatedButton.styleFrom(
-//                             backgroundColor: isRegistered
-//                                 ? (isCheckedIn ? Colors.green : Colors.orange)
-//                                 : null,
-//                             padding: const EdgeInsets.symmetric(
-//                                 horizontal: 20, vertical: 15),
-//                           ),
-//                           child: Text(isRegistered
-//                               ? (isCheckedIn ? 'Check-out' : 'Check-in')
-//                               : 'Register'),
-//                         ),
-
-//                         SizedBox(width: 20),
-//                         isPresent
-//                             ? FutureBuilder<String>(
-//                                 future: getImageUrl(employeeId!),
-//                                 builder: (context, snapshot) {
-//                                   if (snapshot.connectionState ==
-//                                       ConnectionState.waiting) {
-//                                     return const CircularProgressIndicator();
-//                                   } else if (snapshot.hasError ||
-//                                       !snapshot.hasData ||
-//                                       snapshot.data!.isEmpty) {
-//                                     return const Text('No image');
-//                                   } else {
-//                                     return InkWell(
-//                                       onTap: () {
-//                                         showDialog(
-//                                           context: context,
-//                                           builder: (context) => AlertDialog(
-//                                             content:
-//                                                 Image.network(snapshot.data!),
-//                                             actions: <Widget>[
-//                                               TextButton(
-//                                                 child: const Text('Close'),
-//                                                 onPressed: () {
-//                                                   Navigator.of(context).pop();
-//                                                 },
-//                                               ),
-//                                             ],
-//                                           ),
-//                                         );
-//                                       },
-//                                       child: Image.network(
-//                                         snapshot.data!,
-//                                         width: 60,
-//                                         height: 60,
-//                                         fit: BoxFit.fill,
-//                                       ),
-//                                     );
-//                                   }
-//                                 },
-//                               )
-//                             : const Icon(Icons.no_accounts, size: 60),
-//                       ],
-//                     ),
-//                   ),
-//                   const SizedBox(height: 20),
-
-//                   Row(
-//                     mainAxisAlignment:
-//                         MainAxisAlignment.spaceEvenly, // Adjust as needed
-//                     children: [
-//                       Expanded(
-//                         child: SizedBox(
-//                           height: 70, // Adjust the height as needed
-//                           child: Card(
-//                             child: Column(
-//                               mainAxisAlignment: MainAxisAlignment.center,
-//                               children: [
-//                                 const Text('Last Check-in',
-//                                     style:
-//                                         TextStyle(fontWeight: FontWeight.bold)),
-//                                 Text(formatTime(checkInTime)),
-//                               ],
-//                             ),
-//                           ),
-//                         ),
-//                       ),
-//                       const SizedBox(width: 10), // Adjust spacing between cards
-//                       Expanded(
-//                         child: SizedBox(
-//                           height: 70, // Adjust the height as needed
-//                           child: Card(
-//                             child: Column(
-//                               mainAxisAlignment: MainAxisAlignment.center,
-//                               children: [
-//                                 const Text('Last Check-out',
-//                                     style:
-//                                         TextStyle(fontWeight: FontWeight.bold)),
-//                                 Text(formatTime(checkOutTime)),
-//                               ],
-//                             ),
-//                           ),
-//                         ),
-//                       ),
-//                     ],
-//                   ),
-//                   const SizedBox(height: 20),
-//                   Expanded(
-//                     child: ListView(
-//                       children: const [
-//                         Card(
-//                           child: ListTile(
-//                             leading: Icon(Icons.calendar_today),
-//                             title: Text('Upcoming Events'),
-//                             subtitle: Column(
-//                               crossAxisAlignment: CrossAxisAlignment.start,
-//                               children: [
-//                                 Text('Project Deadline: 10th July 2024'),
-//                                 Text('Client Meeting: 15th July 2024'),
-//                               ],
-//                             ),
-//                           ),
-//                         ),
-//                         Card(
-//                           child: ListTile(
-//                             leading: Icon(Icons.history),
-//                             title: Text('Recent Activities'),
-//                             subtitle: Column(
-//                               crossAxisAlignment: CrossAxisAlignment.start,
-//                               children: [
-//                                 Text('Meeting with team at 11:00 AM'),
-//                                 Text('Submitted report at 2:00 PM'),
-//                               ],
-//                             ),
-//                           ),
-//                         ),
-//                       ],
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//             ),
-//     );
-//   }
-// }
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -620,14 +452,14 @@ class _PostLoginPageState extends State<PostLoginPage> {
                 );
               },
             ),
-            ListTile(
-              leading: Icon(Icons.person),
-              title: Text('Personal Information'),
-              onTap: () {
-                // Navigator.pop(context);
-                // navigateToPersonalInformation();
-              },
-            ),
+            // ListTile(
+            //     //  leading: Icon(Icons.person),
+            //     //  title: Text('Personal Information'),
+            //     //  onTap: () {
+            //     //    // Navigator.pop(context);
+            //     //    // navigateToPersonalInformation();
+            //     //  },
+            //     ),
             ListTile(
               leading: Icon(Icons.person),
               title: Text('Logout'),
@@ -669,7 +501,11 @@ class _PostLoginPageState extends State<PostLoginPage> {
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: isRegistered
-                                ? (isWithinRange ||employeeType == "Off-site"?(isCheckedIn ? Colors.green : Colors.orange):null)
+                                ? (isWithinRange || employeeType == "Off-site"
+                                    ? (isCheckedIn
+                                        ? Colors.green
+                                        : Colors.orange)
+                                    : null)
                                 : null,
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 20, vertical: 15),
@@ -800,7 +636,7 @@ class _PostLoginPageState extends State<PostLoginPage> {
                             title: const Text(
                               'Global Communication',
                               style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 25),
+                                  fontWeight: FontWeight.bold, fontSize: 20),
                             ),
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,

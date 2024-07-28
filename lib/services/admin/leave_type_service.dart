@@ -4,7 +4,8 @@ class LeaveTypeService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Future<List<String>> getLeaveTypes() async {
-    QuerySnapshot querySnapshot = await _firestore.collection('LeaveTypes').get();
+    QuerySnapshot querySnapshot =
+        await _firestore.collection('LeaveTypes').get();
     return querySnapshot.docs.map((doc) => doc.id).toList();
   }
 

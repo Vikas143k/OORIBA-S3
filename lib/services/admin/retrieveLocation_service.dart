@@ -5,7 +5,8 @@ class LocationService {
 
   Future<List<String>> getAllLocations() async {
     try {
-      QuerySnapshot querySnapshot = await _firestore.collection('Locations').get();
+      QuerySnapshot querySnapshot =
+          await _firestore.collection('Locations').get();
 
       List<String> locations = querySnapshot.docs.map((doc) => doc.id).toList();
 

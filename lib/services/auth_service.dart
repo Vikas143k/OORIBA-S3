@@ -2,11 +2,11 @@
 // import 'package:cloud_firestore/cloud_firestore.dart';
 // import 'package:flutter/material.dart';
 // import 'package:fluttertoast/fluttertoast.dart';
-// import 'package:ooriba_s3/HR/hr_dashboard_page.dart';
-// import 'package:ooriba_s3/employee_checkin_page.dart';
-// import 'package:ooriba_s3/employee_signup_success.dart';
-// import 'package:ooriba_s3/facial/HomeScreen.dart';
-// import 'package:ooriba_s3/main.dart';
+// import 'package:ooriba_s3_s3/HR/hr_dashboard_page.dart';
+// import 'package:ooriba_s3_s3/employee_checkin_page.dart';
+// import 'package:ooriba_s3_s3/employee_signup_success.dart';
+// import 'package:ooriba_s3_s3/facial/HomeScreen.dart';
+// import 'package:ooriba_s3_s3/main.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
 
 // class AuthService {
@@ -219,10 +219,10 @@
 // import 'package:firebase_auth/firebase_auth.dart';
 // import 'package:flutter/material.dart';
 // import 'package:fluttertoast/fluttertoast.dart';
-// import 'package:ooriba_s3/HR/hr_dashboard_page.dart';
-// import 'package:ooriba_s3/main.dart';
-// import 'package:ooriba_s3/post_login_page.dart';
-// import 'package:ooriba_s3/siteManager/siteManagerDashboard.dart';
+// import 'package:ooriba_s3_s3/HR/hr_dashboard_page.dart';
+// import 'package:ooriba_s3_s3/main.dart';
+// import 'package:ooriba_s3_s3/post_login_page.dart';
+// import 'package:ooriba_s3_s3/siteManager/siteManagerDashboard.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
 
 // class AuthService {
@@ -268,7 +268,7 @@
 //       //         .collection('Regemp')
 //       //         .doc(email)
 //       //         .get();
-//       final FirebaseFirestore _db = FirebaseFirestore.instance; 
+//       final FirebaseFirestore _db = FirebaseFirestore.instance;
 
 //       QuerySnapshot snapshot = (await _db
 //           .collection('Regemp')
@@ -470,28 +470,29 @@ class AuthService {
     required BuildContext context,
   }) async {
     try {
-      if(identifier=="Admin" && password=="Admin"){
+      if (identifier == "admin@gmail.com" && password == "Admin@1") {
         await saveUserSession(identifier, "Admin");
-         Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (BuildContext context) =>
-              AdminDashboardPage(),
-        ),
-      );
-      return true;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (BuildContext context) => AdminDashboardPage(),
+          ),
+        );
+        return true;
       }
       if (isEmail(identifier)) {
         // Sign in using Firebase Authentication
         return await signInWithEmail(identifier, password, context);
       } else if (isPhoneNumber(identifier)) {
         // Check if there is an email associated with the phone number
-          print("..........via email..................Sign in using Firebase Authentication.......................");
+        print(
+            "..........via email..................Sign in using Firebase Authentication.......................");
 
         String? email = await getEmailFromPhoneNumber(identifier);
         if (email != null) {
           // Sign in using Firebase Authentication
-          print("..........number has email..................Sign in using Firebase Authentication.......................");
+          print(
+              "..........number has email..................Sign in using Firebase Authentication.......................");
           return await signInWithEmail(email, password, context);
         } else {
           // Check the Firestore for the phone number
@@ -523,7 +524,8 @@ class AuthService {
     }
   }
 
-  Future<bool> signInWithEmail(String email, String password, BuildContext context) async {
+  Future<bool> signInWithEmail(
+      String email, String password, BuildContext context) async {
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
@@ -532,9 +534,12 @@ class AuthService {
 
       // Fetch the user's role from Firestore based on phone number
       final QuerySnapshot<Map<String, dynamic>> snapshot =
-          await FirebaseFirestore.instance.collection('Regemp')
-              .where('email', isEqualTo: email).limit(1).get();
-      
+          await FirebaseFirestore.instance
+              .collection('Regemp')
+              .where('email', isEqualTo: email)
+              .limit(1)
+              .get();
+
       if (snapshot.docs.isEmpty) {
         Fluttertoast.showToast(
           msg: 'No user found for that email in the database. $email',
@@ -554,7 +559,7 @@ class AuthService {
       // Navigate to the appropriate page based on the role
       return await navigateBasedOnRole(context, role, email);
     } on FirebaseAuthException catch (e) {
-      String message = 'Authentication error: ${e.message}';
+      String message = 'Please verify the credentials';
       Fluttertoast.showToast(
         msg: message,
         toastLength: Toast.LENGTH_LONG,
@@ -570,11 +575,11 @@ class AuthService {
   Future<bool> handlePhoneNumberLogin(
       String phoneNumber, String password, BuildContext context) async {
     // Query Firestore to get the employee details associated with the phone number
-    final DocumentSnapshot<Map<String, dynamic>> userDoc = await FirebaseFirestore
-        .instance
-        .collection('Regemp')
-        .doc(phoneNumber)
-        .get();
+    final DocumentSnapshot<Map<String, dynamic>> userDoc =
+        await FirebaseFirestore.instance
+            .collection('Regemp')
+            .doc(phoneNumber)
+            .get();
 
     if (!userDoc.exists) {
       Fluttertoast.showToast(
@@ -590,7 +595,7 @@ class AuthService {
 
     String storedPassword = userDoc.data()?['password'] ?? '';
     String role = userDoc.data()?['role'] ?? '';
-    String email = userDoc.data()?['email'] ??userDoc.data()?['phoneNo'] ;
+    String email = userDoc.data()?['email'] ?? userDoc.data()?['phoneNo'];
 
     if (storedPassword == password) {
       await saveUserSession(email, role);
@@ -610,7 +615,8 @@ class AuthService {
     }
   }
 
-  Future<bool> navigateBasedOnRole(BuildContext context, String role, String email) async {
+  Future<bool> navigateBasedOnRole(
+      BuildContext context, String role, String email) async {
     await Future.delayed(const Duration(seconds: 1));
     if (role == "Standard") {
       Navigator.pushReplacement(
@@ -708,11 +714,11 @@ class AuthService {
 
   Future<String?> getEmailFromPhoneNumber(String phoneNumber) async {
     // Query Firestore to get the email associated with the phone number
-    final DocumentSnapshot<Map<String, dynamic>> userDoc = await FirebaseFirestore
-        .instance
-        .collection('Regemp')
-        .doc(phoneNumber)
-        .get();
+    final DocumentSnapshot<Map<String, dynamic>> userDoc =
+        await FirebaseFirestore.instance
+            .collection('Regemp')
+            .doc(phoneNumber)
+            .get();
 
     if (!userDoc.exists) {
       return null;

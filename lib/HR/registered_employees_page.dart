@@ -1,8 +1,12 @@
+// import 'dart:io';
+// import 'package:ooriba_s3/services/admin/retrieveLocation_service.dart';
+// import 'package:path/path.dart' as path;
+// import 'package:firebase_storage/firebase_storage.dart';
 // import 'package:flutter/material.dart';
 // import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:image_picker/image_picker.dart';
 // import 'package:ooriba_s3/services/admin/department_service.dart';
-// import 'package:ooriba_s3/services/admin/designation_service.dart';
-// import 'package:ooriba_s3/services/admin/retrieveLocation_service.dart';
+// import 'package:ooriba_s3/services/designation_service.dart';
 
 // class RegisteredEmployeesPage extends StatefulWidget {
 //   const RegisteredEmployeesPage({super.key});
@@ -13,32 +17,8 @@
 // }
 
 // class _RegisteredEmployeesPageState extends State<RegisteredEmployeesPage> {
-    
 //   @override
-//   // Widget build(BuildContext context) {
-//   //   return Scaffold(
-//   //     appBar: AppBar(
-//   //       title: Text('Registered Employees'),
-//   //     ),
-//   //     body: StreamBuilder<QuerySnapshot>(
-//   //       stream: FirebaseFirestore.instance.collection('Regemp').snapshots(),
-//   //       builder: (context, snapshot) {
-//   //         if (snapshot.connectionState == ConnectionState.waiting) {
-//   //           return Center(child: CircularProgressIndicator());
-//   //         } else if (snapshot.hasError) {
-//   //           return Center(child: Text('Error: ${snapshot.error}'));
-//   //         } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-//   //           return Center(child: Text('No registered employees found'));
-//   //         }
-
-//   //         final employees = snapshot.data!.docs;
-//   //         return ListView.builder(
-//   //           itemCount: employees.length,
-//   //           itemBuilder: (context, index) {
-//   //             final data = employees[index].data() as Map<String, dynamic>;
-//   //             return EmployeeCard(data: data);
-//   //           },
-//    Widget build(BuildContext context) {
+//   Widget build(BuildContext context) {
 //     return Scaffold(
 //       appBar: AppBar(
 //         title: const Text('Registered Employees'),
@@ -67,7 +47,8 @@
 //           return ListView.builder(
 //             itemCount: filteredEmployees.length,
 //             itemBuilder: (context, index) {
-//               final data = filteredEmployees[index].data() as Map<String, dynamic>;
+//               final data =
+//                   filteredEmployees[index].data() as Map<String, dynamic>;
 //               return EmployeeCard(data: data);
 //             },
 //           );
@@ -94,21 +75,23 @@
 //             Row(
 //               children: <Widget>[
 //                 CircleAvatar(
-//           radius: 30.0,
-//           backgroundColor: Colors.purple[100],
-//           backgroundImage: data['dpImageUrl'] != null && data['dpImageUrl'].isNotEmpty
-//               ? NetworkImage(data['dpImageUrl'])
-//               : null,
-//           child: data['dpImageUrl'] == null || data['dpImageUrl'].isEmpty
-//               ? Text(
-//                   '${data['firstName'][0]}${data['lastName'][0]}',
-//                   style: const TextStyle(
-//                     fontSize: 24.0,
-//                     color: Colors.white,
-//                   ),
-//                 )
-//               : null,
-//         ),
+//                   radius: 30.0,
+//                   backgroundColor: Colors.purple[100],
+//                   backgroundImage: data['dpImageUrl'] != null &&
+//                           data['dpImageUrl'].isNotEmpty
+//                       ? NetworkImage(data['dpImageUrl'])
+//                       : null,
+//                   child:
+//                       data['dpImageUrl'] == null || data['dpImageUrl'].isEmpty
+//                           ? Text(
+//                               '${data['firstName'][0]}${data['lastName'][0]}',
+//                               style: const TextStyle(
+//                                 fontSize: 24.0,
+//                                 color: Colors.white,
+//                               ),
+//                             )
+//                           : null,
+//                 ),
 //                 //   radius: 30.0,
 //                 //   backgroundColor: Colors.purple[100],
 //                 //   child: Text(
@@ -120,22 +103,24 @@
 //                 //   ),
 //                 // ),
 //                 const SizedBox(width: 16.0),
-//                 Column(
-//                   crossAxisAlignment: CrossAxisAlignment.start,
-//                   children: <Widget>[
-//                     Text(
-//                       '${data['firstName']} ${data['lastName']}',
-//                       style: const TextStyle(
-//                         fontSize: 18.0,
-//                         fontWeight: FontWeight.bold,
+//                 Flexible(
+//                   child: Column(
+//                     crossAxisAlignment: CrossAxisAlignment.start,
+//                     children: <Widget>[
+//                       Text(
+//                         '${data['firstName']} ${data['lastName']}',
+//                         style: const TextStyle(
+//                           fontSize: 18.0,
+//                           fontWeight: FontWeight.bold,
+//                         ),
 //                       ),
-//                     ),
-//                     const SizedBox(height: 4.0),
-//                     Text('Phone: ${data['phoneNo']}'),
-//                     Text('Email: ${data['email']}'),
-//                     Text('Employee Type: ${data['employeeType']}'),
-//                   ],
-//                 ),
+//                       const SizedBox(height: 4.0),
+//                       Text('Phone: ${data['phoneNo']}'),
+//                       Text('Email: ${data['email']}'),
+//                       Text('Employee Type: ${data['employeeType']}'),
+//                     ],
+//                   ),
+//                 )
 //               ],
 //             ),
 //             const SizedBox(height: 16.0),
@@ -178,33 +163,6 @@
 // }
 
 // class _EmployeeDetailsDialogState extends State<EmployeeDetailsDialog> {
-
-//    LocationService locationService = LocationService();
-//    DepartmentService departmentService=DepartmentService();
-//    DesignationService designationService=DesignationService();
-//     List<String> locationNames = [];
-//   List<String> departmentNames = [];
-//   List<String> designationName= [];
-//   Future<void> fetchLocations() async {
-//     List<String> locations = await locationService.getAllLocations();
-//     setState(() {
-//       locationNames = locations;
-//       // print(locationNames);
-//     });
-//   }
-//  Future<void> fetchDepartment() async {
-//     List<String> department = await departmentService.getDepartments();
-//     setState(() {
-//       departmentNames = department;
-//       print(departmentNames);
-//     });
-//   }
-//  Future<void> fetchDesignation() async {
-//     List<String> designation= await designationService.getDesignations();
-//     setState(() {
-//       designationName = designation;
-//     });
-//   }
 //   bool _isEditing = false;
 
 //   late TextEditingController _firstNameController;
@@ -234,13 +192,16 @@
 //   String _selectedEmployeeType = '';
 
 //   final Map<String, String> _validationErrors = {};
+//   final DesignationService _designationService = DesignationService();
+//   final DepartmentService _departmentService = DepartmentService();
+//   final LocationService _locationService = LocationService();
 
+//   List<String> _departments = [];
+//   List<String> _designations = [];
+//   List<String> _locations = [];
 //   @override
 //   void initState() {
 //     super.initState();
-//     fetchLocations();
-//      fetchDepartment();
-//      fetchDesignation();
 //     _firstNameController =
 //         TextEditingController(text: widget.data['firstName']);
 //     _lastNameController = TextEditingController(text: widget.data['lastName']);
@@ -275,6 +236,19 @@
 //     _selectedStatus = widget.data['status'] ?? '';
 //     _selectedRole = widget.data['role'] ?? '';
 //     _selectedEmployeeType = widget.data['employeeType'] ?? '';
+
+//     _fetchData();
+//   }
+
+//   Future<void> _fetchData() async {
+//     final departments = await _departmentService.getDepartments();
+//     final designations = await _designationService.getDesignations();
+//     final locations = await _locationService.getAllLocations();
+//     setState(() {
+//       _departments = departments;
+//       _designations = designations;
+//       _locations = locations;
+//     });
 //   }
 
 //   @override
@@ -341,7 +315,7 @@
 //       _validationErrors['password'] =
 //           'Password must be at least 8 characters long.';
 //     } else if (!RegExp(
-//             r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]')
+//             r'^(?=.[a-z])(?=.[A-Z])(?=.\d)(?=.[@$!%?&])[A-Za-z\d@$!%?&]')
 //         .hasMatch(password)) {
 //       _validationErrors['password'] =
 //           'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.';
@@ -385,6 +359,36 @@
 //     return _validationErrors.isEmpty;
 //   }
 
+//   Future<void> _selectImage(
+//       {required ImageSource source, required String field}) async {
+//     final picker = ImagePicker();
+//     final pickedFile = await picker.pickImage(source: source);
+
+//     if (pickedFile != null) {
+//       final file = File(pickedFile.path);
+//       final fileName = path.basename(file.path);
+//       final destination = 'employee_images/$fileName';
+
+//       try {
+//         final ref = FirebaseStorage.instance.ref(destination);
+//         await ref.putFile(file);
+//         final downloadURL = await ref.getDownloadURL();
+
+//         setState(() {
+//           if (field == 'dpImageUrl') {
+//             _dpImageUrlController.text = downloadURL;
+//           } else if (field == 'aadharImageUrl') {
+//             _aadharImageUrlController.text = downloadURL;
+//           } else if (field == 'supportUrl') {
+//             _supportUrlController.text = downloadURL;
+//           }
+//         });
+//       } catch (e) {
+//         // Handle errors
+//       }
+//     }
+//   }
+
 //   @override
 //   Widget build(BuildContext context) {
 //     return Dialog(
@@ -403,21 +407,36 @@
 //               _buildRow('Permanent Address', _permanentAddressController),
 //               _buildRow('Residential Address', _residentialAddressController),
 //               _buildRow('Date of Birth', _dobController),
-//               _buildRow('Profile Picture URL', _dpImageUrlController),
-//               _buildRow('Supporting Document URL', _supportUrlController),
-//               _buildRow('Aadhar Number', _aadharNoController),
-//               _buildRow('Aadhar Image URL', _aadharImageUrlController),
+//               const SizedBox(height: 8.0),
+//               _buildAttachmentRow(
+//                 label: 'Profile Image',
+//                 controller: _dpImageUrlController,
+//                 field: 'dpImageUrl',
+//               ),
+//               const SizedBox(height: 8.0),
+//               _buildAttachmentRow(
+//                 label: 'Aadhaar Image',
+//                 controller: _aadharImageUrlController,
+//                 field: 'aadharImageUrl',
+//               ),
+//               const SizedBox(height: 8.0),
+//               _buildAttachmentRow(
+//                 label: 'Supporting Document',
+//                 controller: _supportUrlController,
+//                 field: 'supportUrl',
+//               ),
 //               _buildRow('Joining Date', _joiningDateController),
 //               _buildRow('employeeId', _employeeIdController),
 //               _buildRow('Bank Name', _bankNameController),
 //               _buildRow('Account Number', _accountNumberController),
 //               _buildRow('IFSC Code', _ifscCodeController),
-//               _buildDropdown('Department', _selectedDepartment, departmentNames),
-//               _buildDropdown('Designation', _selectedDesignation, designationName),
-//               _buildDropdown('Location', _selectedLocation,
-//                   locationNames),
+//               _buildDropdown('Department', _selectedDepartment, _departments),
+//               _buildDropdown(
+//                   'Designation', _selectedDesignation, _designations),
+//               _buildDropdown('Location', _selectedLocation, _locations),
 //               _buildDropdown('Status', _selectedStatus, ['Active', 'Inactive']),
-//               _buildDropdown('Role', _selectedRole, ['Standard', 'HR']),
+//               _buildDropdown(
+//                   'Role', _selectedRole, ['Standard', 'HR', 'SiteManager']),
 //               _buildDropdown('Employee Type', _selectedEmployeeType,
 //                   ['On-site', 'Off-site']),
 //               if (_validationErrors.isNotEmpty)
@@ -473,7 +492,7 @@
 //                             'ifscCode': _ifscCodeController.text.trim(),
 //                             'department': _selectedDepartment,
 //                             'designation': _selectedDesignation,
-//                             // 'location': _selectedLocation,
+//                             'location': _selectedLocation,
 //                             'status': _selectedStatus,
 //                             'role': _selectedRole,
 //                             'employeeType': _selectedEmployeeType,
@@ -531,6 +550,39 @@
 //           labelText: label,
 //           border: const OutlineInputBorder(),
 //         ),
+//       ),
+//     );
+//   }
+
+//   Widget _buildAttachmentRow({
+//     required String label,
+//     required TextEditingController controller,
+//     required String field,
+//   }) {
+//     return Row(
+//       children: <Widget>[
+//         ElevatedButton(
+//           onPressed: () =>
+//               _selectImage(source: ImageSource.gallery, field: field),
+//           child: Text('Upload $label'),
+//         ),
+//         const SizedBox(width: 8.0),
+//       ],
+//     );
+//   }
+
+//   Widget _buildEditableTextField({
+//     required TextEditingController controller,
+//     required String label,
+//     String? errorText,
+//     bool obscureText = false,
+//   }) {
+//     return TextField(
+//       controller: controller,
+//       obscureText: obscureText,
+//       decoration: InputDecoration(
+//         labelText: label,
+//         errorText: errorText,
 //       ),
 //     );
 //   }
@@ -599,7 +651,9 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ooriba_s3/services/admin/department_service.dart';
-import 'package:ooriba_s3/services/admin/designation_service.dart';
+import 'package:ooriba_s3/services/designation_service.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:http/http.dart' as http;
 
 class RegisteredEmployeesPage extends StatefulWidget {
   const RegisteredEmployeesPage({super.key});
@@ -763,7 +817,7 @@ class _EmployeeDetailsDialogState extends State<EmployeeDetailsDialog> {
   late TextEditingController _phoneController;
   late TextEditingController _emailController;
   late TextEditingController _panController;
-  late TextEditingController _passwordController;
+  // late TextEditingController _passwordController;
   late TextEditingController _permanentAddressController;
   late TextEditingController _residentialAddressController;
   late TextEditingController _dobController;
@@ -801,7 +855,7 @@ class _EmployeeDetailsDialogState extends State<EmployeeDetailsDialog> {
     _phoneController = TextEditingController(text: widget.data['phoneNo']);
     _emailController = TextEditingController(text: widget.data['email']);
     _panController = TextEditingController(text: widget.data['panNo']);
-    _passwordController = TextEditingController(text: widget.data['password']);
+    // _passwordController = TextEditingController(text: widget.data['password']);
     _permanentAddressController =
         TextEditingController(text: widget.data['permanentAddress']);
     _residentialAddressController =
@@ -851,7 +905,7 @@ class _EmployeeDetailsDialogState extends State<EmployeeDetailsDialog> {
     _phoneController.dispose();
     _emailController.dispose();
     _panController.dispose();
-    _passwordController.dispose();
+    // _passwordController.dispose();
     _permanentAddressController.dispose();
     _residentialAddressController.dispose();
     _dobController.dispose();
@@ -859,6 +913,11 @@ class _EmployeeDetailsDialogState extends State<EmployeeDetailsDialog> {
     _supportUrlController.dispose();
     _aadharNoController.dispose();
     _aadharImageUrlController.dispose();
+    _joiningDateController.dispose();
+    _employeeIdController.dispose();
+    _bankNameController.dispose();
+    _accountNumberController.dispose();
+    _ifscCodeController.dispose();
     super.dispose();
   }
 
@@ -868,7 +927,7 @@ class _EmployeeDetailsDialogState extends State<EmployeeDetailsDialog> {
     final phone = _phoneController.text.trim();
     final email = _emailController.text.trim();
     final pan = _panController.text.trim();
-    final password = _passwordController.text.trim();
+    // final password = _passwordController.text.trim();
     final permanentAddress = _permanentAddressController.text.trim();
     final residentialAddress = _residentialAddressController.text.trim();
     final dob = _dobController.text.trim();
@@ -876,86 +935,149 @@ class _EmployeeDetailsDialogState extends State<EmployeeDetailsDialog> {
 
     _validationErrors.clear();
 
-    if (firstName.isEmpty || lastName.isEmpty) {
-      _validationErrors['name'] =
-          'First name and last name should not be empty.';
-    } else if (firstName.length > 50 || lastName.length > 50) {
-      _validationErrors['name'] =
-          'First name and last name should not exceed 50 characters.';
-    } else if (!RegExp(r'^[a-zA-Z.]+$').hasMatch(firstName) ||
-        !RegExp(r'^[a-zA-Z.]+$').hasMatch(lastName)) {
-      _validationErrors['name'] =
-          'First name and last name should contain only alphabets and dot (.)';
+    // Validate required fields
+    if (firstName.isEmpty) {
+      _validationErrors['firstName'] = 'First name is required';
     }
-
-    if (!RegExp(r'^[0-9]{10}$').hasMatch(phone)) {
-      _validationErrors['phone'] = 'Phone number should be 10 digits.';
+    if (lastName.isEmpty) {
+      _validationErrors['lastName'] = 'Last name is required';
     }
-
-    if (email.isEmpty ||
-        !RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$')
-            .hasMatch(email)) {
-      _validationErrors['email'] = 'Please enter a valid email address.';
+    if (phone.isEmpty) {
+      _validationErrors['phone'] = 'Phone number is required';
     }
-
-    if (!RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]$').hasMatch(pan)) {
-      _validationErrors['pan'] = 'PAN number should be valid.';
+    if (permanentAddress.isEmpty) {
+      _validationErrors['permanentAddress'] = 'Permanent address is required';
     }
-
-    if (password.isEmpty) {
-      _validationErrors['password'] = 'Password must not be empty.';
-    } else if (password.length < 8) {
-      _validationErrors['password'] =
-          'Password must be at least 8 characters long.';
-    } else if (!RegExp(
-            r'^(?=.[a-z])(?=.[A-Z])(?=.\d)(?=.[@$!%?&])[A-Za-z\d@$!%?&]')
-        .hasMatch(password)) {
-      _validationErrors['password'] =
-          'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.';
-    }
-
-    if (permanentAddress.isEmpty ||
-        permanentAddress.length < 10 ||
-        permanentAddress.length > 100) {
-      _validationErrors['permanentAddress'] =
-          'Permanent address should be between 10 and 100 characters.';
-    }
-
-    if (residentialAddress.isEmpty ||
-        residentialAddress.length < 10 ||
-        residentialAddress.length > 100) {
+    if (residentialAddress.isEmpty) {
       _validationErrors['residentialAddress'] =
-          'Residential address should be between 10 and 100 characters.';
+          'Residential address is required';
+    }
+    if (dob.isEmpty) {
+      _validationErrors['dob'] = 'Date of birth is required';
     }
 
-    if (dob.isEmpty) {
-      _validationErrors['dob'] = 'Date of birth should not be empty.';
-    } else {
-      try {
-        final dobDate = DateTime.parse(dob);
-        final today = DateTime.now();
-        final eighteenYearsAgo =
-            DateTime(today.year - 18, today.month, today.day);
-
-        if (dobDate.isAfter(eighteenYearsAgo)) {
-          _validationErrors['dob'] = 'Employee must be at least 18 years old.';
-        }
-      } catch (e) {
-        _validationErrors['dob'] = 'Invalid date format.';
+    // Validate email if provided
+    if (email.isNotEmpty) {
+      String? emailError = _validateEmail(email);
+      if (emailError != null) {
+        _validationErrors['email'] = emailError;
       }
     }
 
-    if (aadharNo.isNotEmpty && !RegExp(r'^[0-9]{12}$').hasMatch(aadharNo)) {
-      _validationErrors['aadharNo'] = 'Aadhar number should be 12 digits.';
+    // Validate phone number
+    if (phone.isNotEmpty) {
+      String? phoneError = _validatePhoneNumber(phone);
+      if (phoneError != null) {
+        _validationErrors['phone'] = phoneError;
+      }
+    }
+
+    // Validate aadhar number if provided
+    if (aadharNo.isNotEmpty) {
+      String? aadharError = _validateAadharNumber(aadharNo);
+      if (aadharError != null) {
+        _validationErrors['aadharNo'] = aadharError;
+      }
+    }
+
+    // Validate PAN number if provided
+    if (pan.isNotEmpty) {
+      String? panError = _validatePanNumber(pan);
+      if (panError != null) {
+        _validationErrors['pan'] = panError;
+      }
+    }
+
+    // Validate date of birth
+    if (dob.isNotEmpty) {
+      String? dobError = _validateDateOfBirth(dob);
+      if (dobError != null) {
+        _validationErrors['dob'] = dobError;
+      }
     }
 
     return _validationErrors.isEmpty;
   }
 
-  Future<void> _selectImage(
-      {required ImageSource source, required String field}) async {
+  String? _validateEmail(String? value) {
+    if (value != null &&
+        value.isNotEmpty &&
+        !RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+      return 'Enter a valid email address';
+    }
+    return null;
+  }
+
+  String? _validatePhoneNumber(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Phone number is required';
+    }
+    if (!RegExp(r'^\d{10}$').hasMatch(value)) {
+      return 'Enter a valid 10-digit phone number';
+    }
+    return null;
+  }
+
+  String? _validateAadharNumber(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Aadhar number is required';
+    }
+    if (!RegExp(r'^\d{12}$').hasMatch(value)) {
+      return 'Enter a valid 12-digit Aadhar number';
+    }
+    return null;
+  }
+
+  String? _validatePanNumber(String? value) {
+    if (value != null &&
+        value.isNotEmpty &&
+        !RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]{1}$').hasMatch(value)) {
+      return 'Enter a valid PAN number';
+    }
+    return null;
+  }
+
+  String? _validateDateOfBirth(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Date of birth is required';
+    }
+
+    // Validate format dd/mm/yyyy
+    final dateFormat = RegExp(r'^\d{2}/\d{2}/\d{4}$');
+    if (!dateFormat.hasMatch(value)) {
+      return 'Enter a valid date format (dd/mm/yyyy)';
+    }
+
+    try {
+      // Convert to DateTime
+      final parts = value.split('/');
+      final dob = DateTime(
+        int.parse(parts[2]),
+        int.parse(parts[1]),
+        int.parse(parts[0]),
+      );
+
+      // Validate age
+      final today = DateTime.now();
+      int age = today.year - dob.year;
+      if (today.month < dob.month ||
+          (today.month == dob.month && today.day < dob.day)) {
+        age--;
+      }
+
+      if (age < 18) {
+        return 'Age must be at least 18 years';
+      }
+    } catch (e) {
+      return 'Invalid date';
+    }
+
+    return null;
+  }
+
+  Future<void> _captureImage(String key) async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: source);
+    final pickedFile = await picker.pickImage(source: ImageSource.camera);
 
     if (pickedFile != null) {
       final file = File(pickedFile.path);
@@ -968,18 +1090,148 @@ class _EmployeeDetailsDialogState extends State<EmployeeDetailsDialog> {
         final downloadURL = await ref.getDownloadURL();
 
         setState(() {
-          if (field == 'dpImageUrl') {
+          if (key == 'dpImageUrl') {
             _dpImageUrlController.text = downloadURL;
-          } else if (field == 'aadharImageUrl') {
+          } else if (key == 'aadharImageUrl') {
             _aadharImageUrlController.text = downloadURL;
-          } else if (field == 'supportUrl') {
+          } else if (key == 'supportUrl') {
             _supportUrlController.text = downloadURL;
           }
         });
       } catch (e) {
         // Handle errors
+        print('Failed to upload image: $e');
       }
     }
+  }
+
+  Future<void> _captureAttachment(String key) async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.camera);
+
+    if (pickedFile != null) {
+      final file = File(pickedFile.path);
+      final fileName = path.basename(file.path);
+      final destination = 'employee_attachments/$fileName';
+
+      try {
+        final ref = FirebaseStorage.instance.ref(destination);
+        await ref.putFile(file);
+        final downloadURL = await ref.getDownloadURL();
+
+        setState(() {
+          if (key == 'supportUrl') {
+            _supportUrlController.text = downloadURL;
+          }
+        });
+      } catch (e) {
+        // Handle errors
+        print('Failed to upload attachment: $e');
+      }
+    }
+  }
+
+  Future<void> _downloadImage(String url, String fileName) async {
+    try {
+      final response = await http.get(Uri.parse(url));
+      final bytes = response.bodyBytes;
+      final directory = await getApplicationDocumentsDirectory();
+      final filePath = '${directory.path}/$fileName';
+      final file = File(filePath);
+      await file.writeAsBytes(bytes);
+      print('File downloaded to $filePath');
+    } catch (e) {
+      print('Failed to download image: $e');
+    }
+  }
+
+  Widget _buildImageRow(String label, String key) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Container(
+            width: 120,
+            child: Text(
+              '$label: ',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          Container(
+            width: 100, // Fixed width
+            height: 100, // Fixed height
+            child: _dpImageUrlController.text.isNotEmpty &&
+                        key == 'dpImageUrl' ||
+                    _aadharImageUrlController.text.isNotEmpty &&
+                        key == 'aadharImageUrl'
+                ? FadeInImage.assetNetwork(
+                    placeholder:
+                        'assets/placeholder_image.png', // Placeholder image asset path
+                    image: key == 'dpImageUrl'
+                        ? _dpImageUrlController.text
+                        : _aadharImageUrlController
+                            .text, // Image URL from controller
+                    fit: BoxFit.cover,
+                  )
+                : Center(
+                    child: ElevatedButton(
+                      onPressed: () => _captureImage(key),
+                      child: Text('Capture Image'),
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: Size(30, 40), // Adjust the size as needed
+                      ),
+                    ),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAttachmentRow(String label, String key) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Container(
+            width: 110,
+            child: Text(
+              '$label: ',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          Container(
+            child: _supportUrlController.text.isNotEmpty
+                ? Align(
+                    alignment: Alignment.centerLeft,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        final url = _supportUrlController.text;
+                        final fileName =
+                            url.split('/').last; // Extract file name from URL
+                        await _downloadImage(url, fileName); // Download image
+                      },
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: Size(100, 40), // Adjust the size as needed
+                      ),
+                      child: Text('Download'),
+                    ),
+                  )
+                : Center(
+                    child: ElevatedButton(
+                      onPressed: () => _captureAttachment(key),
+                      child: Text('Upload'),
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: Size(100, 40), // Adjust the size as needed
+                      ),
+                    ),
+                  ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -996,28 +1248,14 @@ class _EmployeeDetailsDialogState extends State<EmployeeDetailsDialog> {
               _buildRow('Phone Number', _phoneController),
               _buildRow('Email', _emailController),
               _buildRow('PAN Number', _panController),
-              _buildRow('Password', _passwordController, obscureText: true),
+              // _buildRow('Password', _passwordController, obscureText: true),
               _buildRow('Permanent Address', _permanentAddressController),
               _buildRow('Residential Address', _residentialAddressController),
               _buildRow('Date of Birth', _dobController),
               const SizedBox(height: 8.0),
-              _buildAttachmentRow(
-                label: 'Profile Image',
-                controller: _dpImageUrlController,
-                field: 'dpImageUrl',
-              ),
-              const SizedBox(height: 8.0),
-              _buildAttachmentRow(
-                label: 'Aadhaar Image',
-                controller: _aadharImageUrlController,
-                field: 'aadharImageUrl',
-              ),
-              const SizedBox(height: 8.0),
-              _buildAttachmentRow(
-                label: 'Supporting Document',
-                controller: _supportUrlController,
-                field: 'supportUrl',
-              ),
+              _buildImageRow('Profile Picture', 'dpImageUrl'),
+              _buildAttachmentRow('Aadhar Image', 'aadharImageUrl'),
+              _buildAttachmentRow('Support Attachment', 'supportUrl'),
               _buildRow('Joining Date', _joiningDateController),
               _buildRow('employeeId', _employeeIdController),
               _buildRow('Bank Name', _bankNameController),
@@ -1059,14 +1297,14 @@ class _EmployeeDetailsDialogState extends State<EmployeeDetailsDialog> {
                           // Save the updated data to Firestore
                           FirebaseFirestore.instance
                               .collection('Regemp')
-                              .doc(widget.data['id'])
+                              .doc(widget.data['phoneNo'])
                               .update({
                             'firstName': _firstNameController.text.trim(),
                             'lastName': _lastNameController.text.trim(),
                             'phoneNo': _phoneController.text.trim(),
                             'email': _emailController.text.trim(),
                             'panNo': _panController.text.trim(),
-                            'password': _passwordController.text.trim(),
+                            // 'password': _passwordController.text.trim(),
                             'permanentAddress':
                                 _permanentAddressController.text.trim(),
                             'residentialAddress':
@@ -1144,23 +1382,6 @@ class _EmployeeDetailsDialogState extends State<EmployeeDetailsDialog> {
           border: const OutlineInputBorder(),
         ),
       ),
-    );
-  }
-
-  Widget _buildAttachmentRow({
-    required String label,
-    required TextEditingController controller,
-    required String field,
-  }) {
-    return Row(
-      children: <Widget>[
-        ElevatedButton(
-          onPressed: () =>
-              _selectImage(source: ImageSource.gallery, field: field),
-          child: Text('Upload $label'),
-        ),
-        const SizedBox(width: 8.0),
-      ],
     );
   }
 

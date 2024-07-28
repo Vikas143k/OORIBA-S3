@@ -41,7 +41,7 @@ class EmployeeIdGenerator {
           locationDoc.data() as Map<String, dynamic>;
 
       // Get prefix and current count
-      String prefix = locationData['code'];
+      String prefix = locationData['prefix'];
       int count;
 
       // Check if count field exists

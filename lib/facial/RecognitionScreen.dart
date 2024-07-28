@@ -1,4 +1,3 @@
-
 // import 'dart:io';
 // import 'dart:math';
 // import 'dart:typed_data';
@@ -7,10 +6,10 @@
 // import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 // import 'package:image_picker/image_picker.dart';
 // import 'package:image/image.dart' as img;
-// import 'package:ooriba_s3/employee_checkin_page.dart';
-// import 'package:ooriba_s3/facial/ML/Recognition.dart';
-// import 'package:ooriba_s3/facial/ML/Recognizer.dart';
-// import 'package:ooriba_s3/services/retrieveDataByEmail.dart';
+// import 'package:ooriba_s3_s3/employee_checkin_page.dart';
+// import 'package:ooriba_s3_s3/facial/ML/Recognition.dart';
+// import 'package:ooriba_s3_s3/facial/ML/Recognizer.dart';
+// import 'package:ooriba_s3_s3/services/retrieveDataByEmail.dart';
 
 // class RecognitionScreen extends StatefulWidget {
 //   final String email;
@@ -169,14 +168,14 @@
 //                   child: InkWell(
 //                     onTap: ()async{
 //                      await _imgFromCamera;
-                     
+
 //           },
 //                     child: SizedBox(
 //                       width: screenWidth / 2 - 70,
 //                       height: screenWidth / 2 - 70,
 //                       child: Icon(Icons.camera,
 //                           color: Color.fromARGB(255, 243, 33, 33), size: screenWidth / 7),
-//                     ), 
+//                     ),
 //                   ),
 //                 ),
 //                 if (_image != null && isFaceRecognized())
@@ -264,7 +263,7 @@ class _RecognitionScreenState extends State<RecognitionScreen> {
   late ImagePicker imagePicker;
   File? _image;
   bool isLoading = false; // Loading state
-Map<String, dynamic> Employee = {};
+  Map<String, dynamic> Employee = {};
   late FaceDetector faceDetector;
   late Recognizer recognizer;
 
@@ -299,9 +298,10 @@ Map<String, dynamic> Employee = {};
   }
 
   Future<void> uploadImageToFirebase(File image, String phoneNumber) async {
-  final FirestoreService firestoreService = FirestoreService();
-  Map<String, dynamic>? employeeData = await firestoreService.getEmployeeByEmailOrPhoneNo(phoneNumber,"Regemp");
-  String id=employeeData?["employeeId"];
+    final FirestoreService firestoreService = FirestoreService();
+    Map<String, dynamic>? employeeData = await firestoreService
+        .getEmployeeByEmailOrPhoneNo(phoneNumber, "Regemp");
+    String id = employeeData?["employeeId"];
     try {
       String imagePath = 'authImage/$id.jpg';
       Reference storageRef = FirebaseStorage.instance.ref().child(imagePath);
@@ -325,14 +325,20 @@ Map<String, dynamic> Employee = {};
       Rect faceRect = face.boundingBox;
       num left = faceRect.left < 0 ? 0 : faceRect.left;
       num top = faceRect.top < 0 ? 0 : faceRect.top;
-      num right = faceRect.right > image.width ? image.width - 1 : faceRect.right;
-      num bottom = faceRect.bottom > image.height ? image.height - 1 : faceRect.bottom;
+      num right =
+          faceRect.right > image.width ? image.width - 1 : faceRect.right;
+      num bottom =
+          faceRect.bottom > image.height ? image.height - 1 : faceRect.bottom;
       num width = right - left;
       num height = bottom - top;
 
       final bytes = _image!.readAsBytesSync();
       img.Image? faceImg = img.decodeImage(bytes);
-      img.Image faceImg2 = img.copyCrop(faceImg!, x: left.toInt(), y: top.toInt(), width: width.toInt(), height: height.toInt());
+      img.Image faceImg2 = img.copyCrop(faceImg!,
+          x: left.toInt(),
+          y: top.toInt(),
+          width: width.toInt(),
+          height: height.toInt());
 
       Recognition recognition = recognizer.recognize(faceImg2, faceRect);
       recognitions.add(recognition);
@@ -341,7 +347,8 @@ Map<String, dynamic> Employee = {};
   }
 
   removeRotation(File inputImage) async {
-    final img.Image? capturedImage = img.decodeImage(await File(inputImage.path).readAsBytes());
+    final img.Image? capturedImage =
+        img.decodeImage(await File(inputImage.path).readAsBytes());
     final img.Image orientedImage = img.bakeOrientation(capturedImage!);
     return await File(_image!.path).writeAsBytes(img.encodeJpg(orientedImage));
   }
@@ -432,7 +439,8 @@ Map<String, dynamic> Employee = {};
                       width: screenWidth / 2 - 70,
                       height: screenWidth / 2 - 70,
                       child: Icon(Icons.camera,
-                          color: const Color.fromARGB(255, 243, 33, 33), size: screenWidth / 7),
+                          color: const Color.fromARGB(255, 243, 33, 33),
+                          size: screenWidth / 7),
                     ),
                   ),
                 ),

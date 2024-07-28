@@ -1,14 +1,13 @@
 //get the original code form git without firebase messaging .
 
-
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+// import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:http/http.dart' as http;
 
 class BroadcastService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+  // final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
 
   Future<void> sendBroadcastMessage(String message) async {
     // Send broadcast message to Firestore
@@ -31,10 +30,11 @@ class BroadcastService {
     const String topic = 'all_users';
 
     final tokenResponse = await _firestore.collection('FCMTokens').get();
-    List<String> tokens = tokenResponse.docs.map((doc) => doc.data()['token'] as String).toList();
+    List<String> tokens =
+        tokenResponse.docs.map((doc) => doc.data()['token'] as String).toList();
 
     // Subscribe all users to the topic (optional, if not already subscribed)
-    await _firebaseMessaging.subscribeToTopic(topic);
+    // await _firebaseMessaging.subscribeToTopic(topic);
 
     // Construct the notification payload
     var notification = {
@@ -48,7 +48,8 @@ class BroadcastService {
       Uri.parse('https://fcm.googleapis.com/fcm/send'),
       headers: <String, String>{
         'Content-Type': 'application/json',
-        'Authorization': 'key=BFjEScs2uoDCURSUfj4pOqbCak-Vq-x8HvKiAJFgSITabjcV5TcQfaLADm5n4w8S5I4gMC8NlL-Cu7mEqywkAH0', // Replace with your server key from Firebase Console
+        'Authorization':
+            'key=BFjEScs2uoDCURSUfj4pOqbCak-Vq-x8HvKiAJFgSITabjcV5TcQfaLADm5n4w8S5I4gMC8NlL-Cu7mEqywkAH0', // Replace with your server key from Firebase Console
       },
       body: jsonEncode(<String, dynamic>{
         'notification': notification,
@@ -71,7 +72,8 @@ class BroadcastService {
 
   Future<String?> getCurrentBroadcastMessage() async {
     try {
-      DocumentSnapshot doc = await _firestore.collection('CurrentBroadcast').doc('current').get();
+      DocumentSnapshot doc =
+          await _firestore.collection('CurrentBroadcast').doc('current').get();
       if (doc.exists && doc.data() != null) {
         Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
         return data['message'] as String?;

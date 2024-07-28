@@ -25,14 +25,16 @@ class _UpcomingEventsPageState extends State<UpcomingEventsPage> {
   }
 
   Future<void> _loadEvents() async {
-    Map<DateTime, List<Map<String, dynamic>>> events = await _eventService.loadEvents();
+    Map<DateTime, List<Map<String, dynamic>>> events =
+        await _eventService.loadEvents();
     setState(() {
       _events = events;
     });
   }
 
   Future<void> _loadHolidays() async {
-    Map<DateTime, List<Map<String, dynamic>>> holidays = await _eventService.loadHolidays();
+    Map<DateTime, List<Map<String, dynamic>>> holidays =
+        await _eventService.loadHolidays();
     setState(() {
       _holidays = holidays;
     });
@@ -47,9 +49,11 @@ class _UpcomingEventsPageState extends State<UpcomingEventsPage> {
 
   Future<void> _addEvent(String event) async {
     if (_selectedDay != null) {
-      DocumentReference docRef = await _eventService.addEvent(_selectedDay!, event);
+      DocumentReference docRef =
+          await _eventService.addEvent(_selectedDay!, event);
       setState(() {
-        DateTime selectedDayWithoutTime = DateTime(_selectedDay!.year, _selectedDay!.month, _selectedDay!.day);
+        DateTime selectedDayWithoutTime = DateTime(
+            _selectedDay!.year, _selectedDay!.month, _selectedDay!.day);
         if (_events[selectedDayWithoutTime] == null) {
           _events[selectedDayWithoutTime] = [];
         }
@@ -63,9 +67,11 @@ class _UpcomingEventsPageState extends State<UpcomingEventsPage> {
 
   Future<void> _addHoliday(String holiday) async {
     if (_selectedDay != null) {
-      DocumentReference docRef = await _eventService.addHoliday(_selectedDay!, holiday);
+      DocumentReference docRef =
+          await _eventService.addHoliday(_selectedDay!, holiday);
       setState(() {
-        DateTime selectedDayWithoutTime = DateTime(_selectedDay!.year, _selectedDay!.month, _selectedDay!.day);
+        DateTime selectedDayWithoutTime = DateTime(
+            _selectedDay!.year, _selectedDay!.month, _selectedDay!.day);
         if (_holidays[selectedDayWithoutTime] == null) {
           _holidays[selectedDayWithoutTime] = [];
         }
@@ -92,7 +98,8 @@ class _UpcomingEventsPageState extends State<UpcomingEventsPage> {
     await _eventService.deleteHoliday(holidayId);
     setState(() {
       DateTime dateWithoutTime = DateTime(date.year, date.month, date.day);
-      _holidays[dateWithoutTime]!.removeWhere((holiday) => holiday['id'] == holidayId);
+      _holidays[dateWithoutTime]!
+          .removeWhere((holiday) => holiday['id'] == holidayId);
       if (_holidays[dateWithoutTime]!.isEmpty) {
         _holidays.remove(dateWithoutTime);
       }
@@ -201,7 +208,8 @@ class _UpcomingEventsPageState extends State<UpcomingEventsPage> {
                     shrinkWrap: true,
                     scrollDirection: Axis.horizontal,
                     children: events.map((event) {
-                      Map<String, dynamic> eventMap = event as Map<String, dynamic>;
+                      Map<String, dynamic> eventMap =
+                          event as Map<String, dynamic>;
                       bool isHoliday = eventMap.containsKey('holiday');
                       return Container(
                         width: 7,
@@ -231,24 +239,25 @@ class _UpcomingEventsPageState extends State<UpcomingEventsPage> {
           const SizedBox(height: 8.0),
           Expanded(
             child: ListView(
-              children: _getEventsForDay(_selectedDay ?? _focusedDay)
-                  .map((event) {
-                    Map<String, dynamic> eventMap = event as Map<String, dynamic>;
-                    return ListTile(
-                      title: Text(eventMap['event'] ?? eventMap['holiday']),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () {
-                          if (eventMap.containsKey('event')) {
-                            _deleteEvent(eventMap['id'], _selectedDay ?? _focusedDay);
-                          } else {
-                            _deleteHoliday(eventMap['id'], _selectedDay ?? _focusedDay);
-                          }
-                        },
-                      ),
-                    );
-                  })
-                  .toList(),
+              children:
+                  _getEventsForDay(_selectedDay ?? _focusedDay).map((event) {
+                Map<String, dynamic> eventMap = event as Map<String, dynamic>;
+                return ListTile(
+                  title: Text(eventMap['event'] ?? eventMap['holiday']),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () {
+                      if (eventMap.containsKey('event')) {
+                        _deleteEvent(
+                            eventMap['id'], _selectedDay ?? _focusedDay);
+                      } else {
+                        _deleteHoliday(
+                            eventMap['id'], _selectedDay ?? _focusedDay);
+                      }
+                    },
+                  ),
+                );
+              }).toList(),
             ),
           ),
         ],

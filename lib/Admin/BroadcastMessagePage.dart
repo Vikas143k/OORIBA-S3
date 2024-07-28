@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:ooriba_s3/services/admin/broadcast_service.dart'; // Replace with the actual path
 
 class BroadcastMessagePage extends StatefulWidget {
@@ -10,6 +11,18 @@ class BroadcastMessagePage extends StatefulWidget {
 class _BroadcastMessagePageState extends State<BroadcastMessagePage> {
   final TextEditingController _broadcastMessageController = TextEditingController();
   final BroadcastService _broadcastService = BroadcastService();
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+  @override
+  void initState() {
+    super.initState();
+    const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
+    final InitializationSettings initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid,
+    );
+
+    flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  }
 
   Future<void> _sendBroadcastMessage() async {
     String message = _broadcastMessageController.text;
@@ -19,78 +32,27 @@ class _BroadcastMessagePageState extends State<BroadcastMessagePage> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Broadcast message sent')),
     );
+
+    // Send notification
+    await _sendNotification(message);
   }
 
-  Future<void> _editBroadcastMessage(String id, String newMessage) async {
-    await _broadcastService.editBroadcastMessage(id, newMessage);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Broadcast message updated')),
+  Future<void> _sendNotification(String message) async {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
+      'OORIBA', 'Broadcasts', 
+      importance: Importance.max,
+      priority: Priority.high,
+      showWhen: false,
     );
-  }
-
-  Future<void> _deleteBroadcastMessage(String id) async {
-    await _broadcastService.deleteBroadcastMessage(id);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Broadcast message deleted')),
+    const NotificationDetails platformChannelSpecifics = NotificationDetails(
+      android: androidPlatformChannelSpecifics,
     );
-  }
-
-  void _showEditDialog(String id, String currentMessage) {
-    TextEditingController _editController = TextEditingController(text: currentMessage);
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Edit Broadcast Message'),
-          content: TextField(
-            controller: _editController,
-            decoration: const InputDecoration(labelText: 'Message'),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            ElevatedButton(
-              child: const Text('Save'),
-              onPressed: () async {
-                await _editBroadcastMessage(id, _editController.text);
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showDeleteConfirmationDialog(String id) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Delete Broadcast Message'),
-          content: const Text('Are you sure you want to delete this message?'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            ElevatedButton(
-              child: const Text('Delete'),
-              onPressed: () async {
-                await _deleteBroadcastMessage(id);
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
+    await flutterLocalNotificationsPlugin.show(
+      0, // Notification ID
+      'New Global Communication',
+      message,
+      platformChannelSpecifics,
+      payload: 'Broadcast Notification',
     );
   }
 
@@ -151,23 +113,6 @@ class _BroadcastMessagePageState extends State<BroadcastMessagePage> {
                       return ListTile(
                         title: Text(message),
                         subtitle: Text(formattedTime),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            IconButton(
-                              icon: const Icon(Icons.edit),
-                              onPressed: () {
-                                _showEditDialog(messages[index].id, message);
-                              },
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete),
-                              onPressed: () {
-                                _showDeleteConfirmationDialog(messages[index].id);
-                              },
-                            ),
-                          ],
-                        ),
                       );
                     },
                   );
